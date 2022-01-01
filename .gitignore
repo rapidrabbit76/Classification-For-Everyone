@@ -1,0 +1,20 @@
+# IDE
+.vscode/
+
+# Cache
+**/__pycache__/**
+
+# Dataset
+**/data/**
+
+# Logging file
+**/experiments/**
+**/lightning_logs/**
+**/wandb/**
+
+# Models
+*.pt
+*.onnx
+*.ckpt
+*pth
+*zip
