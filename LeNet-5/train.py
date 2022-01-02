@@ -99,6 +99,7 @@ def train():
     wandb_logger.experiment.config.update(hparams)
     wandb_logger.watch(lenet5, log="all", log_freq=100)
 
+    # Trainer setting
     callbacks = [
         EarlyStopping(
             monitor="val_acc",
@@ -110,7 +111,6 @@ def train():
         TQDMProgressBar(refresh_rate=10),
     ]
 
-    # Trainer
     trainer: pl.Trainer = pl.Trainer(
         logger=wandb_logger,
         gpus=1,
