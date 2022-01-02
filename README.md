@@ -3,6 +3,7 @@
 - torch==1.10.0
 - pytorch-lightning==1.5.7
 - wandb==0.12.9
+- albumentations==0.16.1
 
 # **Rules**
 
