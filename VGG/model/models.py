@@ -8,6 +8,7 @@ from .blocks import Classifier, ConvBlock
 class VGG11(nn.Module):
     def __init__(
         self,
+        image_channals: int = 3,
         n_classes: int = 1000,
         use_bn: bool = False,
         image_size: int = 224,
@@ -16,7 +17,7 @@ class VGG11(nn.Module):
 
         self.feature_extractor = nn.Sequential(
             # 1 conv
-            ConvBlock(3, 64, norm=use_bn),
+            ConvBlock(image_channals, 64, norm=use_bn),
             nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)),
             # 2 conv
             ConvBlock(64, 128, norm=use_bn),
@@ -47,6 +48,7 @@ class VGG11(nn.Module):
 class VGG13(VGG11):
     def __init__(
         self,
+        image_channals: int = 3,
         n_classes: int = 1000,
         use_bn: bool = False,
         image_size: int = 224,
@@ -55,7 +57,7 @@ class VGG13(VGG11):
 
         self.feature_extractor = nn.Sequential(
             # 1 conv
-            ConvBlock(3, 64, norm=use_bn),
+            ConvBlock(image_channals, 64, norm=use_bn),
             ConvBlock(64, 64, norm=use_bn),
             nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)),
             # 2 conv
@@ -80,6 +82,7 @@ class VGG13(VGG11):
 class VGG16_C(VGG11):
     def __init__(
         self,
+        image_channals: int = 3,
         n_classes: int = 1000,
         use_bn: bool = False,
         image_size: int = 224,
@@ -88,7 +91,7 @@ class VGG16_C(VGG11):
 
         self.feature_extractor = nn.Sequential(
             # 1 conv
-            ConvBlock(3, 64, norm=use_bn),
+            ConvBlock(image_channals, 64, norm=use_bn),
             ConvBlock(64, 64, norm=use_bn),
             nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)),
             # 2 conv
@@ -116,6 +119,7 @@ class VGG16_C(VGG11):
 class VGG16_D(VGG11):
     def __init__(
         self,
+        image_channals: int = 3,
         n_classes: int = 1000,
         use_bn: bool = False,
         image_size: int = 224,
@@ -124,7 +128,7 @@ class VGG16_D(VGG11):
 
         self.feature_extractor = nn.Sequential(
             # 1 conv
-            ConvBlock(3, 64, norm=use_bn),
+            ConvBlock(image_channals, 64, norm=use_bn),
             ConvBlock(64, 64, norm=use_bn),
             nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)),
             # 2 conv
@@ -152,6 +156,7 @@ class VGG16_D(VGG11):
 class VGG19(VGG11):
     def __init__(
         self,
+        image_channals: int = 3,
         n_classes: int = 1000,
         use_bn: bool = False,
         image_size: int = 224,
@@ -160,7 +165,7 @@ class VGG19(VGG11):
 
         self.feature_extractor = nn.Sequential(
             # 1 conv
-            ConvBlock(3, 64, norm=use_bn),
+            ConvBlock(image_channals, 64, norm=use_bn),
             ConvBlock(64, 64, norm=use_bn),
             nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)),
             # 2 conv
