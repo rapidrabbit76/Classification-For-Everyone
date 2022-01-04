@@ -1,0 +1,10 @@
+project_name: 'AlexNet'
+save_dir: './experiments'
+dataset: 'CIFAR100'
+data_dir: './data'
+torchscript_model_save_path: './experiments/AlexNet.pt'
+seed: '2022'
+
+image_channels: 3
+
+hparams: {lr: 0.003, epochs: 50, batch_size: 128}
