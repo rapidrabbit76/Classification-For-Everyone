@@ -43,10 +43,8 @@ class Classifier(nn.Module):
         self.net = nn.Sequential(
             nn.Linear(in_features, dim),
             nn.ReLU(),
-            nn.Dropout(dropout_rate),
             nn.Linear(dim, dim),
             nn.ReLU(),
-            nn.Dropout(dropout_rate),
             nn.Linear(dim, out_features),
         )
 
