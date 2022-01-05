@@ -1,4 +1,5 @@
 from asyncio.constants import ACCEPT_RETRY_DELAY
+from ctypes import Union
 from curses import meta
 import os
 from turtle import down
@@ -8,45 +9,38 @@ import albumentations as A
 from albumentations.pytorch import ToTensorV2 as ToTensor
 from PIL import Image
 from torch.utils.data import Dataset
+from torchaudio import datasets
 from torchvision import transforms
-from torchvision.datasets import CIFAR100, ImageNet
+from torchvision.datasets import CIFAR100
+import torchvision.datasets as datasets
 import pandas as pd
 import numpy as np
 
 
-class ImageNetDataset(Dataset):
-    ARCHIVE_META = {
-        "train": "LOC_train_solution.csv",
-        "test": "LOC_val_solution.csv",
-    }
-    IMAGE_DIR = "ILSVRC/Data/CLS-LOC"
+transform = A.Compose(
+    [
+        A.Resize(256, 256),
+        # A.RandomCrop(image_size, image_size),
+        A.HorizontalFlip(p=0.5),
+        A.Normalize(),
+        ToTensor(),
+    ],
+)
 
+
+class CIFAR100Dataset(CIFAR100):
     def __init__(
         self,
         root: str,
-        train: Optional[str] = "train",
+        train: bool = True,
+        download: bool = False,
         image_size: int = 224,
-    ):
-        super().__init__()
-
-        path = os.path.join(root, self.ARCHIVE_META[train])
-        df = pd.read_csv(path)
-
-        image_id = df["ImageId"].tolist()
-        label = list(map(lambda x: x.split()[0], df["PredictionString"].tolist()))
-
-        metadata = list(zip(image_id, label))
-
-        if train == "train":
-            self.data = [
-                (os.path.join(root, self.IMAGE_DIR, "train", l, p + ".JPEG"), l)
-                for p, l in metadata
-            ]
-        else:
-            self.data = [
-                (os.path.join(root, self.IMAGE_DIR, "val", p + ".JPEG"), l)
-                for p, l in metadata
-            ]
+    ) -> None:
+        super().__init__(
+            root,
+            train=train,
+            download=download,
+        )
 
         self.transform = A.Compose(
             [
@@ -59,12 +53,21 @@ class ImageNetDataset(Dataset):
         )
 
     def __getitem__(self, index: int) -> Tuple[Any, Any]:
-        path, target = self.data[index]
-        image = np.array(Image.open(path))
+        image, target = self.data[index], self.targets[index]
+        # image = Image.open(image_path).convert("RGV")
         image = self.transform(image=image)["image"]
         return image, target
 
-    def __len__(self):
-        return len(self.data)
 
+if __name__ == "__main__":
+    root_dir = "../data"
+    train_ds = CIFAR100Dataset(root_dir, train=True, download=True)
+    test_ds = CIFAR100Dataset(root_dir, train=False, download=True)
 
+    for image, target in train_ds:
+        print(image.shape, target)
+        break
+
+    for image, target in test_ds:
+        print(image.shape, target)
+        break
