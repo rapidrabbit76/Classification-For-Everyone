@@ -10,4 +10,3 @@ def get_config(config_path: str = "config.yml"):
             Loader=yaml.FullLoader,
         )
     )
-

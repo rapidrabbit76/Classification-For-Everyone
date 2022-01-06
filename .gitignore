@@ -18,3 +18,6 @@
 *.ckpt
 *pth
 *zip
+
+# TEST
+*test*
