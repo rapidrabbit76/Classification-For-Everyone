@@ -79,6 +79,7 @@ class VGGModel(nn.Module):
                 layers.append(nn.MaxPool2d(2, 2))
 
         self.feature_extractor = nn.Sequential(*layers)
+        self.avgpool = nn.AdaptiveAvgPool2d(7)
         self.classfier = nn.Sequential(
             nn.Flatten(),
             Classifier(512 * 7 * 7, 4096, n_classes, 0.5),
@@ -86,4 +87,20 @@ class VGGModel(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.feature_extractor(x)
+        x = self.avgpool(x)
         return self.classfier(x)
+
+    def initialize_weights(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(
+                    m.weight,
+                    mode="fan_out",
+                    nonlinearity="relu",
+                )
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.Linear):
+                nn.init.normal_(m.weight, 0, 0.01)
+                nn.init.constant_(m.bias, 0)
