@@ -136,14 +136,14 @@ def train():
     wandb_logger.experiment.unwatch(vgg_model)
 
     # Model to Torchscript
-    script = vgg_model.to_torchscript()
-    torch.jit.save(script, config.torchscript_model_save_path)
-    wandb_logger.experiment.save(
-        os.path.join(
-            config.torchscript_model_save_path,
-            f"{hparams.model_type}.pt",
-        )
+    saved_model_path = utils.model_save(
+        vgg_model,
+        config.torchscript_model_save_path,
+        hparams.model_type,
     )
+
+    # Save artifacts
+    wandb_logger.experiment.save(saved_model_path)
 
 
 if __name__ == "__main__":

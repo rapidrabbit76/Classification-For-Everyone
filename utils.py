@@ -1,6 +1,9 @@
-from easydict import EasyDict
+import os
+
+import pytorch_lightning as pl
 import yaml
-from pytorch_lightning.loggers import WandbLogger
+from easydict import EasyDict
+import torch
 
 
 def get_config(config_path: str = "config.yml"):
@@ -10,3 +13,17 @@ def get_config(config_path: str = "config.yml"):
             Loader=yaml.FullLoader,
         )
     )
+
+
+def model_save(
+    model: pl.LightningModule,
+    save_dir: str,
+    model_name: str,
+) -> str:
+    script = model.to_torchscript()
+    saved_model_path = os.path.join(
+        save_dir,
+        f"{model_name}.pt",
+    )
+    torch.jit.save(script, saved_model_path)
+    return saved_model_path
