@@ -1,5 +1,4 @@
 project_name: "VGG"
-model: "11"
 save_dir: "./experiments"
 dataset: "CIFAR10"
 data_dir: "./data"
@@ -11,4 +10,4 @@ n_classes: 10
 image_size: 224
 
 hparams:
-  { model_type: "VGG11", lr: 0.005, epochs: 100, batch_size: 32, use_bn: true }
+  { model_type: "VGG13", lr: 0.005, epochs: 100, batch_size: 32, use_bn: true }

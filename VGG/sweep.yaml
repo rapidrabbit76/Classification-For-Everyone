@@ -1,11 +1,16 @@
-method: bayes
+method: grid
 metric:
   goal: maximize
   name: test_acc
 parameters:
   lr:
-    values: [0.01, 0.001, 0.0001]
+    values:
+      - 0.01
+      - 0.001
+      - 0.0001
   optimizer:
-    values: ["adam", "sgd"]
+    values:
+      - adam
+      - sgd
 
 program: train.py
