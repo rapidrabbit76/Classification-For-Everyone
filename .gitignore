@@ -6,6 +6,7 @@
 
 # Dataset
 **/data/**
+data
 
 # Logging file
 **/experiments/**
