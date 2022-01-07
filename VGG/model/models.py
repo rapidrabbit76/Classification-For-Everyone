@@ -7,7 +7,8 @@ from .blocks import Classifier, ConvBlock
 
 VGG_types = {
     "VGG11": [64, "M", 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"],
-    "VGG13": [64, 64, "M", 128, 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"],
+    "VGG13":
+    [64, 64, "M", 128, 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"],
     "VGG16": [
         64,
         64,
@@ -55,20 +56,21 @@ VGG_types = {
 
 
 class VGGModel(nn.Module):
+
     def __init__(
         self,
         model_type: str = "VGG11",
         image_channals: int = 3,
         n_classes: int = 1000,
         use_bn: bool = False,
+        dropout_rate: int = 0.5,
     ) -> None:
         super().__init__()
 
         layers = []
 
-        assert (
-            model_type in VGG_types.keys()
-        ), f"{model_type} is not in {' '.join(VGG_types.keys())}"
+        assert (model_type in VGG_types.keys()
+                ), f"{model_type} is not in {' '.join(VGG_types.keys())}"
 
         in_channels = image_channals
         for x in VGG_types[model_type]:
@@ -82,7 +84,12 @@ class VGGModel(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool2d(7)
         self.classfier = nn.Sequential(
             nn.Flatten(),
-            Classifier(512 * 7 * 7, 4096, n_classes, 0.5),
+            Classifier(
+                512 * 7 * 7,
+                4096,
+                n_classes,
+                dropout_rate,
+            ),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

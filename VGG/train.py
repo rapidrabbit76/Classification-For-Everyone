@@ -17,12 +17,12 @@ from torchmetrics import Accuracy
 import datamodule
 from model import VGGModel
 
-
 sys.path.insert(1, os.path.abspath(".."))
 import utils
 
 
 class VGGModelModule(pl.LightningModule):
+
     def __init__(
         self,
         model_type: str,
@@ -30,6 +30,7 @@ class VGGModelModule(pl.LightningModule):
         n_classes: int,
         lr: float,
         use_bn: bool,
+        dropout_rate: int,
     ):
         super().__init__()
         self.save_hyperparameters()
@@ -39,6 +40,7 @@ class VGGModelModule(pl.LightningModule):
             self.hparams.image_channals,
             self.hparams.n_classes,
             self.hparams.use_bn,
+            self.hparams.dropout_rate,
         )
         self.model.initialize_weights()
 
@@ -97,6 +99,7 @@ def train():
         config.n_classes,
         hparams.lr,
         hparams.use_bn,
+        hparams.dropout_rate,
     )
 
     # Logger

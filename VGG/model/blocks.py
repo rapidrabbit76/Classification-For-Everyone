@@ -3,6 +3,7 @@ from torch import nn
 
 
 class ConvBlock(nn.Module):
+
     def __init__(
         self,
         in_channels: int,
@@ -32,6 +33,7 @@ class ConvBlock(nn.Module):
 
 
 class Classifier(nn.Module):
+
     def __init__(
         self,
         in_features: int,
@@ -43,8 +45,10 @@ class Classifier(nn.Module):
         self.net = nn.Sequential(
             nn.Linear(in_features, dim),
             nn.ReLU(),
+            nn.Dropout(dropout_rate),
             nn.Linear(dim, dim),
             nn.ReLU(),
+            nn.Dropout(dropout_rate),
             nn.Linear(dim, out_features),
         )
 
