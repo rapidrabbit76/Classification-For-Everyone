@@ -1,0 +1,12 @@
+project_name: "SqueezeNet"
+save_dir: "./experiments"
+dataset: "CIFAR10"
+data_dir: "./data"
+torchscript_model_save_path: "./experiments/"
+seed: 9423
+
+image_channals: 3
+n_classes: 10
+image_size: 224
+
+hparams: { lr: 0.005, epochs: 100, batch_size: 32, dropout_rate: 0.5 }
