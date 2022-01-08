@@ -54,6 +54,7 @@ class SqueezeNet(nn.Module):
             nn.Dropout(dropout_rate),
             ConvBlock(512, n_classes, 1, 1),
             nn.AdaptiveAvgPool2d(1),
+            nn.Flatten(),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
