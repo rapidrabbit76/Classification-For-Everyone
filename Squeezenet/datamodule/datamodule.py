@@ -20,10 +20,11 @@ class CIFAR100DataModule(pl.LightningDataModule):
         """Dataset download"""
         CIFAR100Dataset(self.hparams.data_dir, True, download=True)
         CIFAR100Dataset(self.hparams.data_dir, False, download=True)
+        self.dataset = CIFAR100Dataset
 
     def setup(self, stage: Optional[str] = None) -> None:
         if stage == "fit" or stage is None:
-            self.train_ds = CIFAR100Dataset(self.hparams.data_dir, True)
+            self.train_ds = self.dataset(self.hparams.data_dir, True)
             train_ds_size = int(len(self.train_ds) * 0.8)
             val_ds_size = len(self.train_ds) - train_ds_size
             self.train_ds, self.val_ds = random_split(
@@ -32,11 +33,10 @@ class CIFAR100DataModule(pl.LightningDataModule):
             )
 
         if stage == "test" or stage is None:
-            self.test_ds = CIFAR100Dataset(
+            self.test_ds = self.dataset(
                 self.hparams.data_dir,
                 "val",
             )
-        return super().setup(stage=stage)
 
     def train_dataloader(self) -> DataLoader:
         return DataLoader(
@@ -68,3 +68,4 @@ class CIFAR10DataModule(CIFAR100DataModule):
     def prepare_data(self) -> None:
         CIFAR10Dataset(self.hparams.data_dir, True, download=True)
         CIFAR10Dataset(self.hparams.data_dir, False, download=True)
+        self.dataset = CIFAR10Dataset
