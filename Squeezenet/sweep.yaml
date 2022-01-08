@@ -1,0 +1,21 @@
+method: grid
+metric:
+  goal: maximize
+  name: test_acc
+parameters:
+  lr:
+    values:
+      - 0.01
+      - 0.001
+      - 0.0001
+  dropout_rate:
+    values:
+      - 0.3
+      - 0.5
+      - 0.7
+  optimizer:
+    values:
+      - adam
+      - sgd
+
+program: train.py
