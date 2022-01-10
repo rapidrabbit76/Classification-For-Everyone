@@ -11,7 +11,7 @@ class ConvBlock(nn.Module):
         kernel_size: int = 3,
         stride: int = 1,
         padding: int = 0,
-        bias: bool = False,
+        bias: bool = True,
     ):
         super().__init__()
         self.conv = nn.Conv2d(
