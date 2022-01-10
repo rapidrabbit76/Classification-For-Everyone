@@ -79,7 +79,7 @@ class AlexNetModel(pl.LightningModule):
                 patience=7,
             ),
             'interval': 'step',
-            'monitor': 'val_loss'
+            'monitor': 'train_loss',
         }
         return {'optimizer': optimizer, 'lr_scheduler': scheduler_dict}
 
