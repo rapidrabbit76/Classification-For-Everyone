@@ -2,6 +2,7 @@ from math import log
 from xml.etree.ElementInclude import include
 import torch
 from torch import nn
+import math
 
 from .blocks import FireModule, ConvBlock
 
@@ -45,13 +46,12 @@ class SqueezeNet(nn.Module):
         self,
         image_channals: int = 3,
         n_classes: int = 1000,
-        dropout_rate: int = 0.5,
     ) -> None:
         super().__init__()
 
         self.feature_extractor = SqueezeNetFeatureExtractor(image_channals)
         self.classifier = nn.Sequential(
-            nn.Dropout(dropout_rate),
+            nn.Dropout(0.5),
             ConvBlock(512, n_classes, 1, 1),
             nn.AdaptiveAvgPool2d(1),
             nn.Flatten(),
@@ -64,14 +64,10 @@ class SqueezeNet(nn.Module):
     def initialize_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(
+                nn.init.kaiming_uniform_(
                     m.weight,
-                    mode="fan_out",
-                    nonlinearity="relu",
+                    nonlinearity='relu',
                 )
             elif isinstance(m, nn.BatchNorm2d):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.Linear):
-                nn.init.normal_(m.weight, 0, 0.01)
-                nn.init.constant_(m.bias, 0)
+                m.weight.data.fill_(1)
+                m.bias.data.zero_()
