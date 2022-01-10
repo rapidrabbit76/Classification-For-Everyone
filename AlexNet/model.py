@@ -46,8 +46,8 @@ class ConvBlock(nn.Module):
             padding: str = 'valid',
             bias: bool = True,
             pooling: bool = True,
-            use_lrm: bool = True,
-            use_bn: bool = False,
+            use_lrm: bool = False,
+            use_bn: bool = True,
     ):
         super().__init__()
         self.block = nn.Sequential(
