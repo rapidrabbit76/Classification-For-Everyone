@@ -76,7 +76,7 @@ class AlexNetModel(pl.LightningModule):
                 optimizer,
                 mode='min',
                 factor=0.5,
-                patience=7,
+                patience=3,
             ),
             'interval': 'step',
             'monitor': 'train_loss',
