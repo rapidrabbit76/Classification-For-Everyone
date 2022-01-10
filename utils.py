@@ -3,7 +3,7 @@ import yaml
 from pytorch_lightning.loggers import WandbLogger
 
 
-def get_config(config_path: str = "config.yml"):
+def get_config(config_path: str = "config.yaml"):
     return EasyDict(
         yaml.load(
             open(config_path, "r"),
