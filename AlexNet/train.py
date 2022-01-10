@@ -100,7 +100,6 @@ def train():
     )
 
     # Logger
-    """
     wandb_logger = WandbLogger(
         name=f'{config.project_name}-{config.dataset}',
         project=config.project_name,
@@ -109,7 +108,6 @@ def train():
     )
     wandb_logger.experiment.config.update(hparams)
     wandb_logger.watch(alexnet, log='all', log_freq=100)
-    """
 
     # Trainer setting
     callbacks = [
@@ -124,7 +122,7 @@ def train():
     ]
 
     trainer: pl.Trainer = pl.Trainer(
-        #logger=wandb_logger,
+        logger=wandb_logger,
         gpus=1,
         max_epochs=hparams.epochs,
         callbacks=callbacks,
@@ -135,12 +133,12 @@ def train():
     trainer.test(alexnet, datamodule=dm)
 
     # Finish
-    #wandb_logger.experiment.unwatch(alexnet)
+    wandb_logger.experiment.unwatch(alexnet)
 
     # Model to Torchscript
-    #script = alexnet.to_torchscript()
-    #torch.jit.save(script, config.torchscript_model_save_path)
-    #wandb_logger.experiment.save(config.torchscript_model_save_path)
+    script = alexnet.to_torchscript()
+    torch.jit.save(script, config.torchscript_model_save_path)
+    wandb_logger.experiment.save(config.torchscript_model_save_path)
 
 
 if __name__ == '__main__':
