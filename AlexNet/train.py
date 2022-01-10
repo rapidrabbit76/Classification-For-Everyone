@@ -29,7 +29,7 @@ class AlexNetModel(pl.LightningModule):
             n_classes: int,
             lr: float,
     ):
-        super.__init__()
+        super().__init__()
         self.save_hyperparameters()
 
         self.model = AlexNet(
@@ -89,8 +89,8 @@ def train():
     seed_everything(config.seed)
 
     # Dataloader
-    dm = datamodule.CIFAR100DataModule(config.data_dir)
-    n_classes = 100
+    dm = datamodule.CIFAR10DataModule(config.data_dir)
+    n_classes = 10
 
     # Model
     alexnet = AlexNetModel(
