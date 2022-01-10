@@ -28,7 +28,6 @@ class SqueezeNetModule(pl.LightningModule):
         image_channals: int,
         n_classes: int,
         lr: float,
-        dropout_rate: int,
     ):
         super().__init__()
         self.save_hyperparameters()
@@ -36,7 +35,6 @@ class SqueezeNetModule(pl.LightningModule):
         self.model = SqueezeNet(
             self.hparams.image_channals,
             self.hparams.n_classes,
-            self.hparams.dropout_rate,
         )
         self.model.initialize_weights()
 
@@ -74,7 +72,10 @@ class SqueezeNetModule(pl.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        return optim.SGD(self.model.parameters(), lr=self.hparams.lr)
+        return optim.SGD(self.model.parameters(),
+                         lr=self.hparams.lr,
+                         momentum=0.9,
+                         weight_decay=0.0002)
 
 
 def train():
@@ -100,7 +101,6 @@ def train():
         config.image_channals,
         config.n_classes,
         hparams.lr,
-        hparams.dropout_rate,
     )
 
     # Logger
@@ -115,21 +115,11 @@ def train():
     wandb_logger.watch(model, log="all", log_freq=100)
 
     # Trainer setting
-    callbacks = [
-        EarlyStopping(
-            monitor="val_acc",
-            min_delta=0.00,
-            patience=3,
-            verbose=False,
-            mode="max",
-        ),
-    ]
 
     trainer: pl.Trainer = pl.Trainer(
         logger=wandb_logger,
         gpus=1,
         max_epochs=hparams.epochs,
-        callbacks=callbacks,
     )
 
     # Train
@@ -143,7 +133,7 @@ def train():
     saved_model_path = utils.model_save(
         model,
         config.torchscript_model_save_path,
-        hparams.model_type,
+        config.model_name + '.pt',
     )
 
     # Save artifacts
