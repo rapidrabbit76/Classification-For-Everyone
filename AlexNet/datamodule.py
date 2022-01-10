@@ -2,15 +2,15 @@ from typing import Optional
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader, random_split
 from torchvision import transforms
-from torchvision.datasets import CIFAR100
+from torchvision.datasets import CIFAR10
 
 
-class CIFAR100DataModule(pl.LightningDataModule):
+class CIFAR10DataModule(pl.LightningDataModule):
     def __init__(
             self,
             data_dir: str = './data',
-            image_size: int = 227,
-            batch_size: int = 128,
+            image_size: int = 256,
+            batch_size: int = 256,
     ):
         super().__init__()
         self.save_hyperparameters()
@@ -20,25 +20,25 @@ class CIFAR100DataModule(pl.LightningDataModule):
                 transforms.Resize((image_size, image_size)),
                 transforms.RandomHorizontalFlip(p=0.5),
                 transforms.RandomVerticalFlip(p=0.5),
+                transforms.ToTensor(),
                 transforms.Normalize(
                     mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
                     std=[x / 255.0 for x in [63.0, 62.1, 66.7]],
                 ),
-                transforms.ToTensor(),
             ]
         )
 
         self.test_transform = transforms.Compose(
             [
                 transforms.Resize((image_size, image_size)),
+                transforms.ToTensor(),
                 transforms.Normalize(
                     mean=[x / 255.0 for x in [125.3, 123.0, 113.9]],
                     std=[x / 255.0 for x in [63.0, 62.1, 66.7]],
                 ),
-                transforms.ToTensor(),
             ]
         )
-        self.dataset = CIFAR100
+        self.dataset = CIFAR10
 
     def prepare_data(self) -> None:
         """Dataset downlaod"""
