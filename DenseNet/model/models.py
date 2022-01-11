@@ -1,7 +1,6 @@
 import torch
 from torch import nn
-
-from .blocks import ConvBlock, DenseBlock, TransitionBlock
+from .blocks import DenseBlock, TransitionBlock
 
 DENSE_NET_TYPE = {
     '121': [6, 12, 24, 16],
