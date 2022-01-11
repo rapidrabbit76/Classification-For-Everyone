@@ -6,7 +6,7 @@ from pytorch_lightning.utilities.seed import seed_everything
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch.optim.lr_scheduler import CosineAnnealingLR, ReduceLROnPlateau
 from pytorch_lightning.callbacks import (
     EarlyStopping,
     TQDMProgressBar,
@@ -72,12 +72,14 @@ class AlexNetModel(pl.LightningModule):
     def configure_optimizers(self):
         optimizer = optim.Adam(self.parameters(), lr=self.hparams.lr)
         scheduler_dict = {
-            'scheduler': CosineAnnealingLR(
+            'scheduler': ReduceLROnPlateau(
                 optimizer,
-                T_max=10,
-                eta_min=self.hparams.lr*0.01,
+                mode='min',
+                factor=0.5,
+                patience=3,
             ),
             'interval': 'step',
+            'monitor': 'train_loss',
         }
         return {'optimizer': optimizer, 'lr_scheduler': scheduler_dict}
 

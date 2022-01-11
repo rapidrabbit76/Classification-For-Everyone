@@ -7,4 +7,4 @@ seed: '2022'
 
 image_channels: 3
 
-hparams: {lr: 0.03, epochs: 50, batch_size: 128}
+hparams: {lr: 0.03, epochs: 50, batch_size: 32}

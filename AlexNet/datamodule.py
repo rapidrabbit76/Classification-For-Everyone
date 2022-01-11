@@ -10,7 +10,7 @@ class CIFAR10DataModule(pl.LightningDataModule):
             self,
             data_dir: str = './data',
             image_size: int = 256,
-            batch_size: int = 256,
+            batch_size: int = 32,
     ):
         super().__init__()
         self.save_hyperparameters()
@@ -75,7 +75,7 @@ class CIFAR10DataModule(pl.LightningDataModule):
             self.train_ds,
             batch_size=self.hparams.batch_size,
             shuffle=True,
-            num_workers=4,
+            num_workers=0,
         )
 
     def val_dataloader(self) -> DataLoader:
@@ -83,7 +83,7 @@ class CIFAR10DataModule(pl.LightningDataModule):
             self.val_ds,
             batch_size=self.hparams.batch_size,
             shuffle=False,
-            num_workers=4,
+            num_workers=0,
         )
 
     def test_dataloader(self) -> DataLoader:
@@ -91,5 +91,5 @@ class CIFAR10DataModule(pl.LightningDataModule):
             self.test_ds,
             batch_size=self.hparams.batch_size,
             shuffle=False,
-            num_workers=4,
+            num_workers=0,
         )
