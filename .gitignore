@@ -1,5 +1,6 @@
 # IDE
 .vscode/
+.idea/
 
 # Cache
 **/__pycache__/**
@@ -20,5 +21,9 @@ data
 *pth
 *zip
 
+# Jupyter notebooks
+*.ipynb
+
 # TEST
 *test*
+

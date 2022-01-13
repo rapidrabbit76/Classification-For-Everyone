@@ -7,10 +7,12 @@ import torch
 
 
 def get_config(config_path: str = "config.yaml"):
-    return EasyDict(yaml.load(
-        open(config_path, "r"),
-        Loader=yaml.FullLoader,
-    ))
+    return EasyDict(
+        yaml.load(
+            open(config_path, "r"),
+            Loader=yaml.FullLoader,
+        )
+    )
 
 
 def model_save(
