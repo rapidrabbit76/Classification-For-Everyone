@@ -16,13 +16,13 @@ class GoogLeNet(nn.Module):
 
         if is_aux is not True:
             self.feature_extractor = nn.Sequential(
-                ConvBlock(image_channels, 64, kernel_size=2, padding='same'),
-                nn.MaxPool2d(kernel_size=3, stride=2, padding='same'),
+                ConvBlock(image_channels, 64, kernel_size=7, stride=2, padding=3),
+                nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
                 nn.BatchNorm2d(num_features=64, eps=1e-3),
-                ConvBlock(64, 64, stride=1, padding='valid'),
-                ConvBlock(64, 192, stride=1, padding='same'),
+                ConvBlock(64, 64, kernel_size=1, stride=1, padding=0),
+                ConvBlock(64, 192, kernel_size=3, stride=1, padding=1),
                 nn.BatchNorm2d(num_features=192, eps=1e-3),
-                nn.MaxPool2d(kernel_size=3, stride=2, padding='same'),
+                nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
                 # inception (3a)
                 InceptionBlock(
                     in_channels=192,
@@ -43,7 +43,7 @@ class GoogLeNet(nn.Module):
                     out_channels_5by5=96,
                     out_channels_pool_proj=64,
                 ),
-                nn.MaxPool2d(kernel_size=3, stride=2, padding='same'),
+                nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
                 # inception (4a)
                 InceptionBlock(
                     in_channels=480,
@@ -94,7 +94,7 @@ class GoogLeNet(nn.Module):
                     out_channels_5by5=128,
                     out_channels_pool_proj=128,
                 ),
-                nn.MaxPool2d(kernel_size=3, stride=2, padding='same'),
+                nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
                 # inception (5a)
                 InceptionBlock(
                     in_channels=832,
@@ -115,7 +115,7 @@ class GoogLeNet(nn.Module):
                     out_channels_5by5=128,
                     out_channels_pool_proj=128,
                 ),
-                nn.AvgPool2d(kernel_size=1, stride=1, padding=0)
+                nn.AvgPool2d(kernel_size=7, stride=1, padding=0)
             )
 
             self.classifier = Classifier(in_features=1024, out_features=n_classes)
