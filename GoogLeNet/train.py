@@ -87,7 +87,6 @@ class GoogLeNetModel(pl.LightningModule):
         }
         return {'optimizer': optimizer, 'lr_scheduler': scheduler_dict}
 
-
 def train():
     # Hyperparameters
     config = utils.get_config()
@@ -150,5 +149,5 @@ def train():
     wandb_logger.experiment.save(config.torchscript_model_save_path)
 
 
-if __name__=='__main':
+if __name__=='__main__':
     train()
