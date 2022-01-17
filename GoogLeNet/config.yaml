@@ -1,0 +1,18 @@
+project_name: 'GoogLeNet'
+save_dir: './experiments'
+dataset: 'CIFAR10'
+data_dir: './data'
+torchscript_model_save_path: './experiments/GoogLeNet.pt'
+seed: '2022'
+
+image_size: 224
+image_channels: 3
+n_classes: 10
+
+hparams:
+  {
+    lr: 0.03,
+    lr_step: 8,
+    epochs: 200,
+    batch_size: 64
+  }
