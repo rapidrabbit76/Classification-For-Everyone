@@ -1,8 +1,7 @@
 import torch
 import torch.nn as nn
 
-# module 오탈자 수정, padding str -> int로 수정
-# padding 수정 필요
+
 class ConvBlock(nn.Module):
 
     def __init__(
@@ -31,7 +30,7 @@ class ConvBlock(nn.Module):
         x = self.bn(x)
         return self.act(x)
 
-# 상속 nn.Module로 교체
+
 class InceptionBlock(nn.Module):
 
     def __init__(
