@@ -59,10 +59,10 @@ class InceptionBlock(nn.Module):
         x1 = ConvBlock(self.in_channels, self.out_channels_1by1, kernel_size=1)(x)
 
         x2_1 = ConvBlock(self.in_channels, self.out_channels_3by3_reduce, kernel_size=1)(x)
-        x2_2 = ConvBlock(self.out_channels_3by3_reduce, self.out_channels_3by3, kernel_size=3)(x2_1)
+        x2_2 = ConvBlock(self.out_channels_3by3_reduce, self.out_channels_3by3, kernel_size=3, padding=1)(x2_1)
 
         x3_1 = ConvBlock(self.in_channels, self.out_channels_5by5_reduce, kernel_size=1)(x)
-        x3_2 = ConvBlock(self.out_channels_5by5_reduce, self.out_channels_5by5, kernel_size=5)(x3_1)
+        x3_2 = ConvBlock(self.out_channels_5by5_reduce, self.out_channels_5by5, kernel_size=5, padding=2)(x3_1)
 
         x4_1 = self.maxpooling2d(x)
         x4_2 = ConvBlock(self.in_channels, self.out_channels_pool_proj, kernel_size=1)(x4_1)
