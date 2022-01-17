@@ -1,8 +1,9 @@
 import torch
 import torch.nn as nn
 
-
-class ConvBlock(nn.module):
+# module 오탈자 수정, padding str -> int로 수정
+# padding 수정 필요
+class ConvBlock(nn.Module):
 
     def __init__(
             self,
@@ -10,7 +11,7 @@ class ConvBlock(nn.module):
             out_channels: int,
             kernel_size: int,
             stride: int = 1,
-            padding: str = 'same',
+            padding: int = 0,
             bias: bool = True,
     ):
         super().__init__()
@@ -30,8 +31,8 @@ class ConvBlock(nn.module):
         x = self.bn(x)
         return self.act(x)
 
-
-class InceptionBlock(ConvBlock):
+# 상속 nn.Module로 교체
+class InceptionBlock(nn.Module):
 
     def __init__(
             self,
@@ -53,7 +54,7 @@ class InceptionBlock(ConvBlock):
         self.out_channels_5by5 = out_channels_5by5
         self.out_channels_pool_proj = out_channels_pool_proj
 
-        self.maxpooling2d = nn.MaxPool2d(kernel_size=3, stride=1, padding='same')
+        self.maxpooling2d = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x1 = ConvBlock(self.in_channels, self.out_channels_1by1, kernel_size=1)(x)
