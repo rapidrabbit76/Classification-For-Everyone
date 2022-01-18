@@ -27,6 +27,8 @@ class GoogLeNetModel(pl.LightningModule):
             image_channels: int,
             n_classes: int,
             lr: float,
+            epochs: int,
+            lr_step: int,
     ):
         super().__init__()
         self.save_hyperparameters()
@@ -35,9 +37,13 @@ class GoogLeNetModel(pl.LightningModule):
             self.hparams.image_channels,
             self.hparams.n_classes,
         )
+        self.model.initialize_weights()
 
         self.loss = nn.CrossEntropyLoss()
         self.accuracy = Accuracy()
+
+        self.epochs = epochs
+        self.lr_step = lr_step
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.model(x)
@@ -78,14 +84,15 @@ class GoogLeNetModel(pl.LightningModule):
             'scheduler': MultiStepLR(
                 optimizer,
                 milestones=utils.get_milestones(
-                    epoch=self.hparams.epochs,
-                    step=self.hparams.lr_step
+                    epoch=self.epochs,
+                    step=self.lr_step
                 ),
                 gamma=0.92,
                 verbose=True,
             )
         }
         return {'optimizer': optimizer, 'lr_scheduler': scheduler_dict}
+
 
 def train():
     # Hyperparameters
@@ -104,7 +111,9 @@ def train():
     googlenet = GoogLeNetModel(
         image_channels=config.image_channels,
         n_classes=config.n_classes,
-        lr=hparams.lr
+        lr=hparams.lr,
+        epochs=hparams.epochs,
+        lr_step=hparams.lr_step,
     )
 
     # Logger
@@ -122,7 +131,7 @@ def train():
         EarlyStopping(
             monitor='val_acc',
             min_delta=0.00,
-            patience=5,
+            patience=3,
             verbose=True,
             mode='max',
         ),
