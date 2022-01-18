@@ -44,30 +44,27 @@ class InceptionBlock(nn.Module):
             out_channels_pool_proj: int,
     ):
         super().__init__()
-        self.in_channels = in_channels
-
-        self.out_channels_1by1 = out_channels_1by1
-        self.out_channels_3by3_reduce = out_channels_3by3_reduce
-        self.out_channels_3by3 = out_channels_3by3
-        self.out_channels_5by5_reduce = out_channels_5by5_reduce
-        self.out_channels_5by5 = out_channels_5by5
-        self.out_channels_pool_proj = out_channels_pool_proj
-
-        self.maxpooling2d = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
+        self.branch1 = ConvBlock(in_channels, out_channels_1by1, kernel_size=1)
+        self.branch2 = nn.Sequential(
+            ConvBlock(in_channels, out_channels_3by3_reduce, kernel_size=1),
+            ConvBlock(out_channels_3by3_reduce, out_channels_3by3, kernel_size=3, padding=1)
+        )
+        self.branch3 = nn.Sequential(
+            ConvBlock(in_channels, out_channels_5by5_reduce, kernel_size=1),
+            ConvBlock(out_channels_5by5_reduce, out_channels_5by5, kernel_size=5, padding=2)
+        )
+        self.branch4 = nn.Sequential(
+            nn.MaxPool2d(kernel_size=3, stride=1, padding=1),
+            ConvBlock(in_channels, out_channels_pool_proj, kernel_size=1)
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x1 = ConvBlock(self.in_channels, self.out_channels_1by1, kernel_size=1)(x)
+        x1 = self.branch1(x)
+        x2 = self.branch2(x)
+        x3 = self.branch3(x)
+        x4 = self.branch4(x)
 
-        x2_1 = ConvBlock(self.in_channels, self.out_channels_3by3_reduce, kernel_size=1)(x)
-        x2_2 = ConvBlock(self.out_channels_3by3_reduce, self.out_channels_3by3, kernel_size=3, padding=1)(x2_1)
-
-        x3_1 = ConvBlock(self.in_channels, self.out_channels_5by5_reduce, kernel_size=1)(x)
-        x3_2 = ConvBlock(self.out_channels_5by5_reduce, self.out_channels_5by5, kernel_size=5, padding=2)(x3_1)
-
-        x4_1 = self.maxpooling2d(x)
-        x4_2 = ConvBlock(self.in_channels, self.out_channels_pool_proj, kernel_size=1)(x4_1)
-
-        return torch.cat([x1, x2_2, x3_2, x4_2], dim=1)
+        return torch.cat([x1, x2, x3, x4], dim=1)
 
 
 class AuxClassifier(nn.Module):
