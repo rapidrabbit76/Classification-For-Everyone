@@ -1,1 +1,1 @@
-from .datamodule import CIFAR10DataModule
+from .datamodule import CIFAR10DataModule, CIFAR100DataModule

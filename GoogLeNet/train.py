@@ -101,11 +101,18 @@ def train():
     seed_everything(config.seed)
 
     # Dataloader
-    dm = datamodule.CIFAR10DataModule(
-        config.data_dir,
-        image_size=config.image_size,
-        batch_size=hparams.batch_size,
-    )
+    if config.dataset == 'CIFAR10':
+        dm = datamodule.CIFAR10DataModule(
+            config.data_dir,
+            image_size=config.image_size,
+            batch_size=hparams.batch_size,
+        )
+    else:
+        dm = datamodule.CIFAR100DataModule(
+            config.data_dir,
+            image_size=config.image_size,
+            batch_size=hparams.batch_size,
+        )
 
     # Model
     googlenet = GoogLeNetModel(
