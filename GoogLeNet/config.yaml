@@ -1,13 +1,13 @@
 project_name: 'GoogLeNet'
 save_dir: './experiments'
-dataset: 'CIFAR10'
+dataset: 'CIFAR100'
 data_dir: './data'
 torchscript_model_save_path: './experiments/GoogLeNet.pt'
 seed: '2022'
 
 image_size: 224
 image_channels: 3
-n_classes: 10
+n_classes: 100
 
 hparams:
   {
