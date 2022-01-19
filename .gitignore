@@ -7,6 +7,7 @@
 
 # Dataset
 **/data/**
+data
 
 # Logging file
 **/experiments/**
@@ -22,3 +23,7 @@
 
 # Jupyter notebooks
 *.ipynb
+
+# TEST
+*test*
+
