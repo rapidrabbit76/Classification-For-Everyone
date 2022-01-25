@@ -130,6 +130,7 @@ def train():
 
     trainer: pl.Trainer = pl.Trainer(
         logger=wandb_logger,
+        gpus=1,
         max_epochs=hparams.epochs,
         callbacks=callbacks,
     )

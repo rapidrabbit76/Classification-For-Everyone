@@ -34,6 +34,7 @@ class DenseNet(nn.Module):
                 continue
             layers += [TransitionBlock(dim, dim // 2)]
             dim = dim // 2
+
         self.feature_extractor = nn.Sequential(*layers)
         self.avgpool = nn.AdaptiveAvgPool2d(1)
         self.classifier = nn.Sequential(
