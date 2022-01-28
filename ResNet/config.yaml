@@ -13,6 +13,6 @@ hparams:
   {
     lr: 0.1,
     epochs: 200,
-    batch_size: 128,
-    model_type: 18,
+    batch_size: 32,
+    model_type: 50,
   }
