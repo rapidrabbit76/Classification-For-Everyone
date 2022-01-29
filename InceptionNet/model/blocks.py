@@ -14,7 +14,7 @@ class ConvBlock(nn.Module):
         out_channels: int,
         kernel_size: _size_2_t = 3,
         stride: _size_2_t = 1,
-        padding: int = 1,
+        padding: _size_2_t = 1,
         norm: bool = False,
         bias: bool = False,
     ):
@@ -79,13 +79,227 @@ class Inceptionx3(nn.Module):
 
 class Inceptionx5(nn.Module):
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        in_channels: int,
+        dims: List[int],
+        norm: bool,
+        n: int = 7,
+    ) -> None:
         super().__init__()
-        # TODO
+        self.branch1 = nn.Sequential(
+            ConvBlock(
+                in_channels,
+                dims[0],
+                1,
+                stride=1,
+                padding=0,
+                norm=norm,
+            ),
+            ConvBlock(
+                dims[0],
+                dims[0],
+                kernel_size=(1, n),
+                stride=1,
+                padding=(0, n // 2),
+                norm=norm,
+            ),
+            ConvBlock(
+                dims[0],
+                dims[0],
+                kernel_size=(n, 1),
+                stride=1,
+                padding=(n // 2, 0),
+                norm=norm,
+            ),
+            ConvBlock(
+                dims[0],
+                dims[0],
+                kernel_size=(1, n),
+                stride=1,
+                padding=(0, n // 2),
+                norm=norm,
+            ),
+            ConvBlock(
+                dims[0],
+                dims[0],
+                kernel_size=(n, 1),
+                stride=1,
+                padding=(n // 2, 0),
+                norm=norm,
+            ),
+        )
+
+        self.branch2 = nn.Sequential(
+            ConvBlock(
+                in_channels,
+                dims[1],
+                kernel_size=1,
+                stride=1,
+                padding=0,
+                norm=norm,
+            ),
+            ConvBlock(
+                dims[1],
+                dims[1],
+                kernel_size=(1, n),
+                stride=1,
+                padding=(0, n // 2),
+                norm=norm,
+            ),
+            ConvBlock(
+                dims[1],
+                dims[1],
+                kernel_size=(n, 1),
+                stride=1,
+                padding=(n // 2, 0),
+                norm=norm,
+            ),
+        )
+
+        self.branch3 = nn.Sequential(
+            nn.AvgPool2d(
+                kernel_size=(3, 3),
+                stride=(1, 1),
+                padding=1,
+            ),
+            ConvBlock(
+                in_channels,
+                dims[2],
+                kernel_size=1,
+                stride=1,
+                padding=0,
+                norm=norm,
+            ),
+        )
+
+        self.branch4 = ConvBlock(
+            in_channels,
+            dims[3],
+            kernel_size=1,
+            stride=1,
+            padding=0,
+            norm=norm,
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        b1 = self.branch1(x)
+        b2 = self.branch2(x)
+        b3 = self.branch3(x)
+        b4 = self.branch4(x)
+        return torch.cat([b1, b2, b3, b4], dim=1)
 
 
 class Inceptionx2(nn.Module):
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        in_channels: int,
+        dims: List[int],
+        norm: bool,
+    ) -> None:
         super().__init__()
-        # TODO
+        self.branch1 = nn.Sequential(
+            ConvBlock(
+                in_channels,
+                dims[0] // 4,
+                kernel_size=1,
+                stride=1,
+                padding=0,
+                norm=norm,
+            ),
+            ConvBlock(
+                dims[0] // 4,
+                dims[0] // 4,
+                kernel_size=3,
+                stride=1,
+                padding=1,
+                norm=norm,
+            ),
+        )
+
+        self.branch1_1 = ConvBlock(
+            dims[0] // 4,
+            dims[0],
+            kernel_size=(1, 3),
+            stride=1,
+            padding=(0, 3 // 2),
+            norm=norm,
+        )
+
+        self.branch1_2 = ConvBlock(
+            dims[0] // 4,
+            dims[1],
+            kernel_size=(3, 1),
+            stride=1,
+            padding=(3 // 2, 0),
+            norm=norm,
+        )
+
+        self.branch2 = ConvBlock(
+            in_channels,
+            dims[2] // 4,
+            kernel_size=1,
+            stride=1,
+            padding=0,
+            norm=norm,
+        )
+
+        self.branch2_1 = ConvBlock(
+            dims[2] // 4,
+            dims[2],
+            kernel_size=(1, 3),
+            stride=1,
+            padding=(0, 3 // 2),
+            norm=norm,
+        )
+
+        self.branch2_2 = ConvBlock(
+            dims[2] // 4,
+            dims[3],
+            kernel_size=(3, 1),
+            stride=1,
+            padding=(3 // 2, 0),
+            norm=norm,
+        )
+
+        self.branch3 = nn.Sequential(
+            nn.MaxPool2d(kernel_size=3, stride=1, padding=1),
+            ConvBlock(
+                in_channels,
+                dims[4],
+                kernel_size=1,
+                stride=1,
+                padding=0,
+                norm=norm,
+            ))
+
+        self.branch4 = ConvBlock(
+            in_channels,
+            dims[5],
+            kernel_size=1,
+            stride=1,
+            padding=0,
+            norm=norm,
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        b1 = self.branch1(x)
+        b1_1 = self.branch1_1(b1)
+        b1_2 = self.branch1_2(b1)
+        b2 = self.branch1(x)
+        b2_1 = self.branch2_1(b2)
+        b2_2 = self.branch2_2(b2)
+        b3 = self.branch3(x)
+        b4 = self.branch4(x)
+        return torch.cat(
+            [
+                b1_1,
+                b1_2,
+                b2_1,
+                b2_2,
+                b3,
+                b4,
+            ],
+            dim=1,
+        )
