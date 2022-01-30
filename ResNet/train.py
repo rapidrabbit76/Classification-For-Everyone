@@ -28,6 +28,7 @@ class ResNetModel(pl.LightningModule):
             n_classes: int,
             lr: int,
             model_type: int,
+            dim: int,
     ):
         super().__init__()
         self.save_hyperparameters()
@@ -36,6 +37,7 @@ class ResNetModel(pl.LightningModule):
             self.hparams.image_channels,
             self.hparams.n_classes,
             self.hparams.model_type,
+            self.hparams.dim,
         )
         self.model.initialize_weights()
 
@@ -112,11 +114,13 @@ def train():
         )
 
     # Model
+    # dim parameter 추가
     resnet = ResNetModel(
         image_channels=config.image_channels,
         n_classes=config.n_classes,
         lr=hparams.lr,
         model_type=hparams.model_type,
+        dim=config.dim,
     )
 
     # Logger
