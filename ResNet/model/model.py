@@ -19,9 +19,10 @@ class ResNet(nn.Module):
             image_channels: int,
             n_classes: int,
             model_type: int,
+            dim: int,
     ):
         super().__init__()
-        dim = 64
+
         layers = []
         layers += [ConvBlock(image_channels, dim, kernel_size=7, stride=2, padding=3)]
         layers += [nn.ReLU()]
