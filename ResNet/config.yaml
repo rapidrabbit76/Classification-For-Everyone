@@ -8,7 +8,7 @@ seed: '2022'
 image_size: 224
 image_channels: 3
 n_classes: 10
-dim: 64 
+dim: 64
 
 hparams:
   {

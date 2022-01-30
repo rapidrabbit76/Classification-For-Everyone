@@ -114,7 +114,6 @@ def train():
         )
 
     # Model
-    # dim parameter 추가
     resnet = ResNetModel(
         image_channels=config.image_channels,
         n_classes=config.n_classes,
