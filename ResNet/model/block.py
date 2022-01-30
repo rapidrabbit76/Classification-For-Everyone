@@ -48,7 +48,7 @@ class BasicBlock(nn.Module):
 
         self.conv_3by3_3 = ConvBlock(dim//2, dim, kernel_size=3, stride=2, padding=1)
         self.downsample = ConvBlock(dim//2, dim, kernel_size=1, stride=2)
-        self.relu = nn.ReLU()
+        self.act = nn.ReLU()
         self.bn = nn.BatchNorm2d(num_features=dim)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -56,7 +56,7 @@ class BasicBlock(nn.Module):
 
         if self.is_first_layer is False and self.is_first_block is True:
             x = self.conv_3by3_3(x)
-            x = self.relu(x)
+            x = self.act(x)
             x = self.conv_3by3_2(x)
 
             identity = self.downsample(identity)
@@ -64,15 +64,15 @@ class BasicBlock(nn.Module):
 
             x = x + identity
 
-            return self.relu(x)
+            return self.act(x)
 
         x = self.conv_3by3_1(x)
-        x = self.relu(x)
+        x = self.act(x)
         x = self.conv_3by3_2(x)
 
         x = x + identity
 
-        return self.relu(x)
+        return self.act(x)
 
 
 class BottleNeckBlock(nn.Module):
@@ -104,7 +104,7 @@ class BottleNeckBlock(nn.Module):
         self.conv3_1_1by1_2 = ConvBlock(dim, dim*4, kernel_size=1)
         self.downsample = ConvBlock(dim*2, dim*4, kernel_size=1, stride=2)
 
-        self.relu = nn.ReLU()
+        self.act = nn.ReLU()
         self.bn = nn.BatchNorm2d(num_features=dim*4)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -112,9 +112,9 @@ class BottleNeckBlock(nn.Module):
 
         if self.is_first_layer is True and self.is_first_block is True:
             x = self.conv2_1_1by1_1(x)
-            x = self.relu(x)
+            x = self.act(x)
             x = self.conv2_1_3by3(x)
-            x = self.relu(x)
+            x = self.act(x)
             x = self.conv2_1_1by1_2(x)
 
             identity = self.scale(identity)
@@ -122,13 +122,13 @@ class BottleNeckBlock(nn.Module):
 
             x = x + identity
 
-            return self.relu(x)
+            return self.act(x)
 
         elif self.is_first_layer is False and self.is_first_block is True:
             x = self.conv3_1_1by1_1(x)
-            x = self.relu(x)
+            x = self.act(x)
             x = self.conv3_1_3by3(x)
-            x = self.relu(x)
+            x = self.act(x)
             x = self.conv3_1_1by1_2(x)
 
             identity = self.downsample(identity)
@@ -136,17 +136,17 @@ class BottleNeckBlock(nn.Module):
 
             x = x + identity
 
-            return self.relu(x)
+            return self.act(x)
 
         x = self.conv_1by1_1_common(x)
-        x = self.relu(x)
+        x = self.act(x)
         x = self.conv_3by3_common(x)
-        x = self.relu(x)
+        x = self.act(x)
         x = self.conv_1by1_2_common(x)
 
         x = x + identity
 
-        return self.relu(x)
+        return self.act(x)
 
 
 class ResidualBlock(nn.Module):
