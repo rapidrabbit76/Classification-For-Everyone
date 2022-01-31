@@ -27,7 +27,7 @@ class ConvBlock(nn.Module):
             padding=padding,
             bias=bias,
         )
-        self.norm = nn.BatchNorm2d(in_channels) if norm else nn.Identity()
+        self.norm = nn.BatchNorm2d(out_channels) if norm else nn.Identity()
         self.act = nn.ReLU(inplace=True)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
