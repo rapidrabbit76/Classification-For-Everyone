@@ -303,3 +303,67 @@ class Inceptionx2(nn.Module):
             ],
             dim=1,
         )
+
+
+class GridReduction(nn.Module):
+
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        norm: bool,
+    ) -> None:
+        super().__init__()
+
+        self.conv = ConvBlock(
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=3,
+            stride=2,
+            padding=0,
+            norm=norm,
+        )
+
+        self.pooling = nn.MaxPool2d(kernel_size=3, stride=2)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        conv = self.conv(x)
+        pooling = self.pooling(x)
+        return torch.cat([conv, pooling], dim=1)
+
+
+class AuxClassifier(nn.Module):
+
+    def __init__(
+        self,
+        in_channels: int,
+        num_classes: int,
+        norm: bool,
+    ) -> None:
+        super().__init__()
+        self.pooling = nn.AdaptiveMaxPool2d(output_size=(5, 5))
+        self.conv_1 = ConvBlock(
+            in_channels=in_channels,
+            out_channels=128,
+            kernel_size=1,
+            stride=1,
+            padding=0,
+            norm=norm,
+        )
+        self.conv_2 = ConvBlock(
+            in_channels=128,
+            out_channels=768,
+            kernel_size=1,
+            stride=1,
+            padding=0,
+            norm=norm,
+        )
+        self.flatten = nn.Flatten()
+        self.fc = nn.Linear(768, num_classes)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.pooling(x)
+        x = self.conv_1(x)
+        x = self.conv_2(x)
+        x = self.flatten(x)
+        return self.fc(x)
