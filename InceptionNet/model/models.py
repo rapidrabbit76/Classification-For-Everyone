@@ -9,7 +9,6 @@ class Inception_v3(nn.Module):
 
     def __init__(
         self,
-        config,
         image_channels: int,
         num_classes: int,
         norm: bool,
@@ -43,7 +42,7 @@ class Inception_v3(nn.Module):
             norm=norm,
         )
 
-        self.pool1 = nn.MaxPool2d(kernel_size=3, stride=2)
+        self.pooling = nn.MaxPool2d(kernel_size=3, stride=2)
 
         self.conv4 = ConvBlock(
             in_channels=64,
@@ -72,7 +71,7 @@ class Inception_v3(nn.Module):
             norm=norm,
         )
 
-        self.inceptionx3 = nn.Module(
+        self.inceptionx3 = nn.Sequential(
             Inceptionx3(in_channels=288, dims=[96, 96, 96, 96], norm=norm),
             Inceptionx3(in_channels=96 * 4, dims=[96, 96, 96, 96], norm=norm),
             Inceptionx3(in_channels=96 * 4, dims=[96, 96, 96, 96], norm=norm),
@@ -81,9 +80,10 @@ class Inception_v3(nn.Module):
         self.aux = AuxClassifier(
             in_channels=96 * 4 * 2,
             num_classes=num_classes,
+            norm=norm,
         )
 
-        self.inceptionx5 = nn.Module(
+        self.inceptionx5 = nn.Sequential(
             Inceptionx5(in_channels=96 * 4 * 2, dims=[160] * 4, norm=norm),
             Inceptionx5(in_channels=160 * 4, dims=[160] * 4, norm=norm),
             Inceptionx5(in_channels=160 * 4, dims=[160] * 4, norm=norm),
@@ -94,10 +94,10 @@ class Inception_v3(nn.Module):
         )
 
         inceptionx2_dims = [
-            [256, 256, 192, 192, 64],
+            [256, 256, 192, 192, 64, 64],
             [384, 384, 384, 384, 256, 256],
         ]
-        self.inceptionx2 = nn.Module(
+        self.inceptionx2 = nn.Sequential(
             Inceptionx2(
                 in_channels=160 * 4 * 2,
                 dims=inceptionx2_dims[0],
@@ -120,7 +120,7 @@ class Inception_v3(nn.Module):
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
-        x = self.pool1(x)
+        x = self.pooling(x)
         x = self.conv4(x)
         x = self.conv5(x)
         x = self.conv6(x)
@@ -129,6 +129,7 @@ class Inception_v3(nn.Module):
         aux = self.aux(x)
         x = self.inceptionx5(x)
         x = self.inceptionx2(x)
+        x = self.avgpool(x)
         x = self.classifier(x)
 
         if self.training:

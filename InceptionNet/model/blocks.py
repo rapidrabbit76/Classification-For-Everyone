@@ -58,7 +58,7 @@ class Inceptionx3(nn.Module):
 
         self.branch3 = nn.Sequential(
             nn.AvgPool2d(kernel_size=3, stride=1, padding=1),
-            ConvBlock(in_channels, dims[2], 1, stride=1, norm=norm),
+            ConvBlock(in_channels, dims[2], 1, stride=1, padding=0, norm=norm),
         )
         self.branch4 = ConvBlock(
             in_channels,
@@ -287,7 +287,7 @@ class Inceptionx2(nn.Module):
         b1 = self.branch1(x)
         b1_1 = self.branch1_1(b1)
         b1_2 = self.branch1_2(b1)
-        b2 = self.branch1(x)
+        b2 = self.branch2(x)
         b2_1 = self.branch2_1(b2)
         b2_2 = self.branch2_2(b2)
         b3 = self.branch3(x)
@@ -359,11 +359,13 @@ class AuxClassifier(nn.Module):
             norm=norm,
         )
         self.flatten = nn.Flatten()
+        self.avgpooling = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(768, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.pooling(x)
         x = self.conv_1(x)
         x = self.conv_2(x)
+        x = self.avgpooling(x)
         x = self.flatten(x)
         return self.fc(x)
