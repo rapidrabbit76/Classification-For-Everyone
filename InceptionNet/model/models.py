@@ -4,6 +4,10 @@ from torch import nn
 
 from .blocks import AuxClassifier, Inceptionx2, Inceptionx3, Inceptionx5, ConvBlock, GridReduction
 
+from typing import Union, Tuple
+
+MODEL_RETURN_TYPE = Union[Tuple[torch.Tensor, torch.Tensor], torch.Tensor]
+
 
 class Inception_v3(nn.Module):
 
@@ -42,7 +46,7 @@ class Inception_v3(nn.Module):
             norm=norm,
         )
 
-        self.pooling = nn.MaxPool2d(kernel_size=3, stride=2)
+        self.pool = nn.MaxPool2d(kernel_size=3, stride=2)
 
         self.conv4 = ConvBlock(
             in_channels=64,
@@ -116,11 +120,11 @@ class Inception_v3(nn.Module):
             nn.Linear(sum(inceptionx2_dims[1]), num_classes),
         )
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
+    def forward(self, x: torch.Tensor) -> MODEL_RETURN_TYPE:
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
-        x = self.pooling(x)
+        x = self.pool(x)
         x = self.conv4(x)
         x = self.conv5(x)
         x = self.conv6(x)
