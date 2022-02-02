@@ -12,7 +12,7 @@ image_size: 299
 hparams:
   {
     norm: true,
-    lr: 0.045,
+    lr: 0.01,
     epochs: 100,
     batch_size: 64,
     label_smoothing: 0.1,

@@ -56,7 +56,7 @@ class InceptionV3Module(pl.LightningModule):
         )
 
         # Metrics
-        self.loss = nn.CrossEntropyLoss(label_smoothing=0)
+        self.loss = nn.CrossEntropyLoss()
         self.accuracy = Accuracy()
 
     def forward(self, x: torch.Tensor) -> MODEL_RETURN_TYPE:
@@ -93,12 +93,6 @@ class InceptionV3Module(pl.LightningModule):
 
         loss = (main_loss * self.hparams.loss_weight +
                 aux_loss * self.hparams.aux_loss_weight)
-
-        #  gradient clipping
-        # torch.nn.utils.clip_grad.clip_grad_norm_(
-        #     self.model.parameters(),
-        #     self.hparams.gradient_clipping,
-        # )
 
         self.log_dict({
             'main_loss': main_loss,
@@ -137,25 +131,10 @@ class InceptionV3Module(pl.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        optimizer = optim.RMSprop(
-            params=self.model.parameters(),
+        return optim.Adam(
+            self.parameters(),
             lr=self.hparams.lr,
-            weight_decay=self.hparams.weight_decay,
-            momentum=self.hparams.momentum,
         )
-
-        lr_scheduler_dict = {
-            'scheduler':
-            optim.lr_scheduler.ExponentialLR(
-                optimizer=optimizer,
-                gamma=self.hparams.lr_exponential_rate,
-            ),
-            "interval":
-            "epoch",
-            'frequency':
-            2,
-        }
-        return [optimizer], [lr_scheduler_dict]
 
 
 def train():
@@ -216,7 +195,6 @@ def train():
         gpus=1,
         precision=hparams.precision,
         max_epochs=hparams.epochs,
-        gradient_clip_val=hparams.gradient_clipping,
         callbacks=callbacks,
     )
 
