@@ -34,7 +34,6 @@ class CIFAR10Dataset(CIFAR10):
 
         self.transform = A.Compose([
             A.Resize(image_size, image_size),
-            A.HorizontalFlip(p=0.5),
             A.Normalize(),
             ToTensor(),
         ], )

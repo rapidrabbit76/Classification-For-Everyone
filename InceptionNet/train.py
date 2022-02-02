@@ -11,6 +11,7 @@ import torch.optim as optim
 from pytorch_lightning.callbacks import (
     EarlyStopping,
     TQDMProgressBar,
+    LearningRateMonitor,
 )
 from pytorch_lightning.loggers import WandbLogger
 from torch.nn import functional as F
@@ -39,6 +40,7 @@ class InceptionV3Module(pl.LightningModule):
         lr_exponential_rate: float,
         label_smoothing: float,
         weight_decay: float,
+        momentum: float,
         eps: float,
         gradient_clipping: float,
         loss_weight: float,
@@ -52,7 +54,6 @@ class InceptionV3Module(pl.LightningModule):
             num_classes=self.hparams.n_classes,
             norm=self.hparams.norm,
         )
-        self.model.initialize_weights()
 
         # Metrics
         self.loss = nn.CrossEntropyLoss(label_smoothing=0)
@@ -88,14 +89,24 @@ class InceptionV3Module(pl.LightningModule):
         batch_idx: int,
     ) -> torch.Tensor:
         loss_dict, acc = self.step(batch)
+        main_loss, aux_loss = loss_dict['loss'], loss_dict['aux_loss']
 
-        loss = loss_dict['loss'] * self.hparams.loss_weight + loss_dict[
-            'aux_loss'] * self.hparams.aux_loss_weight
+        loss = (main_loss * self.hparams.loss_weight +
+                aux_loss * self.hparams.aux_loss_weight)
 
-        self.log("main_loss", loss_dict['loss'], prog_bar=True)
-        self.log("aux_loss", loss_dict['aux_loss'], prog_bar=True)
-        self.log("train_loss", loss, prog_bar=True)
-        self.log("train_acc", acc, prog_bar=True)
+        #  gradient clipping
+        # torch.nn.utils.clip_grad.clip_grad_norm_(
+        #     self.model.parameters(),
+        #     self.hparams.gradient_clipping,
+        # )
+
+        self.log_dict({
+            'main_loss': main_loss,
+            'aux_loss': aux_loss,
+            'train_loss': loss,
+            'train_acc': acc,
+        })
+
         return loss
 
     def validation_step(
@@ -105,8 +116,11 @@ class InceptionV3Module(pl.LightningModule):
     ) -> torch.Tensor:
         loss_dict, acc = self.step(batch)
         loss = loss_dict['loss']
-        self.log("val_loss", loss, prog_bar=True)
-        self.log("val_acc", acc, prog_bar=True)
+        self.log_dict({
+            'val_loss': loss,
+            'val_acc': acc,
+        })
+
         return loss
 
     def test_step(
@@ -116,8 +130,10 @@ class InceptionV3Module(pl.LightningModule):
     ) -> torch.Tensor:
         loss_dict, acc = self.step(batch)
         loss = loss_dict['loss']
-        self.log("test_loss", loss, prog_bar=True)
-        self.log("test_acc", acc, prog_bar=True)
+        self.log_dict({
+            'test_loss': loss,
+            'test_acc': acc,
+        })
         return loss
 
     def configure_optimizers(self):
@@ -125,25 +141,21 @@ class InceptionV3Module(pl.LightningModule):
             params=self.model.parameters(),
             lr=self.hparams.lr,
             weight_decay=self.hparams.weight_decay,
-            eps=self.hparams.eps,
+            momentum=self.hparams.momentum,
         )
 
-        lr_scheduler_config = {
-            "scheduler":
+        lr_scheduler_dict = {
+            'scheduler':
             optim.lr_scheduler.ExponentialLR(
                 optimizer=optimizer,
                 gamma=self.hparams.lr_exponential_rate,
             ),
             "interval":
-            "step",
+            "epoch",
             'frequency':
             2,
-            "monitor":
-            "val_loss",
-            "strict":
-            True,
         }
-        return [optimizer], [lr_scheduler_config]
+        return [optimizer], [lr_scheduler_dict]
 
 
 def train():
@@ -156,11 +168,13 @@ def train():
     if config.dataset == 'CIFAR10':
         dm = datamodule.CIFAR10DataModule(
             config.data_dir,
+            image_size=config.image_size,
             batch_size=hparams.batch_size,
         )
     else:
         dm = datamodule.CIFAR100DataModule(
             config.data_dir,
+            image_size=config.image_size,
             batch_size=hparams.batch_size,
         )
 
@@ -173,6 +187,7 @@ def train():
         lr_exponential_rate=hparams.lr_exponential_rate,
         label_smoothing=hparams.label_smoothing,
         weight_decay=hparams.weight_decay,
+        momentum=hparams.momentum,
         eps=hparams.eps,
         gradient_clipping=hparams.gradient_clipping,
         loss_weight=hparams.loss_weight,
@@ -192,20 +207,16 @@ def train():
 
     # Trainer setting
     callbacks = [
-        TQDMProgressBar(refresh_rate=10),
-        EarlyStopping(
-            monitor="val_acc",
-            min_delta=0.00,
-            patience=3,
-            verbose=False,
-            mode="max",
-        ),
+        TQDMProgressBar(refresh_rate=5),
+        LearningRateMonitor(logging_interval='epoch'),
     ]
 
     trainer: pl.Trainer = pl.Trainer(
         logger=wandb_logger,
         gpus=1,
+        precision=hparams.precision,
         max_epochs=hparams.epochs,
+        gradient_clip_val=hparams.gradient_clipping,
         callbacks=callbacks,
     )
 
@@ -220,7 +231,6 @@ def train():
     saved_model_path = utils.model_save(
         model,
         config.torchscript_model_save_path,
-        hparams.model_type,
     )
 
     # Save artifacts

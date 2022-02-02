@@ -27,8 +27,9 @@ class ConvBlock(nn.Module):
             padding=padding,
             bias=bias,
         )
-        self.norm = nn.BatchNorm2d(out_channels) if norm else nn.Identity()
-        self.act = nn.ReLU(inplace=True)
+        self.norm = nn.BatchNorm2d(out_channels,
+                                   eps=0.001) if norm else nn.Identity()
+        self.act = nn.ReLU()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.conv(x)
@@ -341,21 +342,24 @@ class AuxClassifier(nn.Module):
         norm: bool,
     ) -> None:
         super().__init__()
-        self.pooling = nn.AdaptiveMaxPool2d(output_size=(5, 5))
+        self.pooling = nn.AvgPool2d(
+            kernel_size=(5, 5),
+            stride=3,
+        )
         self.conv_1 = ConvBlock(
             in_channels=in_channels,
             out_channels=128,
             kernel_size=1,
             stride=1,
-            padding=0,
+            padding=1,
             norm=norm,
         )
         self.conv_2 = ConvBlock(
             in_channels=128,
             out_channels=768,
-            kernel_size=1,
+            kernel_size=5,
             stride=1,
-            padding=0,
+            padding=1,
             norm=norm,
         )
         self.flatten = nn.Flatten()
