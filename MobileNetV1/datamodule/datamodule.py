@@ -16,7 +16,7 @@ class CIFAR10DataModule(pl.LightningDataModule):
             image_size: int = 224,
             batch_size: int = 64,
             rho: float = 1.0,
-    ):
+    ) -> None:
         super().__init__()
         self.save_hyperparameters()
 
@@ -131,13 +131,17 @@ class CIFAR100DataModule(pl.LightningDataModule):
             data_dir: str = './data',
             image_size: int = 224,
             batch_size: int = 64,
-    ):
+            rho: float = 1.0,
+    ) -> None:
         super().__init__()
         self.save_hyperparameters()
 
         self.train_transforms = A.Compose([
             A.Resize(256, 256),
-            A.RandomResizedCrop(image_size, image_size),
+            A.RandomResizedCrop(
+                np.int16(np.round(rho * image_size)),
+                np.int16(np.round(rho * image_size))
+            ),
             A.HorizontalFlip(p=0.5),
             A.VerticalFlip(p=0.5),
             A.Normalize(
@@ -150,7 +154,10 @@ class CIFAR100DataModule(pl.LightningDataModule):
         ], )
 
         self.test_transforms = A.Compose([
-            A.Resize(image_size, image_size),
+            A.Resize(
+                np.int16(np.round(rho * image_size)),
+                np.int16(np.round(rho * image_size))
+            ),
             A.Normalize(
                 mean=(0.49139968, 0.48215841, 0.44653091),
                 std=(0.24703223, 0.24348513, 0.26158784),
