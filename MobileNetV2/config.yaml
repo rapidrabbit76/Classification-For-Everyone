@@ -1,0 +1,19 @@
+project_name: 'MobileNetV2'
+save_dir: './experiments'
+dataset: 'CIFAR10'
+data_dir: './data'
+torchscript_model_save_path: './experiments/'
+seed: '2022'
+
+image_size: 224
+image_channels: 3
+n_classes: 10
+
+hparams:
+  {
+    lr: 0.01,
+    epochs: 200,
+    batch_size: 64,
+    alpha: 0.75,
+    rho: 0.713
+  }
