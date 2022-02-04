@@ -81,7 +81,7 @@ class MobileNetV2Model(pl.LightningModule):
                 optimizer,
                 mode='min',
                 factor=0.1,
-                patience=10,
+                patience=5,
                 verbose=True,
             ),
             'monitor': 'val_loss',
@@ -134,7 +134,7 @@ def train():
         EarlyStopping(
             monitor='val_acc',
             min_delta=0.00,
-            patience=3,
+            patience=10,
             verbose=True,
             mode='max',
         ),
