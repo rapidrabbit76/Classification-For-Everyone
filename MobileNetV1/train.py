@@ -159,7 +159,7 @@ def train():
     saved_model_path = utils.model_save(
         mobilenetv1,
         config.torchscript_model_save_path,
-        hparams.project_name
+        config.project_name
     )
 
     # Save artifacts
