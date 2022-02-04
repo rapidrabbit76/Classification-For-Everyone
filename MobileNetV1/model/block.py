@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from typing import List
 
 
 class ConvBlock(nn.Module):
@@ -38,8 +39,8 @@ class DepthWiseSeparableBlock(nn.Module):
 
     def __init__(
             self,
-            dim: list,
-            stride: list,
+            dim: List[int],
+            stride: List[int],
             iterate: int = 0,
             is_common: bool = False,
             is_repeat: bool = False,
