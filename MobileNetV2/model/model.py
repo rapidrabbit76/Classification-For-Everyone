@@ -103,4 +103,4 @@ class MobileNetV2(nn.Module):
                 nn.init.constant_(m.bias, 0)
 
     def _multiply_width(self, dim: int) -> int:
-        return np.int16(np.ceil(self.alpha*dim))
+        return int(np.ceil(self.alpha*dim))
