@@ -28,6 +28,7 @@ class MobileNetV2Model(pl.LightningModule):
             n_classes: int,
             lr: int,
             alpha: float,
+            weight_decay: float,
     ):
         super().__init__()
         self.save_hyperparameters()
@@ -68,19 +69,20 @@ class MobileNetV2Model(pl.LightningModule):
     def test_step(self, batch, batch_idx) -> torch.Tensor:
         loss, acc = self.step(batch)
         self.log('test_loss', loss, prog_bar=True)
-        self.lof('test_acc', acc, prog_bar=True)
+        self.log('test_acc', acc, prog_bar=True)
         return loss
 
     def configure_optimizers(self):
         optimizer = optim.Adam(
             self.parameters(),
-            lr=self.hparams.lr
+            lr=self.hparams.lr,
+            weight_decay=self.hparams.weight_decay,
         )
         scheduler_dict = {
             'scheduler': ReduceLROnPlateau(
                 optimizer,
                 mode='min',
-                factor=0.1,
+                factor=0.5,
                 patience=5,
                 verbose=True,
             ),
@@ -116,7 +118,8 @@ def train():
         image_channels=config.image_channels,
         n_classes=config.n_classes,
         lr=hparams.lr,
-        alpha=hparams.alpha
+        alpha=hparams.alpha,
+        weight_decay=hparams.weight_decay,
     )
 
     # Logger
