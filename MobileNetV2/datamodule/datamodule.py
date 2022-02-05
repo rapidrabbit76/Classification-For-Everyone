@@ -26,6 +26,8 @@ class CIFAR10DataModule(pl.LightningDataModule):
                 np.int16(np.round(rho*image_size)),
                 np.int16(np.round(rho*image_size))
             ),
+            A.CLAHE(clip_limit=2, p=0.2),
+            A.HueSaturationValue(p=0.3),
             A.HorizontalFlip(p=0.5),
             A.VerticalFlip(p=0.5),
             A.Normalize(
@@ -142,6 +144,8 @@ class CIFAR100DataModule(pl.LightningDataModule):
                 np.int16(np.round(rho * image_size)),
                 np.int16(np.round(rho * image_size))
             ),
+            A.CLAHE(clip_limit=2, p=0.2),
+            A.HueSaturationValue(p=0.3),
             A.HorizontalFlip(p=0.5),
             A.VerticalFlip(p=0.5),
             A.Normalize(
