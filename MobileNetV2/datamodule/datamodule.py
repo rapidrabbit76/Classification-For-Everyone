@@ -27,6 +27,7 @@ class CIFAR10DataModule(pl.LightningDataModule):
                 np.int16(np.round(rho*image_size))
             ),
             A.HorizontalFlip(p=0.5),
+            A.VerticalFlip(p=0.5),
             A.Normalize(
                 mean=(0.49139968, 0.48215841, 0.44653091),
                 std=(0.24703223, 0.24348513, 0.26158784),
@@ -142,6 +143,7 @@ class CIFAR100DataModule(pl.LightningDataModule):
                 np.int16(np.round(rho * image_size))
             ),
             A.HorizontalFlip(p=0.5),
+            A.VerticalFlip(p=0.5),
             A.Normalize(
                 mean=(0.49139968, 0.48215841, 0.44653091),
                 std=(0.24703223, 0.24348513, 0.26158784),
