@@ -82,7 +82,7 @@ class MobileNetV2Model(pl.LightningModule):
             'scheduler': ReduceLROnPlateau(
                 optimizer,
                 mode='min',
-                factor=0.5,
+                factor=0.1,
                 patience=5,
                 verbose=True,
             ),
