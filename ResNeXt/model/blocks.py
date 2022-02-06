@@ -1,10 +1,11 @@
 from asyncio import FastChildWatcher
+from numpy import number
 import torch
 from torch import nn
 
 from typing import Tuple, Union, List, Any
 
-__all__ = ['ConvBlock', 'ResNeXtBlock']
+__all__ = ['ConvBlock', 'ResNeXtBlock', 'Classifier']
 
 
 class ConvBlock(nn.Module):
@@ -13,25 +14,31 @@ class ConvBlock(nn.Module):
         self,
         in_channels: int,
         out_channels: int,
-        norm: bool,
-        act: bool,
         **kwargs: Any,
     ):
         super().__init__()
-        kwargs['bias'] = False
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            **kwargs,
-        )
-        self.norm = nn.BatchNorm2d(out_channels) if norm else nn.Identity()
-        self.act = nn.ReLU(inplace=True) if act else nn.Identity()
+        act = kwargs.get('act', True)
+        layer = []
+
+        layer += [
+            nn.Conv2d(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                kernel_size=kwargs.get('kernel_size'),
+                stride=kwargs.get('stride', 1),
+                padding=kwargs.get('padding', 0),
+                groups=kwargs.get('groups', 1),
+                bias=kwargs.get('bias', False),
+            )
+        ]
+        layer += [nn.BatchNorm2d(out_channels)]
+        if act:
+            layer += [nn.ReLU(inplace=True)]
+
+        self.block = nn.Sequential(*layer)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.conv(x)
-        x = self.norm(x)
-        x = self.act(x)
-        return x
+        return self.block(x)
 
 
 class ResNeXtBlock(nn.Module):
@@ -41,60 +48,69 @@ class ResNeXtBlock(nn.Module):
         in_channels: int,
         out_channels: int,
         stride: int,
-        norm: bool,
-        groups: int,
-        depth: int,
-        base_width: int,
-        **kwargs,
-    ) -> None:
+        **kwargs: Any,
+    ):
         super().__init__()
+        groups = kwargs.get('groups')
+        depth = kwargs.get('depth')
+        basewidth = kwargs.get('basewidth')
 
-        d = int(depth * out_channels / base_width)
-
-        self.residual_block = nn.Sequential(
+        width = int(depth * out_channels / basewidth) * groups
+        self.split_transforms = nn.Sequential(
             ConvBlock(
                 in_channels=in_channels,
-                out_channels=groups * d,
-                norm=norm,
-                act=True,
+                out_channels=width,
                 kernel_size=1,
-                stride=1,
-                padding=0,
-                kwargs=kwargs,
             ),
             ConvBlock(
-                in_channels=groups * d,
-                out_channels=groups * d,
-                norm=norm,
-                act=True,
+                in_channels=width,
+                out_channels=width,
                 kernel_size=3,
                 stride=stride,
+                groups=groups,
                 padding=1,
-                kwargs=kwargs,
             ),
             ConvBlock(
-                in_channels=groups * d,
+                in_channels=width,
                 out_channels=out_channels * 4,
-                norm=norm,
-                act=False,
                 kernel_size=1,
-                stride=1,
-                kwargs=kwargs,
+                act=False,
             ),
         )
-        self.act = nn.ReLU(inplace=True)
+
         self.shortcut = nn.Sequential()
+        self.act = nn.ReLU(inplace=True)
+
         if stride != 1 or in_channels != out_channels * 4:
             self.shortcut = ConvBlock(
                 in_channels=in_channels,
                 out_channels=out_channels * 4,
-                norm=norm,
-                act=False,
-                stride=stride,
                 kernel_size=1,
+                stride=stride,
+                act=False,
             )
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        res = self.residual_block(x)
+    def forward(self, x):
+        residual = self.split_transforms(x)
         sc = self.shortcut(x)
-        return self.act(res + sc)
+
+        return self.act(residual + sc)
+
+
+class Classifier(nn.Module):
+
+    def __init__(
+        self,
+        in_features: int,
+        num_classes: int,
+    ) -> None:
+        super().__init__()
+        self.flatten = nn.Flatten()
+        self.fc = nn.Linear(
+            in_features=in_features,
+            out_features=num_classes,
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.flatten(x)
+        return self.fc(x)
