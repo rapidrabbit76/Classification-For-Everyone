@@ -17,7 +17,7 @@ class ConvBlock(nn.Module):
         dropout_rate = kwargs.get("dropout_rate", 0)
         layer = []
         # WRN use BN->ReLU->Conv
-        layer += [nn.BatchNorm2d(out_channels)]
+        layer += [nn.BatchNorm2d(in_channels)]
         layer += [nn.ReLU(inplace=True)]
         if dropout_rate > 0:
             layer += [nn.Dropout2d(dropout_rate, inplace=True)]
@@ -49,10 +49,6 @@ class WideResNetBlock(nn.Module):
         **kwargs: Any,
     ):
         super().__init__()
-        # groups = kwargs.get("groups", 1)
-        # depth = kwargs.get("depth", 64)
-        # basewidth = kwargs.get("basewidth", 64)
-        # width = int(depth * out_channels / basewidth) * groups
 
         self.residual = nn.Sequential(
             ConvBlock(
@@ -76,12 +72,13 @@ class WideResNetBlock(nn.Module):
 
         self.shortcut = nn.Sequential()
 
-        if stride != 1 or in_channels != out_channels * 4:
+        if stride != 1 or in_channels != out_channels:
             self.shortcut = nn.Conv2d(
                 in_channels=in_channels,
                 out_channels=out_channels,
                 kernel_size=1,
-                stride=1,
+                stride=stride,
+                padding=0,
                 bias=False,
             )
 
