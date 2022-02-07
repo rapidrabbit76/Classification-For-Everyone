@@ -1,5 +1,3 @@
-import math
-import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from .blocks import *
@@ -34,7 +32,6 @@ class WideResNet(nn.Module):
         self.conv3 = self._make_layer(32 * K, N, 2, dropout_rate, **kwargs)
         self.conv4 = self._make_layer(64 * K, N, 2, dropout_rate, **kwargs)
         self.bn = nn.BatchNorm2d(64 * K)
-        self.act = nn.ReLU(inplace=True)
 
         self.avg = nn.AdaptiveAvgPool2d((1, 1))
         self.classifier = Classifier(

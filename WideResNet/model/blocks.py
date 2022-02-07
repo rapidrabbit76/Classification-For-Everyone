@@ -20,7 +20,7 @@ class ConvBlock(nn.Module):
         layer += [nn.BatchNorm2d(in_channels)]
         layer += [nn.ReLU(inplace=True)]
         if dropout_rate > 0:
-            layer += [nn.Dropout2d(dropout_rate, inplace=True)]
+            layer += [nn.Dropout2d(dropout_rate)]
         layer += [
             nn.Conv2d(
                 in_channels=in_channels,
