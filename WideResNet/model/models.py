@@ -4,7 +4,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 from .blocks import *
 
-__all__ = ["WideResNet", "model_types"]
+__all__ = [
+    "WideResNet",
+]
 
 
 class WideResNet(nn.Module):
