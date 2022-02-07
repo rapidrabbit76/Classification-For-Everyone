@@ -6,7 +6,6 @@ from .dataset import CIFAR100Dataset, CIFAR10Dataset
 
 
 class CIFAR100DataModule(pl.LightningDataModule):
-
     def __init__(
         self,
         data_dir: str = "./data",
@@ -23,7 +22,11 @@ class CIFAR100DataModule(pl.LightningDataModule):
 
     def setup(self, stage: Optional[str] = None) -> None:
         if stage == "fit" or stage is None:
-            self.train_ds = CIFAR100Dataset(self.hparams.data_dir, True)
+            self.train_ds = CIFAR100Dataset(
+                self.hparams.data_dir,
+                True,
+                image_size=self.hparams.image_size,
+            )
             train_ds_size = int(len(self.train_ds) * 0.8)
             val_ds_size = len(self.train_ds) - train_ds_size
             self.train_ds, self.val_ds = random_split(
@@ -35,6 +38,7 @@ class CIFAR100DataModule(pl.LightningDataModule):
             self.test_ds = CIFAR100Dataset(
                 self.hparams.data_dir,
                 "val",
+                image_size=self.hparams.image_size,
             )
         return super().setup(stage=stage)
 
@@ -64,14 +68,17 @@ class CIFAR100DataModule(pl.LightningDataModule):
 
 
 class CIFAR10DataModule(CIFAR100DataModule):
-
     def prepare_data(self) -> None:
         CIFAR10Dataset(self.hparams.data_dir, True, download=True)
         CIFAR10Dataset(self.hparams.data_dir, False, download=True)
 
     def setup(self, stage: Optional[str] = None) -> None:
         if stage == "fit" or stage is None:
-            self.train_ds = CIFAR10Dataset(self.hparams.data_dir, True)
+            self.train_ds = CIFAR10Dataset(
+                self.hparams.data_dir,
+                True,
+                image_size=self.hparams.image_size,
+            )
             train_ds_size = int(len(self.train_ds) * 0.8)
             val_ds_size = len(self.train_ds) - train_ds_size
             self.train_ds, self.val_ds = random_split(
@@ -82,5 +89,6 @@ class CIFAR10DataModule(CIFAR100DataModule):
         if stage == "test" or stage is None:
             self.test_ds = CIFAR10Dataset(
                 self.hparams.data_dir,
-                "val",
+                False,
+                image_size=self.hparams.image_size,
             )
