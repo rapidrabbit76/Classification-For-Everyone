@@ -30,7 +30,7 @@ class ConvBlock(nn.Module):
         return self.conv(x)
 
 
-class BNeckBLock(nn.Module):
+class BNeckBlock(nn.Module):
 
     def __init__(
             self,
@@ -41,11 +41,11 @@ class BNeckBLock(nn.Module):
             use_se: bool = False,
     ) -> None:
         super().__init__()
-
+        self.use_se = use_se
         self.use_res_connection = (stride == 1) and (dim[0] == dim[1])
         self.act = nn.Hardswish() if act == 'HE' else nn.ReLU6()
 
-        self.blocks = nn.Sequential(
+        self.first_block = nn.Sequential(
             # Conv 1x1
             ConvBlock(
                 in_channels=dim[0],
@@ -65,6 +65,8 @@ class BNeckBLock(nn.Module):
             ),
             nn.BatchNorm2d(num_features=dim[0]*factor),
             self.act,
+        )
+        self.second_block = nn.Sequential(
             # Conv 1x1, linear act.
             ConvBlock(
                 in_channels=dim[0]*factor,
@@ -73,36 +75,38 @@ class BNeckBLock(nn.Module):
             ),
             nn.BatchNorm2d(num_features=dim[1]),
         )
+        self.CE_block = nn.Sequential(
+            nn.AdaptiveAvgPool2d(1),
+            nn.Linear(in_features=dim[0]*factor, out_features=dim[2]),
+            nn.ReLU(),
+            nn.Linear(in_features=dim[2], out_features=dim[0]*factor),
+            nn.Hardsigmoid(),
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        if self.use_res_connection is True:
+        if self.use_res_connection is True and self.use_se is True:
             identity = x
-            return identity + self.blocks(x)
-        else:
-            return self.blocks(x)
+            x = self.first_block(x)
+            x += self.CE_block(x)
 
+            return identity + self.second_block(x)
 
-class CEBlock(nn.Module):
+        elif self.use_res_connection is True and self.use_se is False:
+            identity = x
+            x = self.first_block(x)
 
-    def __init__(
-            self,
-            dim: List[int],
-    ) -> None:
-        super().__init__()
+            return identity + self.second_block(x)
 
-        self.avgpooling = nn.AdaptiveAvgPool2d(1)
-        self.linear = nn.Linear(in_features=dim[0], out_features=dim[1])
-        self.relu = nn.ReLU()
-        self.linear2 = nn.Linear(in_features=dim[1], out_features=dim[2])
-        self.sigmoid = nn.Sigmoid()
+        elif self.use_res_connection is False and self.use_se is True:
+            x = self.first_block(x)
+            x += self.CE_block(x)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.avgpooling(x)
-        x = self.linear(x)
-        x = self.relu(x)
-        x = self.linear2(x)
+            return self.second_block(x)
 
-        return self.sigmoid(x)
+        elif self.use_res_connection is False and self.use_se is False:
+            x = self.first_block(x)
+
+            return self.second_block(x)
 
 
 class Classifier(nn.Module):
