@@ -35,7 +35,9 @@ class BNeckBlock(nn.Module):
     def __init__(
             self,
             dim: List[int],
-            factor: int,
+            factor: float,
+            kernel: int,
+            padding: int,
             stride: int,
             act: str,
             use_se: bool = False,
@@ -49,27 +51,27 @@ class BNeckBlock(nn.Module):
             # Conv 1x1
             ConvBlock(
                 in_channels=dim[0],
-                out_channels=dim[0]*factor,
+                out_channels=self.expand_width(dim[0], factor),
                 kernel_size=1,
             ),
-            nn.BatchNorm2d(num_features=dim[0]*factor),
+            nn.BatchNorm2d(self.expand_width(dim[0], factor)),
             self.act,
             # Dwise 3x3
             ConvBlock(
-                in_channels=dim[0]*factor,
-                out_channels=dim[0]*factor,
-                kernel_size=3,
+                in_channels=self.expand_width(dim[0], factor),
+                out_channels=self.expand_width(dim[0], factor),
+                kernel_size=kernel,
                 stride=stride,
-                padding=1,
-                groups=dim[0]*factor,
+                padding=padding,
+                groups=self.expand_width(dim[0], factor),
             ),
-            nn.BatchNorm2d(num_features=dim[0]*factor),
+            nn.BatchNorm2d(num_features=self.expand_width(dim[0], factor)),
             self.act,
         )
         self.second_block = nn.Sequential(
             # Conv 1x1, linear act.
             ConvBlock(
-                in_channels=dim[0]*factor,
+                in_channels=self.expand_width(dim[0], factor),
                 out_channels=dim[1],
                 kernel_size=1,
             ),
@@ -77,9 +79,9 @@ class BNeckBlock(nn.Module):
         )
         self.CE_block = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
-            nn.Linear(in_features=dim[0]*factor, out_features=dim[2]),
+            nn.Linear(in_features=self.expand_width(dim[0], factor), out_features=dim[2]),
             nn.ReLU(),
-            nn.Linear(in_features=dim[2], out_features=dim[0]*factor),
+            nn.Linear(in_features=dim[2], out_features=self.expand_width(dim[0], factor)),
             nn.Hardsigmoid(),
         )
 
@@ -107,6 +109,10 @@ class BNeckBlock(nn.Module):
             x = self.first_block(x)
 
             return self.second_block(x)
+
+    @staticmethod
+    def expand_width(dim: int, factor: float):
+        return int(dim*factor)
 
 
 class Classifier(nn.Module):
