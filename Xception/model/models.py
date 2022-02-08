@@ -55,17 +55,19 @@ class XceptionNet(nn.Module):
             grow_first=True,
         )
 
-        self.middle_flow_xeption_blocks = [
-            XceptionBlock(
-                in_channels=728,
-                out_channels=728,
-                reps=3,
-                stride=1,
-                start_with_relu=True,
-                grow_first=True,
-            )
-            for _ in range(8)
-        ]
+        self.middle_flow_xeption_blocks = nn.Sequential(
+            *[
+                XceptionBlock(
+                    in_channels=728,
+                    out_channels=728,
+                    reps=3,
+                    stride=1,
+                    start_with_relu=True,
+                    grow_first=True,
+                )
+                for _ in range(8)
+            ]
+        )
 
         self.xeption_block4 = XceptionBlock(
             in_channels=728,
@@ -96,7 +98,7 @@ class XceptionNet(nn.Module):
         x = self.conv2(x)
         x = self.xeption_block1(x)
         x = self.xeption_block2(x)
-        x = self.xeption_block2(x)
+        x = self.xeption_block3(x)
 
         # Middle flow
         x = self.middle_flow_xeption_blocks(x)

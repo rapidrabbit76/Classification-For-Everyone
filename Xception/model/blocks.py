@@ -3,7 +3,12 @@ from torch import nn
 
 from typing import Tuple, Union, List, Any
 
-__all__ = ["ConvBlock", "XceptionBlock", "SeparableConv", "Classifier"]
+__all__ = [
+    "ConvBlock",
+    "XceptionBlock",
+    "SeparableConv",
+    "Classifier",
+]
 
 
 class ConvBlock(nn.Module):
@@ -46,7 +51,7 @@ class SeparableConv(nn.Module):
         super(SeparableConv, self).__init__()
         self.depthwise = nn.Conv2d(
             in_channels=in_channels,
-            out_channels=out_channels,
+            out_channels=in_channels,
             kernel_size=3,
             padding=1,
             groups=in_channels,
@@ -115,9 +120,7 @@ class XceptionBlock(nn.Module):
         self.rep = nn.Sequential(*rep)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.rep(x)
-        sc = self.skip(x)
-        return x + sc
+        return self.rep(x) + self.skip(x)
 
 
 class Classifier(nn.Module):
