@@ -40,6 +40,7 @@ class BNeckBlock(nn.Module):
             padding: int,
             stride: int,
             act: str,
+            reduction_ratio: int = 3,
             use_se: bool = False,
     ) -> None:
         super().__init__()
@@ -79,9 +80,27 @@ class BNeckBlock(nn.Module):
         )
         self.CE_block = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
-            nn.Linear(in_features=self.expand_width(dim[0], factor), out_features=dim[2]),
+            nn.Conv2d(
+                in_channels=self.expand_width(dim[0], factor),
+                out_channels=self.expand_width(
+                    dim=dim[0],
+                    factor=factor,
+                    ratio=reduction_ratio,
+                    use_ratio=True
+                ),
+                kernel_size=1,
+            ),
             nn.ReLU(),
-            nn.Linear(in_features=dim[2], out_features=self.expand_width(dim[0], factor)),
+            nn.Conv2d(
+                in_channels=self.expand_width(
+                    dim=dim[0],
+                    factor=factor,
+                    ratio=reduction_ratio,
+                    use_ratio=True
+                ),
+                out_channels=self.expand_width(dim[0], factor),
+                kernel_size=1,
+            ),
             nn.Hardsigmoid(),
         )
 
@@ -89,7 +108,7 @@ class BNeckBlock(nn.Module):
         if self.use_res_connection is True and self.use_se is True:
             identity = x
             x = self.first_block(x)
-            x += self.CE_block(x)
+            x = torch.mul(x, self.CE_block(x))
 
             return identity + self.second_block(x)
 
@@ -101,7 +120,7 @@ class BNeckBlock(nn.Module):
 
         elif self.use_res_connection is False and self.use_se is True:
             x = self.first_block(x)
-            x += self.CE_block(x)
+            x = torch.mul(x, self.CE_block(x))
 
             return self.second_block(x)
 
@@ -111,8 +130,16 @@ class BNeckBlock(nn.Module):
             return self.second_block(x)
 
     @staticmethod
-    def expand_width(dim: int, factor: float):
-        return int(dim*factor)
+    def expand_width(
+            dim: int,
+            factor: float,
+            ratio: int = 3,
+            use_ratio: bool = False,
+    ) -> int:
+        if use_ratio is True:
+            return int((dim*factor)/ratio)
+        else:
+            return int(dim*factor)
 
 
 class Classifier(nn.Module):
@@ -125,7 +152,7 @@ class Classifier(nn.Module):
         super().__init__()
 
         self.classifier = nn.Sequential(
-            nn.Dropout(0.5),
+            nn.Dropout(0.2),
             nn.Linear(in_features, out_features),
         )
 

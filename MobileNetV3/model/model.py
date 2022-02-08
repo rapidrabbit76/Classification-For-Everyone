@@ -11,230 +11,121 @@ class MobileNetV3(nn.Module):
             image_channels: int,
             n_classes: int,
             alpha: float = 1.0,
+            model_size: str = 'large',
     ) -> None:
         super().__init__()
         self.alpha = alpha
 
-        self.feature_extractor = nn.Sequential(
+        if model_size == 'large':
+            model_type = [
+                [16, 16, 1.0, 3, 1, 2, 'RE', 3, False],
+                [16, 24, 4.0, 3, 1, 2, 'RE', 3, False],
+                [24, 24, 3.0, 3, 1, 1, 'RE', 3, False],
+                [24, 40, 3.0, 5, 2, 2, 'RE', 3, True],
+                [40, 40, 3.0, 5, 2, 1, 'RE', 3, True],
+                [40, 40, 3.0, 5, 2, 1, 'RE', 3, True],
+                [40, 80, 6.0, 3, 1, 2, 'HS', 3, False],
+                [80, 80, 2.4, 3, 1, 1, 'HS', 3, False],
+                [80, 80, 2.3, 3, 1, 1, 'HS', 3, False],
+                [80, 80, 2.3, 3, 1, 1, 'HS', 3, False],
+                [80, 112, 6.0, 3, 1, 1, 'HS', 3, True],
+                [112, 112, 6.0, 3, 1, 1, 'HS', 3, True],
+                [112, 160, 6.0, 5, 2, 2, 'HS', 3, True],
+                [160, 160, 6.0, 5, 2, 1, 'HS', 3, True],
+                [160, 160, 6.0, 5, 2, 1, 'HS', 3, True],
+                [160, 960, 1],
+                [1],
+                [960, 1280, 1]
+            ],
+            bneck_size = 14
+        else:
+            model_type = [
+                [16, 16, 1.0, 3, 1, 2, 'RE', 3, True],
+                [16, 24, 6.0, 3, 1, 2, 'RE', 3, False],
+                [24, 24, 3.7, 3, 1, 1, 'RE', 3, False],
+                [24, 40, 4.0, 5, 2, 2, 'HS', 3, True],
+                [40, 40, 6.0, 5, 2, 1, 'HS', 3, True],
+                [40, 40, 6.0, 5, 2, 1, 'HS', 3, True],
+                [40, 48, 3.0, 5, 2, 1, 'HS', 3, True],
+                [48, 48, 3.0, 5, 2, 1, 'HS', 3, True],
+                [48, 96, 6.0, 5, 2, 2, 'HS', 3, True],
+                [96, 96, 6.0, 5, 2, 1, 'HS', 3, True],
+                [96, 96, 6.0, 5, 2, 1, 'HS', 3, True],
+                [96, 576, 1],
+                [1],
+                [576, 1024, 1]
+            ],
+            bneck_size = 10
+
+        layers = []
+
+        layers.append(
             ConvBlock(
                 in_channels=image_channels,
                 out_channels=self.multiply_width(16),
                 kernel_size=3,
                 stride=2,
                 padding=1,
-            ),
-            nn.BatchNorm2d(num_features=self.multiply_width(16)),
-            nn.Hardswish(),
-            BNeckBlock(
-                dim=[
-                    self.multiply_width(16),
-                    self.multiply_width(16),
-                    self.multiply_width(8)
-                ],
-                factor=1.0,
-                kernel=3,
-                padding=1,
-                stride=1,
-                act='RE',
-            ),
-            BNeckBlock(
-                dim=[
-                    self.multiply_width(16),
-                    self.multiply_width(24),
-                    self.multiply_width(12)
-                ],
-                factor=4.0,
-                kernel=3,
-                padding=1,
-                stride=2,
-                act='RE',
-            ),
-            BNeckBlock(
-                dim=[
-                    self.multiply_width(24),
-                    self.multiply_width(24),
-                    self.multiply_width(12)
-                ],
-                factor=3.0,
-                kernel=3,
-                padding=1,
-                stride=1,
-                act='RE',
-            ),
-            BNeckBlock(
-                dim=[
-                    self.multiply_width(24),
-                    self.multiply_width(40),
-                    self.multiply_width(20)
-                ],
-                factor=3.0,
-                kernel=5,
-                padding=2,
-                stride=2,
-                act='RE',
-                use_se=True,
-            ),
-            BNeckBlock(
-                dim=[
-                    self.multiply_width(40),
-                    self.multiply_width(40),
-                    self.multiply_width(20)
-                ],
-                factor=3.0,
-                kernel=5,
-                padding=2,
-                stride=1,
-                act='RE',
-                use_se=True,
-            ),
-            BNeckBlock(
-                dim=[
-                    self.multiply_width(40),
-                    self.multiply_width(40),
-                    self.multiply_width(20)
-                ],
-                factor=3.0,
-                kernel=5,
-                padding=2,
-                stride=1,
-                act='RE',
-                use_se=True,
-            ),
-            BNeckBlock(
-                dim=[
-                    self.multiply_width(40),
-                    self.multiply_width(80),
-                    self.multiply_width(40)
-                ],
-                factor=6.0,
-                kernel=3,
-                padding=1,
-                stride=2,
-                act='HS',
-            ),
-            BNeckBlock(
-                dim=[
-                    self.multiply_width(80),
-                    self.multiply_width(80),
-                    self.multiply_width(40)
-                ],
-                factor=2.4,
-                kernel=3,
-                padding=1,
-                stride=1,
-                act='HS',
-            ),
-            BNeckBlock(
-                dim=[
-                    self.multiply_width(80),
-                    self.multiply_width(80),
-                    self.multiply_width(40)
-                ],
-                factor=2.3,
-                kernel=3,
-                padding=1,
-                stride=1,
-                act='HS',
-            ),
-            BNeckBlock(
-                dim=[
-                    self.multiply_width(80),
-                    self.multiply_width(80),
-                    self.multiply_width(40)
-                ],
-                factor=2.3,
-                kernel=3,
-                padding=1,
-                stride=1,
-                act='HS',
-            ),
-            BNeckBlock(
-                dim=[
-                    self.multiply_width(80),
-                    self.multiply_width(112),
-                    self.multiply_width(56)
-                ],
-                factor=6.0,
-                kernel=3,
-                padding=1,
-                stride=1,
-                act='HS',
-                use_se=True,
-            ),
-            BNeckBlock(
-                dim=[
-                    self.multiply_width(112),
-                    self.multiply_width(112),
-                    self.multiply_width(56)
-                ],
-                factor=6.0,
-                kernel=3,
-                padding=1,
-                stride=1,
-                act='HS',
-                use_se=True,
-            ),
-            BNeckBlock(
-                dim=[
-                    self.multiply_width(112),
-                    self.multiply_width(160),
-                    self.multiply_width(80)
-                ],
-                factor=6.0,
-                kernel=5,
-                padding=2,
-                stride=2,
-                act='HS',
-                use_se=True,
-            ),
-            BNeckBlock(
-                dim=[
-                    self.multiply_width(160),
-                    self.multiply_width(160),
-                    self.multiply_width(80)
-                ],
-                factor=6.0,
-                kernel=5,
-                padding=2,
-                stride=1,
-                act='HS',
-                use_se=True,
-            ),
-            BNeckBlock(
-                dim=[
-                    self.multiply_width(160),
-                    self.multiply_width(160),
-                    self.multiply_width(80)
-                ],
-                factor=6.0,
-                kernel=5,
-                padding=2,
-                stride=1,
-                act='HS',
-                use_se=True,
-            ),
-            ConvBlock(
-                in_channels=self.multiply_width(160),
-                out_channels=self.multiply_width(960),
-                kernel_size=1,
-            ),
-            nn.BatchNorm2d(num_features=self.multiply_width(960)),
-            nn.Hardswish(),
-            nn.AdaptiveAvgPool2d(1),
-            ConvBlock(
-                in_channels=self.multiply_width(960),
-                out_channels=self.multiply_width(1280),
-                kernel_size=1,
-            ),
-            nn.Hardswish(),
-            ConvBlock(
-                in_channels=self.multiply_width(1280),
-                out_channels=self.multiply_width(1000),
-                kernel_size=1,
-            ),
-        )
+            )
+        ),
+        layers.append(
+            nn.BatchNorm2d(
+                num_features=self.multiply_width(16)
+            )
+        ),
+        layers.append(
+            nn.Hardswish()
+        ),
+
+        for idx in range(len(model_type)):
+            if idx <= bneck_size:
+                layers.append(
+                    BNeckBlock(
+                        dim=[
+                            self.multiply_width(model_type[idx][0]),
+                            self.multiply_width(model_type[idx][1])
+                        ],
+                        factor=model_type[idx][2],
+                        kernel=model_type[idx][3],
+                        padding=model_type[idx][4],
+                        stride=model_type[idx][5],
+                        act=model_type[idx][6],
+                        reduction_ratio=model_type[idx][7],
+                        use_se=model_type[idx][8]
+                    )
+                )
+            elif idx == bneck_size + 1:
+                layers.append(
+                    ConvBlock(
+                        in_channels=model_type[idx][0],
+                        out_channels=model_type[idx][1],
+                        kernel_size=model_type[idx][2],
+                    )
+                ),
+                layers.append(
+                    nn.BatchNorm2d(
+                        num_features=self.multiply_width((model_type[idx][1]))
+                    )
+                ),
+                layers.append(
+                    nn.Hardswish()
+                ),
+                layers.append(nn.AdaptiveAvgPool2d(model_type[idx+1][0]))
+            elif idx == bneck_size + 3:
+                layers.append(
+                    ConvBlock(
+                        in_channels=model_type[idx][0],
+                        out_channels=model_type[idx][1],
+                        kernel_size=model_type[idx][2],
+                    )
+                ),
+                layers.append(
+                    nn.Hardswish()
+                )
+
+        self.feature_extractor = nn.Sequential(*layers)
         self.classifier = Classifier(
-            in_features=self.multiply_width(1000),
+            in_features=self.multiply_width(model_type[-1][1]),
             out_features=n_classes
         )
 
