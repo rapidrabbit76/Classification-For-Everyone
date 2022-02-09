@@ -46,7 +46,6 @@ class BNeckBlock(nn.Module):
         super().__init__()
         self.use_se = use_se
         self.use_res_connection = (stride == 1) and (dim[0] == dim[1])
-        self.act = nn.Hardswish() if act == 'HE' else nn.ReLU6()
 
         self.first_block = nn.Sequential(
             # Conv 1x1
@@ -56,7 +55,7 @@ class BNeckBlock(nn.Module):
                 kernel_size=1,
             ),
             nn.BatchNorm2d(self.expand_width(dim[0], factor)),
-            self.act,
+            nn.Hardswish() if act == 'HE' else nn.ReLU(),
             # Dwise 3x3
             ConvBlock(
                 in_channels=self.expand_width(dim[0], factor),
@@ -67,7 +66,7 @@ class BNeckBlock(nn.Module):
                 groups=self.expand_width(dim[0], factor),
             ),
             nn.BatchNorm2d(num_features=self.expand_width(dim[0], factor)),
-            self.act,
+            nn.Hardswish() if act == 'HE' else nn.ReLU()
         )
         self.second_block = nn.Sequential(
             # Conv 1x1, linear act.
@@ -148,11 +147,12 @@ class Classifier(nn.Module):
             self,
             in_features: int,
             out_features: int,
+            dropout_rate: float,
     ) -> None:
         super().__init__()
 
         self.classifier = nn.Sequential(
-            nn.Dropout(0.2),
+            nn.Dropout(dropout_rate),
             nn.Linear(in_features, out_features),
         )
 

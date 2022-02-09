@@ -11,14 +11,16 @@ class MobileNetV3(nn.Module):
             image_channels: int,
             n_classes: int,
             alpha: float = 1.0,
-            model_size: str = 'large',
+            model_size: str = '_large',
+            bneck_size: int = 14,
+            dropout_rate: float = 0.5
     ) -> None:
         super().__init__()
         self.alpha = alpha
 
-        if model_size == 'large':
+        if model_size == '_large':
             model_type = [
-                [16, 16, 1.0, 3, 1, 2, 'RE', 3, False],
+                [16, 16, 1.0, 3, 1, 1, 'RE', 3, False],
                 [16, 24, 4.0, 3, 1, 2, 'RE', 3, False],
                 [24, 24, 3.0, 3, 1, 1, 'RE', 3, False],
                 [24, 40, 3.0, 5, 2, 2, 'RE', 3, True],
@@ -36,9 +38,8 @@ class MobileNetV3(nn.Module):
                 [160, 960, 1],
                 [1],
                 [960, 1280, 1]
-            ],
-            bneck_size = 14
-        else:
+            ]
+        elif model_size == '_small':
             model_type = [
                 [16, 16, 1.0, 3, 1, 2, 'RE', 3, True],
                 [16, 24, 6.0, 3, 1, 2, 'RE', 3, False],
@@ -54,8 +55,7 @@ class MobileNetV3(nn.Module):
                 [96, 576, 1],
                 [1],
                 [576, 1024, 1]
-            ],
-            bneck_size = 10
+            ]
 
         layers = []
 
@@ -126,7 +126,8 @@ class MobileNetV3(nn.Module):
         self.feature_extractor = nn.Sequential(*layers)
         self.classifier = Classifier(
             in_features=self.multiply_width(model_type[-1][1]),
-            out_features=n_classes
+            out_features=n_classes,
+            dropout_rate=dropout_rate
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
