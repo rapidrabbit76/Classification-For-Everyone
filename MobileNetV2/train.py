@@ -141,7 +141,7 @@ def train():
             verbose=True,
             mode='max',
         ),
-        TQDMProgressBar(refresh_rate=10),
+        TQDMProgressBar(refresh_rate=20),
     ]
 
     trainer: pl.Trainer = pl.Trainer(
