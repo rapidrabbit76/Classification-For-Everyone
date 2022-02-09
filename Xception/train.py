@@ -102,26 +102,12 @@ class XceptionModule(pl.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        optimizer = optim.SGD(
+        optimizer = optim.Adam(
             params=self.model.parameters(),
             lr=self.hparams.lr,
-            momentum=self.hparams.momentum,
-            weight_decay=self.hparams.weight_decay,
-        )
-        scheduler = optim.lr_scheduler.ExponentialLR(
-            optimizer=optimizer,
-            gamma=self.hparams.lr_scheduler_gamma,
         )
 
-        scheduler_dict = {
-            "scheduler": scheduler,
-            "interval": self.hparams.scheduler_interval,
-            "frequency": self.hparams.scheduler_frequency,
-        }
-        return {
-            "optimizer": optimizer,
-            "lr_scheduler": scheduler_dict,
-        }
+        return optimizer
 
 
 def train():
@@ -154,11 +140,15 @@ def train():
         log_model="all",
     )
 
-    wandb_logger.watch(model, log="all", log_freq=100)
+    wandb_logger.watch(
+        model,
+        log="all",
+        log_freq=config.log_every_n_steps,
+    )
 
     # Trainer setting
     callbacks = [
-        TQDMProgressBar(refresh_rate=5),
+        TQDMProgressBar(refresh_rate=1),
         LearningRateMonitor(logging_interval="epoch"),
     ]
 
