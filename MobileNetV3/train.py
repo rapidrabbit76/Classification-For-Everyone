@@ -14,30 +14,30 @@ from pytorch_lightning.loggers import WandbLogger
 from torchmetrics import Accuracy
 
 import datamodule
-from model import MobileNetV2
+from model import MobileNetV3
 
 sys.path.insert(1, os.path.abspath('..'))
 import utils
 
 
-class MobileNetV2Model(pl.LightningModule):
+class MobileNetV3Model(pl.LightningModule):
 
     def __init__(
             self,
-            image_channels: int,
-            n_classes: int,
-            lr: int,
-            alpha: float,
-            weight_decay: float,
+            config,
     ):
         super().__init__()
         self.save_hyperparameters()
 
-        self.model = MobileNetV2(
-            self.hparams.image_channels,
-            self.hparams.n_classes,
-            self.hparams.alpha,
+        self.model = MobileNetV3(
+            image_channels=self.hparams.config.image_channels,
+            n_classes=self.hparams.config.n_classes,
+            alpha=self.hparams.config.alpha,
+            model_size=self.hparams.config.model_size,
+            bneck_size=self.hparams.config.bneck_size,
+            dropout_rate=self.hparams.config.dropout_rate
         )
+
         self.model.initialize_weights()
 
         self.loss = nn.CrossEntropyLoss()
@@ -75,15 +75,15 @@ class MobileNetV2Model(pl.LightningModule):
     def configure_optimizers(self):
         optimizer = optim.Adam(
             self.parameters(),
-            lr=self.hparams.lr,
-            weight_decay=self.hparams.weight_decay,
+            lr=self.hparams.config.lr,
+            weight_decay=self.hparams.config.weight_decay,
         )
         scheduler_dict = {
             'scheduler': ReduceLROnPlateau(
                 optimizer,
                 mode='min',
-                factor=0.1,
-                patience=5,
+                factor=self.hparams.config.scheduler_factor,
+                patience=self.hparams.config.scheduler_patience,
                 verbose=True,
             ),
             'monitor': 'val_loss',
@@ -94,7 +94,6 @@ class MobileNetV2Model(pl.LightningModule):
 def train():
     # Hyperparameters
     config = utils.get_config()
-    hparams = config.hparams
     seed_everything(config.seed)
 
     # Dataloader
@@ -102,25 +101,19 @@ def train():
         dm = datamodule.CIFAR10DataModule(
             config.data_dir,
             image_size=config.image_size,
-            batch_size=hparams.batch_size,
-            rho=hparams.rho
+            batch_size=config.batch_size,
+            rho=config.rho
         )
     else:
         dm = datamodule.CIFAR100DataModule(
             config.data_dir,
             image_size=config.image_size,
-            batch_size=hparams.batch_size,
-            rho=hparams.rho
+            batch_size=config.batch_size,
+            rho=config.rho
         )
 
     # Model
-    mobilenetv2 = MobileNetV2Model(
-        image_channels=config.image_channels,
-        n_classes=config.n_classes,
-        lr=hparams.lr,
-        alpha=hparams.alpha,
-        weight_decay=hparams.weight_decay,
-    )
+    mobilenetv3 = MobileNetV3Model(config=config)
 
     # Logger
     wandb_logger = WandbLogger(
@@ -129,40 +122,40 @@ def train():
         save_dir=config.save_dir,
         log_model='all',
     )
-    wandb_logger.experiment.config.update(hparams)
-    wandb_logger.watch(mobilenetv2, log='all', log_freq=100)
+
+    wandb_logger.watch(mobilenetv3, log='all', log_freq=100)
 
     # Trainer setting
     callbacks = [
         EarlyStopping(
             monitor='val_acc',
             min_delta=0.00,
-            patience=10,
+            patience=config.earlystopping_patience,
             verbose=True,
             mode='max',
         ),
-        TQDMProgressBar(refresh_rate=20),
+        TQDMProgressBar(refresh_rate=10),
     ]
 
     trainer: pl.Trainer = pl.Trainer(
         logger=wandb_logger,
         gpus=1,
-        max_epochs=hparams.epochs,
+        max_epochs=config.epochs,
         callbacks=callbacks,
     )
 
     # Train
-    trainer.fit(mobilenetv2, datamodule=dm)
-    trainer.test(mobilenetv2, datamodule=dm)
+    trainer.fit(mobilenetv3, datamodule=dm)
+    trainer.test(mobilenetv3, datamodule=dm)
 
     # Finish
-    wandb_logger.experiment.unwatch(mobilenetv2)
+    wandb_logger.experiment.unwatch(mobilenetv3)
 
     # Model to Torchscript
     saved_model_path = utils.model_save(
-        mobilenetv2,
+        mobilenetv3,
         config.torchscript_model_save_path,
-        config.project_name
+        config.project_name+config.model_size
     )
 
     # Save artifacts

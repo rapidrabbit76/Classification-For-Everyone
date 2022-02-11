@@ -68,7 +68,7 @@ class MobileNetV1Model(pl.LightningModule):
     def test_step(self, batch, batch_idx) -> torch.Tensor:
         loss, acc = self.step(batch)
         self.log('test_loss', loss, prog_bar=True)
-        self.lof('test_acc', acc, prog_bar=True)
+        self.log('test_acc', acc, prog_bar=True)
         return loss
 
     def configure_optimizers(self):

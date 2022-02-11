@@ -66,23 +66,15 @@ class BottleNeckS1Block(nn.Module):
             ),
             nn.BatchNorm2d(num_features=dim[1]),
         )
-        self.downsample = ConvBlock(
-            in_channels=dim[0],
-            out_channels=dim[1],
-            kernel_size=1,
-        )
-        self.bn_ds = nn.BatchNorm2d(num_features=dim[1])
-        self.act = nn.ReLU6()
+
+        self.use_res_connection = dim[0] == dim[1]
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        identity = x
-        identity = self.downsample(identity)
-        identity = self.bn_ds(identity)
-
-        x = self.blocks(x)
-        x += identity
-
-        return self.act(x)
+        if self.use_res_connection is True:
+            identity = x
+            return identity + self.blocks(x)
+        else:
+            return self.blocks(x)
 
 
 class BottleNeckS2Block(nn.Module):
