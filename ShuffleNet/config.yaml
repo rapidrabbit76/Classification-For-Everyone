@@ -1,0 +1,25 @@
+# Project
+project_name: "ShuffleNet"
+save_dir: "./experiments"
+torchscript_model_save_path: "./experiments/"
+seed: 9423
+
+# Data
+dataset: "CIFAR10"
+data_dir: "./data"
+image_channels: 3
+num_classes: 10
+image_size: 224
+
+# Training
+model_type: "x05"
+log_every_n_steps: 10
+lr: 0.1
+epochs: 200
+batch_size: 128
+precision: 16
+momentum: 0.9
+weight_decay: 0.0005
+lr_scheduler_gamma: 0.2
+gradient_clip_val: 4
+accumulate_grad_batches: 1
