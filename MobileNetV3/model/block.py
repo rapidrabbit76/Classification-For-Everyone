@@ -104,6 +104,7 @@ class BNeckBlock(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+
         if self.use_res_connection is True and self.use_se is True:
             identity = x
             x = self.first_block(x)
@@ -123,7 +124,7 @@ class BNeckBlock(nn.Module):
 
             return self.second_block(x)
 
-        elif self.use_res_connection is False and self.use_se is False:
+        else:
             x = self.first_block(x)
 
             return self.second_block(x)
