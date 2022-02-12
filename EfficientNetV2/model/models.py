@@ -1,20 +1,16 @@
-from black import out
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from .blocks import *
-from typing import List, Union
-import inspect
+from typing import List
 
+# fmt: off
 __all__ = [
     "EfficientNetV2",
-    "efficientnet_v2_s",
-    "efficientnet_v2_m",
-    "efficientnet_v2_l",
-    "efficientnet_v2_lx",
+    "efficientnet_v2_s", "efficientnet_v2_m",
+    "efficientnet_v2_l", "efficientnet_v2_lx",
 ]
 
-
+# fmt: off
 class ModelType:
     def __init__(
         self,
@@ -26,11 +22,8 @@ class ModelType:
     ) -> None:
         # Check config
         assert (
-            len(layers)
-            == len(out_channels)
-            == len(strides)
-            == len(expand_ratios)
-            == len(fused)
+            len(layers) == len(out_channels)
+            == len(strides) == len(expand_ratios) == len(fused)
         )
 
         self.layers = layers
@@ -40,34 +33,39 @@ class ModelType:
         self.fused = fused
 
 
+# fmt: off
 class ModelTypes:
     s = ModelType(
-        layers=[2, 4, 4, 6, 9, 15],
-        out_channels=[24, 48, 64, 128, 160, 256],
-        strides=[1, 2, 2, 2, 1, 2],
-        expand_ratios=[1, 4, 4, 4, 6, 6],
-        fused=[1, 1, 1, 0, 0, 0],
+        #  layer index:  0    1   2    3    4    5  
+        layers=         [2,   4,  4,   6,   9,  15],
+        out_channels=   [24, 48, 64, 128, 160, 256],
+        strides=        [1,   2,  2,   2,   1,   2],
+        expand_ratios=  [1,   4,  4,   4,   6,   6],
+        fused=          [1,   1,  1,   0,   0,   0],
     )
     m = ModelType(
-        layers=[3, 5, 5, 7, 14, 18, 5],
-        out_channels=[24, 48, 80, 160, 176, 304, 512],
-        strides=[1, 2, 2, 2, 1, 2, 1],
-        expand_ratios=[1, 4, 4, 4, 6, 6, 6],
-        fused=[1, 1, 1, 0, 0, 0, 0],
+        #  layer index:  0    1   2    3    4    5    6
+        layers=         [3,   5,  5,   7,  14,  15,   5],
+        out_channels=   [24, 48, 80, 160, 176, 304, 512],
+        strides=        [1,   2,  2,   2,   1,   2,   1],
+        expand_ratios=  [1,   4,  4,   4,   6,   6,   6],
+        fused=          [1,   1,  1,   0,   0,   0,   0],
     )
     l = ModelType(
-        layers=[4, 7, 7, 10, 19, 25, 7],
-        out_channels=[32, 64, 96, 192, 224, 384, 640],
-        strides=[1, 2, 2, 2, 1, 2, 1],
-        expand_ratios=[1, 4, 4, 4, 6, 6, 6],
-        fused=[1, 1, 1, 0, 0, 0, 0],
+        #  layer index:  0    1   2    3    4    5    6
+        layers=         [4,   7,  7,  10,  19,  25,   7],
+        out_channels=   [32, 64, 96, 192, 224, 384, 640],
+        strides=        [1,   2,  2,   2,   1,   2,   1],
+        expand_ratios=  [1,   4,  4,   4,   6,   6,   6],
+        fused=          [1,   1,  1,   0,   0,   0,   0],
     )
     xl = ModelType(
-        layers=[4, 8, 8, 16, 24, 32, 8],
-        out_channels=[32, 64, 96, 192, 256, 512, 640],
-        strides=[1, 2, 2, 2, 1, 2, 1],
-        expand_ratios=[1, 4, 4, 4, 6, 6, 6],
-        fused=[1, 1, 1, 0, 0, 0, 0],
+        #  layer index:  0    1   2    3    4    5    6
+        layers=         [4,   8,  8,  16,  24,  32,   8],
+        out_channels=   [32, 64, 96, 192, 256, 512, 640],
+        strides=        [1,   2,  2,   2,   1,   2,   1],
+        expand_ratios=  [1,   4,  4,   4,   6,   6,   6],
+        fused=          [1,   1,  1,   0,   0,   0,   0],
     )
 
 
