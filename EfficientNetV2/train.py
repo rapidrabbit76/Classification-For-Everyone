@@ -193,15 +193,6 @@ def train():
     # Finish
     wandb_logger.experiment.unwatch(model)
 
-    # Model to Torchscript
-    saved_model_path = utils.model_save(
-        model,
-        config.torchscript_model_save_path,
-    )
-
-    # Save artifacts
-    wandb_logger.experiment.save(saved_model_path)
-
 
 if __name__ == "__main__":
     train()
