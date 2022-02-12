@@ -4,12 +4,32 @@ from typing import Tuple, Union, List, Any
 
 __all__ = [
     "ConvBlock",
-    "ShuffleNetUnit",
+    "MBConvBlock",
     "Classifier",
 ]
 
 Normalization = nn.BatchNorm2d
 Activation = nn.SiLU
+
+
+def _make_divisible(v, divisor, min_value=None):
+    """
+    This function is taken from the original tf repo.
+    It ensures that all layers have a channel number that is divisible by 8
+    It can be seen here:
+    https://github.com/tensorflow/models/blob/master/research/slim/nets/mobilenet/mobilenet.py
+    :param v:
+    :param divisor:
+    :param min_value:
+    :return:
+    """
+    if min_value is None:
+        min_value = divisor
+    new_v = max(min_value, int(v + divisor / 2) // divisor * divisor)
+    # Make sure that round down does not go down by more than 10%.
+    if new_v < 0.9 * v:
+        new_v += divisor
+    return new_v
 
 
 class ConvBlock(nn.Module):
@@ -43,13 +63,20 @@ class ConvBlock(nn.Module):
 
 
 class SE(nn.Module):
-    def __init__(self, dim: int, r: int) -> None:
+    # SE0.25
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        r: int = 4,
+    ) -> None:
         super().__init__()
+        dim = in_channels // r
         self.squeeze = nn.AdaptiveAvgPool2d((1, 1))
         self.excitation = nn.Sequential(
-            nn.Linear(dim, dim // r),
+            nn.Linear(out_channels, dim),
             Activation(),
-            nn.Linear(dim // r, dim),
+            nn.Linear(dim, out_channels),
             nn.Sigmoid(),
         )
 
@@ -100,23 +127,24 @@ class MBConvBlock(nn.Module):
         in_channels: int,
         out_channels: int,
         stride: int,
-        is_fused: bool,
+        is_fused: int,
         expand_ratio: int,
     ) -> None:
         super().__init__()
         assert stride in [1, 2]
+        self.identity = stride == 1 and in_channels == out_channels
+
         dim = in_channels * expand_ratio
         layer = []
-        self.identity = stride == 1 and in_channels == out_channels
         if is_fused:
             layer += [
-                ConvBlock(in_channels, dim, kernel_size=3, stride=stride),
+                ConvBlock(in_channels, dim, kernel_size=3, stride=stride, padding=1),
             ]
         else:
             layer += [
                 ConvBlock(in_channels, dim, kernel_size=1, stride=1),
                 DepthWiseConvBlock(dim, 3, stride, padding=1),
-                SE(dim, expand_ratio),
+                SE(in_channels, dim),
             ]
         layer += [
             ConvBlock(dim, out_channels, kernel_size=1, stride=1, act=False),
