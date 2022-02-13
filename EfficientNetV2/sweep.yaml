@@ -4,7 +4,11 @@ metric:
   name: test_acc
 parameters:
   model_type:
-    values: [s, m, l, lx]
+    values:
+      - s
+      - m
+      - l
+      - lx
   gradient_clip_val:
     values:
       - 2
