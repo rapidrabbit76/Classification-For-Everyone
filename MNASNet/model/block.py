@@ -30,7 +30,41 @@ class ConvBlock(nn.Module):
         return self.conv(x)
 
 
-class BNeckBlock(nn.Module):
+class SepConvBlock(nn.Module):
+
+    def __init__(
+            self,
+            dim: List[int],
+            factor: float,
+            stride: int,
+            padding: int
+    ) -> None:
+        super().__init__()
+
+        self.blocks = nn.Sequential(
+            ConvBlock(
+                in_channels=expand_width(dim[0], factor),
+                out_channels=expand_width(dim[0], factor),
+                kernel_size=3,
+                stride=stride,
+                padding=padding,
+                groups=dim[0],
+            ),
+            nn.BatchNorm2d(num_features=expand_width(dim[0], factor)),
+            nn.ReLU(),
+            ConvBlock(
+                in_channels=expand_width(dim[0], factor),
+                out_channels=expand_width(dim[1], factor),
+                kernel_size=1,
+            ),
+            nn.BatchNorm2d(num_features=expand_width(dim[1], factor))
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.blocks(x)
+
+
+class MBConvBlock(nn.Module):
 
     def __init__(
             self,
@@ -39,7 +73,6 @@ class BNeckBlock(nn.Module):
             kernel: int,
             padding: int,
             stride: int,
-            act: str,
             reduction_ratio: int = 3,
             use_se: bool = False,
     ) -> None:
@@ -51,27 +84,27 @@ class BNeckBlock(nn.Module):
             # Conv 1x1
             ConvBlock(
                 in_channels=dim[0],
-                out_channels=self.expand_width(dim[0], factor),
+                out_channels=expand_width(dim[0], factor),
                 kernel_size=1,
             ),
-            nn.BatchNorm2d(self.expand_width(dim[0], factor)),
-            nn.Hardswish() if act == 'HE' else nn.ReLU(),
-            # Dwise 3x3
+            nn.BatchNorm2d(expand_width(dim[0], factor)),
+            nn.ReLU(),
+            # Dwise kernel x kennel
             ConvBlock(
-                in_channels=self.expand_width(dim[0], factor),
-                out_channels=self.expand_width(dim[0], factor),
+                in_channels=expand_width(dim[0], factor),
+                out_channels=expand_width(dim[0], factor),
                 kernel_size=kernel,
                 stride=stride,
                 padding=padding,
-                groups=self.expand_width(dim[0], factor),
+                groups=expand_width(dim[0], factor),
             ),
-            nn.BatchNorm2d(num_features=self.expand_width(dim[0], factor)),
-            nn.Hardswish() if act == 'HE' else nn.ReLU()
+            nn.BatchNorm2d(num_features=expand_width(dim[0], factor)),
+            nn.ReLU()
         )
         self.second_block = nn.Sequential(
             # Conv 1x1, linear act.
             ConvBlock(
-                in_channels=self.expand_width(dim[0], factor),
+                in_channels=expand_width(dim[0], factor),
                 out_channels=dim[1],
                 kernel_size=1,
             ),
@@ -80,8 +113,8 @@ class BNeckBlock(nn.Module):
         self.CE_block = nn.Sequential(
             nn.AdaptiveAvgPool2d(1),
             nn.Conv2d(
-                in_channels=self.expand_width(dim[0], factor),
-                out_channels=self.expand_width(
+                in_channels=expand_width(dim[0], factor),
+                out_channels=expand_width(
                     dim=dim[0],
                     factor=factor,
                     ratio=reduction_ratio,
@@ -91,13 +124,13 @@ class BNeckBlock(nn.Module):
             ),
             nn.ReLU(),
             nn.Conv2d(
-                in_channels=self.expand_width(
+                in_channels=expand_width(
                     dim=dim[0],
                     factor=factor,
                     ratio=reduction_ratio,
                     use_ratio=True
                 ),
-                out_channels=self.expand_width(dim[0], factor),
+                out_channels=expand_width(dim[0], factor),
                 kernel_size=1,
             ),
             nn.Hardsigmoid(),
@@ -129,17 +162,17 @@ class BNeckBlock(nn.Module):
 
             return self.second_block(x)
 
-    @staticmethod
-    def expand_width(
-            dim: int,
-            factor: float,
-            ratio: int = 3,
-            use_ratio: bool = False,
-    ) -> int:
-        if use_ratio is True:
-            return int((dim*factor)/ratio)
-        else:
-            return int(dim*factor)
+
+def expand_width(
+        dim: int,
+        factor: float,
+        ratio: int = 3,
+        use_ratio: bool = False,
+) -> int:
+    if use_ratio is True:
+        return int((dim*factor)/ratio)
+    else:
+        return int(dim*factor)
 
 
 class Classifier(nn.Module):
