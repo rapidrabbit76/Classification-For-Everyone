@@ -166,7 +166,7 @@ class MBConvBlock(nn.Module):
             factor: float,
             kernel_size: int,
             padding: int,
-            stride: List[int],
+            stride: int,
             reduction_ratio: int = 4,
     ) -> None:
         super().__init__()
