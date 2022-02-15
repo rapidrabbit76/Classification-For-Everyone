@@ -99,11 +99,28 @@ class MNASNet(nn.Module):
                             use_se=MODEL_TYPE[key][block_idx][7]
                         )
                     )
+
+        layers.append(
+            ConvBlock(
+                in_channels=self.multiply_width(MODEL_TYPE['MBConv6_3'][0][1]),
+                out_channels=self.multiply_width(1280),
+                kernel_size=1,
+            )
+        ),
+        layers.append(
+            nn.BatchNorm2d(
+                num_features=self.multiply_width(1280)
+            )
+        ),
+        layers.append(
+            nn.ReLU()
+        ),
+
         layers.append(nn.AdaptiveAvgPool2d(1))
 
         self.feature_extractor = nn.Sequential(*layers)
         self.classifier = Classifier(
-            in_features=self.multiply_width(MODEL_TYPE['MBConv6_3'][0][1]),
+            in_features=self.multiply_width(1280),
             out_features=n_classes,
             dropout_rate=dropout_rate
         )
