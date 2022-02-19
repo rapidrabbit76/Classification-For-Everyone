@@ -1,9 +1,0 @@
-method: grid
-parameters:
-  model_type:
-    values:
-      - "resnext50"
-      - "resnext101"
-      - "resnext152"
-
-program: train.py
