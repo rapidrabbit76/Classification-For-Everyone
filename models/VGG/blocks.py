@@ -1,9 +1,13 @@
 import torch
 from torch import nn
 
+__all__ = ["ConvBlock", "Classifier"]
+
+Normalization = nn.BatchNorm2d
+Activation = nn.ReLU
+
 
 class ConvBlock(nn.Module):
-
     def __init__(
         self,
         in_channels: int,
@@ -12,7 +16,6 @@ class ConvBlock(nn.Module):
         stride: int = 1,
         padding: int = 1,
         bias: bool = False,
-        norm: bool = False,
     ):
         super().__init__()
         self.conv = nn.Conv2d(
@@ -23,8 +26,8 @@ class ConvBlock(nn.Module):
             padding=padding,
             bias=bias,
         )
-        self.norm = nn.BatchNorm2d(out_channels) if norm else nn.Identity()
-        self.act = nn.ReLU()
+        self.norm = Normalization(out_channels)
+        self.act = Activation(inplace=True)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.conv(x)
@@ -33,7 +36,6 @@ class ConvBlock(nn.Module):
 
 
 class Classifier(nn.Module):
-
     def __init__(
         self,
         in_features: int,
