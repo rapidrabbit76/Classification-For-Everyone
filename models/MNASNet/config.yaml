@@ -1,0 +1,24 @@
+# Project
+project_name: 'MNASNet-A1'
+save_dir: './experiments'
+torchscript_model_save_path: './experiments/'
+seed: '2022'
+
+# Data
+dataset: 'CIFAR10'
+data_dir: './data'
+image_size: 224
+image_channels: 3
+n_classes: 10
+
+# Hyper-parameter
+lr: 0.01
+epochs: 1
+batch_size: 32
+alpha: 1.0
+rho: 1.0
+weight_decay: 0.0
+dropout_rate: 0.5
+scheduler_factor: 0.1
+scheduler_patience: 3
+earlystopping_patience: 6

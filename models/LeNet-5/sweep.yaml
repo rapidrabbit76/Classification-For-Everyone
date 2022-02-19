@@ -1,0 +1,15 @@
+method: bayes
+metric:
+  goal: maximize
+  name: test_acc
+parameters:
+  batch_size:
+    values: [64, 128, 256, 512, 1024]
+  epochs:
+    values: [10, 100, 1000, 10000]
+  lr:
+    values: [0.01, 0.001, 0.0001, 0.00001]
+  optimizer:
+    values: ["adam", "sgd"]
+
+program: train.py
