@@ -174,22 +174,14 @@ def main(args):
             args.image_size,
         ]
     )
-    torchscript_path = os.path.join(
-        save_dir,
-        f"{args.experiment_name}_{args.model_type}.ts.zip",
-    )
     model.to_torchscript(
-        file_path=torchscript_path,
+        file_path=os.path.join(save_dir, "model.ts.zip"),
         method="trace",
         example_inputs=example_inputs,
     )
 
-    onnx_path = os.path.join(
-        save_dir,
-        f"{args.experiment_name}_{args.model_type}.onnx",
-    )
     model.to_onnx(
-        file_path=onnx_path,
+        file_path=os.path.join(save_dir, "model.onnx"),
         input_sample=example_inputs,
         export_params=True,
         input_names=["inputs"],
