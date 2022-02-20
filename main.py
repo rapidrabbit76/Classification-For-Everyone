@@ -160,8 +160,8 @@ def main(args):
     )
 
     ############################# TRAIN START ###############################
-    # trainer.fit(model, datamodule=datamodule)
-    train_info = wandb_logger.experiment.unwatch(model)
+    trainer.fit(model, datamodule=datamodule)
+    wandb_logger.experiment.unwatch(model)
     ############################# TEST  START ###############################
     test_info = trainer.test(model, datamodule=datamodule)[-1]
 
