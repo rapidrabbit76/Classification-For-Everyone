@@ -1,5 +1,21 @@
+import os
 from argparse import ArgumentParser
+from typing import Dict, Final
+from unicodedata import name
+
 import pytorch_lightning as pl
+import torch
+import wandb
+from pytorch_lightning.callbacks import (
+    EarlyStopping,
+    LearningRateMonitor,
+    ModelCheckpoint,
+    TQDMProgressBar,
+)
+from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning.utilities.seed import seed_everything
+
+import utils
 from datamodules import *
 from models import *
 from transforms import *
@@ -18,6 +34,8 @@ MODEL_TABLE = {
 TRANSFORMS_TABLE = {
     "BASE": BaseTransforms,
 }
+
+
 def hyperparameters():
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
@@ -70,3 +88,98 @@ def hyperparameters():
     add("--nesterov", type=float, default=False)
 
     return parser
+
+
+def main(args):
+    transforms = TRANSFORMS_TABLE[args.transforms.upper()]
+    datamodule = DATAMODULE_TABLE[args.dataset.upper()]
+    model = MODEL_TABLE[args.model]
+
+    seed_everything(args.seed)
+
+    ######################### BUILD DATAMODULE ##############################
+    image_shape = [
+        args.image_channels,
+        args.image_size,
+        args.image_size,
+    ]
+
+    train_transforms = transforms(
+        image_shape=image_shape,
+        train=True,
+    )
+
+    test_transforms = transforms(
+        image_shape=image_shape,
+        train=False,
+    )
+    datamodule = datamodule(
+        root_dir=args.root_dir,
+        train_transforms=train_transforms,
+        test_transforms=test_transforms,
+        batch_size=args.batch_size,
+        num_workers=args.num_workers,
+    )
+    ############################## MODEL ####################################
+    model = model(args)
+    model.initialize_weights()
+
+    save_dir = os.path.join(
+        args.default_root_dir,
+        args.experiment_name,
+    )
+
+    ckpt_path = utils.make_checkpoint_dir(
+        log_save_dir=os.path.join(save_dir, "ckpt"),
+    )
+
+    ############################## LOGGER ###################################
+    wandb_logger = WandbLogger(
+        project=args.experiment_name,
+        save_dir=save_dir,
+        log_model="all",
+    )
+    wandb_logger.watch(model, log="all", log_freq=args.log_every_n_steps)
+
+    ############################## CALLBACKS ################################
+    callbacks = [
+        TQDMProgressBar(refresh_rate=5),
+        LearningRateMonitor(logging_interval="epoch"),
+        EarlyStopping(
+            monitor=args.callbacks_monitor,
+            mode=args.callbacks_mode,
+            min_delta=args.earlystooping_min_delta,
+            patience=args.max_epochs // 2,
+            verbose=args.callbacks_verbose,
+        ),
+        ModelCheckpoint(
+            monitor=args.callbacks_monitor,
+            mode=args.callbacks_mode,
+            dirpath=ckpt_path,
+            filename="[{epoch}]-[{step}]-[{val/acc:.2f}]",
+            save_top_k=5,
+            save_last=True,
+            verbose=args.callbacks_verbose,
+        ),
+    ]
+
+    ############################## TRAIN SETTING ############################
+    trainer = pl.Trainer.from_argparse_args(
+        args,
+        logger=wandb_logger,
+        callbacks=callbacks,
+    )
+
+    ############################# TRAIN START ###############################
+    # trainer.fit(model, datamodule=datamodule)
+    wandb_logger.experiment.unwatch(model)
+    ############################# TEST  START ###############################
+    test_info = trainer.test(model, datamodule=datamodule)
+
+    return test_info
+
+
+if __name__ == "__main__":
+    parser = hyperparameters()
+    args = pl.Trainer.parse_argparser(parser.parse_args())
+    info = main(args)
