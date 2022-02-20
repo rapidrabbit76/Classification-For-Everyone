@@ -124,22 +124,17 @@ def main(args):
     model = model(args)
     model.initialize_weights()
 
-    save_dir = os.path.join(
-        args.default_root_dir,
-        args.experiment_name,
-    )
-
-    ckpt_path = utils.make_checkpoint_dir(
-        log_save_dir=os.path.join(save_dir, "ckpt"),
-    )
-
     ############################## LOGGER ###################################
     wandb_logger = WandbLogger(
         project=args.experiment_name,
-        save_dir=save_dir,
+        save_dir=os.path.join(
+            args.default_root_dir,
+            args.experiment_name,
+        ),
         log_model="all",
     )
     wandb_logger.watch(model, log="all", log_freq=args.log_every_n_steps)
+    save_dir = wandb_logger.experiment.dir
 
     ############################## CALLBACKS ################################
     callbacks = [
@@ -155,7 +150,7 @@ def main(args):
         ModelCheckpoint(
             monitor=args.callbacks_monitor,
             mode=args.callbacks_mode,
-            dirpath=ckpt_path,
+            dirpath=os.path.join(save_dir, "ckpt"),
             filename="[{epoch}]-[{step}]-[{val/acc:.2f}]",
             save_top_k=5,
             save_last=True,

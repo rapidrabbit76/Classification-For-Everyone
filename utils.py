@@ -1,15 +1,15 @@
 import os
 from datetime import datetime
 from typing import Dict
+import wandb
 
 
-def make_checkpoint_dir(
-    log_save_dir: str,
-):
-    save_dir = os.path.join(
-        log_save_dir,
-        datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-    )
-    os.makedirs(save_dir, exist_ok=True)
-    return save_dir
-
+def make_wandb_artifact(
+    name: str,
+    metadata,
+    artifact_path: str,
+) -> wandb.Artifact:
+    # artifact = wandb.Artifact(name=name, type="model")
+    artifact = wandb.Artifact(name=name, type="model", metadata=metadata)
+    artifact.add_file(local_path=artifact_path)
+    return artifact
