@@ -57,3 +57,34 @@ class VGGModel(nn.Module):
         x = self.avgpool(x)
         return self.classfier(x)
 
+
+def VGG11(
+    image_channals: int,
+    num_classes: int,
+    dropout_rate: int = 0.5,
+):
+    return VGGModel("VGG11", image_channals, num_classes, dropout_rate)
+
+
+def VGG13(
+    image_channals: int,
+    num_classes: int,
+    dropout_rate: int = 0.5,
+):
+    return VGGModel("VGG13", image_channals, num_classes, dropout_rate)
+
+
+def VGG16(
+    image_channals: int,
+    num_classes: int,
+    dropout_rate: int = 0.5,
+):
+    return VGGModel("VGG16", image_channals, num_classes, dropout_rate)
+
+
+def VGG19(
+    image_channals: int,
+    num_classes: int,
+    dropout_rate: int = 0.5,
+):
+    return VGGModel("VGG19", image_channals, num_classes, dropout_rate)
