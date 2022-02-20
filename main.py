@@ -1,5 +1,23 @@
 from argparse import ArgumentParser
 import pytorch_lightning as pl
+from datamodules import *
+from models import *
+from transforms import *
+
+DATAMODULE_TABLE: Final[Dict] = {
+    "MNIST": MnistDataModule,
+    "CIFAR10": CIFAR10DataModule,
+    "CIFAR100": CIFAR100DataModule,
+}
+
+
+MODEL_TABLE = {
+    "VGG": LitVGG,
+}
+
+TRANSFORMS_TABLE = {
+    "BASE": BaseTransforms,
+}
 def hyperparameters():
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
