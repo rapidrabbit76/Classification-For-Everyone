@@ -5,7 +5,6 @@ from unicodedata import name
 
 import pytorch_lightning as pl
 import torch
-import wandb
 from pytorch_lightning.callbacks import (
     EarlyStopping,
     LearningRateMonitor,
@@ -15,7 +14,6 @@ from pytorch_lightning.callbacks import (
 from pytorch_lightning.loggers import WandbLogger
 from pytorch_lightning.utilities.seed import seed_everything
 
-import utils
 from datamodules import *
 from models import *
 from transforms import *
@@ -51,12 +49,6 @@ def hyperparameters():
     add("--seed", type=int, default=9423)
     add("--experiment_name", type=str)
     add("--root_dir", type=str)
-    add(
-        "--artifact_save_to_logger",
-        type=str,
-        default="True",
-        choices=["True", "False"],
-    )
 
     ## data module/set/transforms
     add("--dataset", type=str, choices=ds_candidate)
@@ -125,12 +117,14 @@ def main(args):
     model.initialize_weights()
 
     ############################## LOGGER ###################################
+    save_dir = os.path.join(
+        args.default_root_dir,
+        args.experiment_name,
+    )
+    os.makedirs(save_dir, exist_ok=True)
     wandb_logger = WandbLogger(
         project=args.experiment_name,
-        save_dir=os.path.join(
-            args.default_root_dir,
-            args.experiment_name,
-        ),
+        save_dir=save_dir,
         log_model="all",
     )
     wandb_logger.watch(model, log="all", log_freq=args.log_every_n_steps)
@@ -167,9 +161,40 @@ def main(args):
 
     ############################# TRAIN START ###############################
     # trainer.fit(model, datamodule=datamodule)
-    wandb_logger.experiment.unwatch(model)
+    train_info = wandb_logger.experiment.unwatch(model)
     ############################# TEST  START ###############################
-    test_info = trainer.test(model, datamodule=datamodule)
+    test_info = trainer.test(model, datamodule=datamodule)[-1]
+
+    ############################# MODEL SAVE ################################
+    example_inputs = torch.rand(
+        [
+            1,
+            args.image_channels,
+            args.image_size,
+            args.image_size,
+        ]
+    )
+    torchscript_path = os.path.join(
+        save_dir,
+        f"{args.experiment_name}_{args.model_type}.ts.zip",
+    )
+    model.to_torchscript(
+        file_path=torchscript_path,
+        method="trace",
+        example_inputs=example_inputs,
+    )
+
+    onnx_path = os.path.join(
+        save_dir,
+        f"{args.experiment_name}_{args.model_type}.onnx",
+    )
+    model.to_onnx(
+        file_path=onnx_path,
+        input_sample=example_inputs,
+        export_params=True,
+        input_names=["inputs"],
+        output_names=["output"],
+    )
 
     return test_info
 
