@@ -46,5 +46,5 @@ class BaseTransforms:
         )
 
     def __call__(self, image: Union[np.ndarray, Image.Image]) -> torch.Tensor:
-        image = np.array(image) if not isinstance(image, np.ndarray) else image
+        image = np.array(image)
         return self.transforms(image=image)["image"]
