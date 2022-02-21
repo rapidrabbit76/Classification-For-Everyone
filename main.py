@@ -65,11 +65,13 @@ def hyperparameters():
     add("--dropout_rate", type=float, default=0.5)
 
     ## callbacks
-    add("--callbacks_verbose", type=bool, default=True)
+    add("--callbacks_verbose", action="store_true")
+    add("--callbacks_refresh_rate", type=int, default=5)
+    add("--callbacks_save_top_k", type=int, default=3)
     add("--callbacks_monitor", type=str, default="val/acc")
     add("--callbacks_mode", type=str, default="max")
-    add("--earlystooping_min_delta", type=float, default=0.1)
-    add("--earlystooping_patience", type=float, default=10)
+    add("--earlystooping_min_delta", type=float, default=0.02)
+    add("--earlystooping_patience", type=int, default=10)
 
     ## optimizer
     add("--lr", type=float, default=0.1)
@@ -77,37 +79,30 @@ def hyperparameters():
     ### SGD
     add("--momentum", type=float, default=0)
     add("--weight_decay", type=float, default=0)
-    add("--nesterov", type=float, default=False)
+    add("--nesterov", action="store_true")
 
-    return parser
+    args = pl.Trainer.parse_argparser(parser.parse_args())
+    return args
 
 
 def main(args):
     transforms = TRANSFORMS_TABLE[args.transforms.upper()]
     datamodule = DATAMODULE_TABLE[args.dataset.upper()]
-    model = MODEL_TABLE[args.model]
+    model = MODEL_TABLE[args.model.upper()]
 
     seed_everything(args.seed)
 
     ######################### BUILD DATAMODULE ##############################
-    image_shape = [
-        args.image_channels,
-        args.image_size,
-        args.image_size,
-    ]
+    image_shape = [args.image_channels, args.image_size, args.image_size]
 
-    train_transforms = transforms(
-        image_shape=image_shape,
-        train=True,
-    )
+    train_transforms = transforms(image_shape=image_shape, train=True)
+    val_transforms = transforms(image_shape=image_shape, train=False)
+    test_transforms = transforms(image_shape=image_shape, train=False)
 
-    test_transforms = transforms(
-        image_shape=image_shape,
-        train=False,
-    )
     datamodule = datamodule(
         root_dir=args.root_dir,
         train_transforms=train_transforms,
+        val_transforms=val_transforms,
         test_transforms=test_transforms,
         batch_size=args.batch_size,
         num_workers=args.num_workers,
@@ -122,10 +117,10 @@ def main(args):
         args.experiment_name,
     )
     os.makedirs(save_dir, exist_ok=True)
+
     wandb_logger = WandbLogger(
         project=args.experiment_name,
         save_dir=save_dir,
-        log_model="all",
     )
     wandb_logger.watch(model, log="all", log_freq=args.log_every_n_steps)
     save_dir = wandb_logger.experiment.dir
@@ -138,15 +133,16 @@ def main(args):
             monitor=args.callbacks_monitor,
             mode=args.callbacks_mode,
             min_delta=args.earlystooping_min_delta,
-            patience=args.max_epochs // 2,
+            patience=args.earlystooping_patience,
             verbose=args.callbacks_verbose,
         ),
         ModelCheckpoint(
             monitor=args.callbacks_monitor,
             mode=args.callbacks_mode,
             dirpath=os.path.join(save_dir, "ckpt"),
-            filename="[{epoch}]-[{step}]-[{val/acc:.2f}]",
-            save_top_k= args.callbacks_ save_top_k,
+            filename="[{epoch04d}]-[{step06d}]-[{val/acc:.2f}]",
+            auto_insert_metric_name=False,
+            save_top_k=args.callbacks_save_top_k,
             save_last=True,
             verbose=args.callbacks_verbose,
         ),
@@ -162,18 +158,12 @@ def main(args):
     ############################# TRAIN START ###############################
     trainer.fit(model, datamodule=datamodule)
     wandb_logger.experiment.unwatch(model)
+
     ############################# TEST  START ###############################
     test_info = trainer.test(model, datamodule=datamodule)[-1]
 
     ############################# MODEL SAVE ################################
-    example_inputs = torch.rand(
-        [
-            1,
-            args.image_channels,
-            args.image_size,
-            args.image_size,
-        ]
-    )
+    example_inputs = torch.rand([1] + image_shape)
     model.to_torchscript(
         file_path=os.path.join(save_dir, "model.ts.zip"),
         method="trace",
@@ -192,6 +182,5 @@ def main(args):
 
 
 if __name__ == "__main__":
-    parser = hyperparameters()
-    args = pl.Trainer.parse_argparser(parser.parse_args())
+    args = hyperparameters()
     info = main(args)
