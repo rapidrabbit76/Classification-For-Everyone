@@ -36,7 +36,7 @@ class LitVGG(pl.LightningModule):
         self.save_hyperparameters(config)
         self.model = VGGModel(
             model_type=self.hparams.model_type,
-            image_channals=self.hparams.image_channels,
+            image_channels=self.hparams.image_channels,
             num_classes=self.hparams.num_classes,
             dropout_rate=self.hparams.dropout_rate,
         )
@@ -84,7 +84,7 @@ class LitVGG(pl.LightningModule):
         self.log_dict(
             {
                 "train/loss": loss,
-                "train/acc": tmf.accuracy(logit, y, average=""),
+                "train/acc": tmf.accuracy(logit, y),
                 "train/acc_top_3": tmf.accuracy(logit, y, top_k=3),
                 "train/acc_top_5": tmf.accuracy(logit, y, top_k=5),
             },
