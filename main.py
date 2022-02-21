@@ -146,7 +146,7 @@ def main(args):
             mode=args.callbacks_mode,
             dirpath=os.path.join(save_dir, "ckpt"),
             filename="[{epoch}]-[{step}]-[{val/acc:.2f}]",
-            save_top_k=5,
+            save_top_k= args.callbacks_ save_top_k,
             save_last=True,
             verbose=args.callbacks_verbose,
         ),
