@@ -13,7 +13,9 @@ class MnistDataModule(pl.LightningDataModule):
         self,
         root_dir: str,
         train_transforms: Callable,
+        val_transforms: Callable,
         test_transforms: Callable,
+        
         batch_size: int = 1,
         num_workers: int = 8,
     ):
