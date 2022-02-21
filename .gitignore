@@ -4,10 +4,11 @@
 
 # Cache
 **/__pycache__/**
+.testmondata
 
 # Dataset
-**/data/**
-data
+**/DATASET/**
+DATASET
 
 # Logging file
 **/experiments/**

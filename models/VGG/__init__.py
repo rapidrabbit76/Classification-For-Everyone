@@ -1,1 +1,1 @@
-from .models import VGGModel
+from .lightning_model import *
