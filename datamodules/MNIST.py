@@ -26,6 +26,7 @@ class MnistDataModule(pl.LightningDataModule):
             },
         )
         self.train_transforms = train_transforms
+        self.val_transforms = val_transforms
         self.test_transforms = test_transforms
 
     def prepare_data(self) -> None:
