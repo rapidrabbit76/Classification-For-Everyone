@@ -61,7 +61,7 @@ class MnistDataModule(pl.LightningDataModule):
                 MNIST(
                     self.hparams.root_dir,
                     train=True,
-                    transform=self.test_transforms,
+                    transform=self.val_transforms,
                 ),
                 val_idx,
             )
