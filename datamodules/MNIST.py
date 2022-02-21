@@ -1,9 +1,9 @@
 from typing import Optional, Callable
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader, Subset
-from torchvision import transforms
 from torchvision.datasets import MNIST
 from sklearn.model_selection import train_test_split
+import numpy as np
 
 __all__ = ["MnistDataModule"]
 
@@ -15,7 +15,6 @@ class MnistDataModule(pl.LightningDataModule):
         train_transforms: Callable,
         val_transforms: Callable,
         test_transforms: Callable,
-        
         batch_size: int = 1,
         num_workers: int = 8,
     ):
@@ -38,8 +37,8 @@ class MnistDataModule(pl.LightningDataModule):
 
     def setup(self, stage: Optional[str] = None) -> None:
         if stage == "fit" or stage is None:
-            # split dstaset to train, val
-            ds = MNIST(self.hparams.root_dir, train=True)
+            # split dataset to train, val
+            ds = MNIST(self.hparams.root_dir, train=True, download=False)
             targets = ds.targets
             train_idx, val_idx = train_test_split(
                 np.arange(len(targets)),
@@ -54,6 +53,7 @@ class MnistDataModule(pl.LightningDataModule):
                     self.hparams.root_dir,
                     train=True,
                     transform=self.train_transforms,
+                    download=False,
                 ),
                 train_idx,
             )
@@ -62,6 +62,7 @@ class MnistDataModule(pl.LightningDataModule):
                     self.hparams.root_dir,
                     train=True,
                     transform=self.val_transforms,
+                    download=False,
                 ),
                 val_idx,
             )
