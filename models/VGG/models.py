@@ -26,7 +26,7 @@ class VGGModel(nn.Module):
     def __init__(
         self,
         model_type: str = "VGG11",
-        image_channals: int = 3,
+        image_channels: int = 3,
         num_classes: int = 1000,
         dropout_rate: int = 0.5,
     ) -> None:
@@ -37,7 +37,7 @@ class VGGModel(nn.Module):
             model_type in MODEL_TYPES.keys()
         ), f"{model_type} is not in {' '.join(MODEL_TYPES.keys())}"
 
-        in_channels = image_channals
+        in_channels = image_channels
         for x in MODEL_TYPES[model_type]:
             if type(x) == int:
                 layers.append(ConvBlock(in_channels, x))
