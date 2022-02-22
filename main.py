@@ -140,7 +140,7 @@ def main(args):
             monitor=args.callbacks_monitor,
             mode=args.callbacks_mode,
             dirpath=os.path.join(save_dir, "ckpt"),
-            filename="[{epoch04d}]-[{step06d}]-[{val/acc:.2f}]",
+            filename="[{epoch:04d}]-[{step:06d}]-[{val/acc:.4f}]",
             auto_insert_metric_name=False,
             save_top_k=args.callbacks_save_top_k,
             save_last=True,
