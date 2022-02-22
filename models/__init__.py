@@ -1,4 +1,5 @@
-from .VGG import LitVGG
+from .VGG import *
+from .LeNet5 import *
 
 
-__all__ = ["LitVGG"]
+__all__ = ["LitVGG", "LitLeNet5"]
