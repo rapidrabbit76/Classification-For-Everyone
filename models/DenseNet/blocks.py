@@ -3,57 +3,45 @@ import torch
 from torch import nn
 
 
-class ConvBlock(nn.Module):
+Normalization = nn.BatchNorm2d
+Activation = nn.ReLU
 
+
+class ConvBlock(nn.Module):
     def __init__(
         self,
-        in_channels: int,
-        out_channels: int,
-        kernel_size: int = 3,
-        stride: int = 1,
-        padding: int = 1,
-        bias: bool = False,
+        inp: int,
+        outp: int,
+        k: int = 3,
+        s: int = 1,
+        p: int = 1,
     ):
         super().__init__()
-        self.norm = nn.BatchNorm2d(in_channels)
-        self.act = nn.ReLU(inplace=True)
-        self.conv = nn.Conv2d(
-            in_channels,
-            out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=bias,
+        self.block = nn.Sequential(
+            Normalization(inp),
+            Activation(inplace=True),
+            nn.Conv2d(inp, outp, k, s, p, bias=False),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.norm(x)
-        x = self.act(x)
-        return self.conv(x)
+        return self.block(x)
 
 
 class TransitionBlock(nn.Module):
-
-    def __init__(
-        self,
-        in_channels: int,
-        out_channels: int,
-    ) -> None:
+    def __init__(self, inp: int, outp: int) -> None:
         super().__init__()
-        self.norm = nn.BatchNorm2d(in_channels)
-        self.act = nn.ReLU()
-        self.conv = nn.Conv2d(in_channels, out_channels, 1, 1, 0, bias=False)
-        self.pool = nn.AvgPool2d(2, 2)
+        self.block = nn.Sequential(
+            Normalization(inp),
+            Activation(inplace=True),
+            nn.Conv2d(inp, outp, 1, 1, 0, bias=False),
+            nn.AvgPool2d(2, 2),
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.norm(x)
-        x = self.act(x)
-        x = self.conv(x)
-        return self.pool(x)
+        return self.block(x)
 
 
 class BottleNeckBlock(nn.Module):
-
     def __init__(
         self,
         in_channels: int,
@@ -71,7 +59,6 @@ class BottleNeckBlock(nn.Module):
 
 
 class DenseBlock(nn.Module):
-
     def __init__(
         self,
         blocks: int,

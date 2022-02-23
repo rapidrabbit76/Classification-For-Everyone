@@ -27,6 +27,9 @@ DATAMODULE_TABLE: Final[Dict] = {
 
 MODEL_TABLE = {
     "VGG": LitVGG,
+    "LeNet5": LitLeNet5,
+    "SqueezeNet": LitSqueezeNet,
+    "DenseNet": LitDenseNet,
 }
 
 TRANSFORMS_TABLE = {
@@ -64,6 +67,9 @@ def hyperparameters():
     add("--num_classes", type=int)
     add("--dropout_rate", type=float, default=0.5)
 
+    ## Densenet
+    add("--growth_rate", type=int, default=12)
+
     ## callbacks
     add("--callbacks_verbose", action="store_true")
     add("--callbacks_refresh_rate", type=int, default=5)
@@ -86,9 +92,9 @@ def hyperparameters():
 
 
 def main(args):
-    transforms = TRANSFORMS_TABLE[args.transforms.upper()]
-    datamodule = DATAMODULE_TABLE[args.dataset.upper()]
-    model = MODEL_TABLE[args.model.upper()]
+    transforms = TRANSFORMS_TABLE[args.transforms]
+    datamodule = DATAMODULE_TABLE[args.dataset]
+    model = MODEL_TABLE[args.model]
 
     seed_everything(args.seed)
 
@@ -160,7 +166,7 @@ def main(args):
     wandb_logger.experiment.unwatch(model)
 
     ############################# TEST  START ###############################
-    test_info = trainer.test(model, datamodule=datamodule)[-1]
+    test_info = trainer.test(model, datamodule=datamodule)
 
     ############################# MODEL SAVE ################################
     example_inputs = torch.rand([1] + image_shape)
