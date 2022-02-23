@@ -1,11 +1,10 @@
-from typing import Any, Dict, List, Optional, Type, Union, Tuple, Final
+from typing import *
 
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.nn import functional as F
-from torchmetrics import Accuracy
 from torchmetrics import functional as tmf
 
 from .models import VGGModel
