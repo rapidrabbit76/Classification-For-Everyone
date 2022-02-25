@@ -4,10 +4,11 @@
 
 # Cache
 **/__pycache__/**
+.testmondata
 
 # Dataset
-**/data/**
-data
+**/DATASET/**
+DATASET
 
 # Logging file
 **/experiments/**
@@ -23,7 +24,4 @@ data
 
 # Jupyter notebooks
 *.ipynb
-
-# TEST
-*test*
 

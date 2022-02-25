@@ -1,0 +1,26 @@
+# Project
+project_name: "ResNeXt"
+model_type: "resnext50"
+save_dir: "./experiments"
+torchscript_model_save_path: "./experiments/"
+seed: 9423
+
+# Data
+dataset: "CIFAR10"
+data_dir: "./data"
+image_channels: 3
+num_classes: 10
+image_size: 224
+groups: 32
+depth: 4
+basewidth: 64
+
+# Training
+norm: true
+lr: 0.1
+epochs: 100
+batch_size: 64
+weight_decay: 0.0001
+lr_scheduler_gamma: 0.1
+momentum: 0.9
+precision: 32

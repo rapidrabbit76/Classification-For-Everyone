@@ -1,0 +1,22 @@
+# Project
+project_name: "Xception"
+save_dir: "./experiments"
+torchscript_model_save_path: "./experiments/"
+seed: 9423
+
+# Data
+dataset: "CIFAR10"
+data_dir: "./data"
+image_channels: 3
+num_classes: 10
+image_size: 299
+
+# Training
+
+log_every_n_steps: 10
+lr: 0.0005
+epochs: 100
+batch_size: 64
+precision: 32
+gradient_clip_val: Null
+accumulate_grad_batches: 1
