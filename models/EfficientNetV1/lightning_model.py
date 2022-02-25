@@ -27,13 +27,11 @@ class LitEfficientNet(pl.LightningModule):
         """
         super().__init__()
         self.save_hyperparameters(config)
-        model_size = self.hparams.config.model_size
 
         self.model = EfficientNet(
             image_channels=self.hparams.config.image_channels,
             num_classes=self.hparams.config.num_classes,
-            width_coefficient=self.hparams.config.model_type[model_size][0],
-            depth_coefficient=self.hparams.config.model_type[model_size][1],
+            model_type=self.hparams.config.model_type,
             dropout_rate=self.hparams.config.dropout_rate
         )
 
@@ -57,7 +55,7 @@ class LitEfficientNet(pl.LightningModule):
                 patience=self.hparams.config.scheduler_patience,
                 verbose=True,
             ),
-            'monitor': 'val_loss',
+            'monitor': 'val/loss',
         }
         return {'optimizer': optimizer, 'lr_scheduler': scheduler_dict}
 
