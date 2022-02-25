@@ -27,6 +27,7 @@ DATAMODULE_TABLE: Final[Dict] = {
 
 MODEL_TABLE = {
     "VGG": LitVGG,
+    "EfficientNetV1": LitEfficientNet
 }
 
 TRANSFORMS_TABLE = {
@@ -55,7 +56,7 @@ def hyperparameters():
     add("--transforms", type=str, choices=transfoms_candidate)
     add("--num_workers", type=int, default=16)
     add("--image_channels", type=int, default=3)
-    add("--image_size", type=int)
+    add("--image_size", type=int, default=224)
     add("--batch_size", type=int, default=64)
 
     ## each model
@@ -75,10 +76,12 @@ def hyperparameters():
 
     ## optimizer
     add("--lr", type=float, default=0.1)
+    add("--scheduler_factor", type=float, default=0.1),
+    add("--scheduler_patience", type=int, default=3)
 
     ### SGD
     add("--momentum", type=float, default=0)
-    add("--weight_decay", type=float, default=0)
+    add("--weight_decay", type=float, default=0.0)
     add("--nesterov", action="store_true")
 
     args = pl.Trainer.parse_argparser(parser.parse_args())
