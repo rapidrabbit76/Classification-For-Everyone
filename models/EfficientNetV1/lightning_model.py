@@ -29,10 +29,10 @@ class LitEfficientNet(pl.LightningModule):
         self.save_hyperparameters(config)
 
         self.model = EfficientNet(
-            image_channels=self.hparams.config.image_channels,
-            num_classes=self.hparams.config.num_classes,
-            model_type=self.hparams.config.model_type,
-            dropout_rate=self.hparams.config.dropout_rate
+            image_channels=self.hparams.image_channels,
+            num_classes=self.hparams.num_classes,
+            model_type=self.hparams.model_type,
+            dropout_rate=self.hparams.dropout_rate
         )
 
         # Metrics
@@ -44,15 +44,15 @@ class LitEfficientNet(pl.LightningModule):
     def configure_optimizers(self) -> optim.Optimizer:
         optimizer = optim.Adam(
             self.parameters(),
-            lr=self.hparams.config.lr,
-            weight_decay=self.hparams.config.weight_decay,
+            lr=self.hparams.lr,
+            weight_decay=self.hparams.weight_decay,
         )
         scheduler_dict = {
             'scheduler': ReduceLROnPlateau(
                 optimizer,
                 mode='min',
-                factor=self.hparams.config.scheduler_factor,
-                patience=self.hparams.config.scheduler_patience,
+                factor=self.hparams.scheduler_factor,
+                patience=self.hparams.scheduler_patience,
                 verbose=True,
             ),
             'monitor': 'val/loss',
@@ -72,7 +72,7 @@ class LitEfficientNet(pl.LightningModule):
                 nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.Linear):
                 nn.init.normal_(m.weight, 0, 0.01)
-                nn.init.constant_(m.biad, 0)
+                nn.init.constant_(m.bias, 0)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.model(x)

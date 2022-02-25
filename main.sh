@@ -9,7 +9,7 @@ python main.py \
     --image_channels=3 \
     --image_size=224 \
     --batch_size=32 \
-    --model="EfficientNetV1"  \
+    --model="EFFICIENTNETV1" \
     --model_type="b0" \
     --dropout_rate=0.5 \
     --lr=0.03 \
@@ -21,7 +21,7 @@ python main.py \
     --earlystooping_patience=6 \
     --log_every_n_steps=10 \
     --gpus=1 \
-    --max_epochs=1 \
+    --max_epochs=100 \
     --detect_anomaly=True 
 
 

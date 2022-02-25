@@ -27,7 +27,7 @@ DATAMODULE_TABLE: Final[Dict] = {
 
 MODEL_TABLE = {
     "VGG": LitVGG,
-    "EfficientNetV1": LitEfficientNet
+    "EFFICIENTNETV1": LitEfficientNet
 }
 
 TRANSFORMS_TABLE = {
