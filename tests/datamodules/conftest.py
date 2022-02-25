@@ -25,6 +25,7 @@ def train_transforms(config):
         config.image_size,
         config.image_size,
     ]
+    print(image_shape)
     return BaseTransforms(
         image_shape=image_shape,
         train=False,
@@ -43,6 +44,7 @@ def datamodule(request, config, train_transforms):
     dm = request.param(
         root_dir=config.root_dir,
         train_transforms=train_transforms,
+        val_transforms=train_transforms,
         test_transforms=train_transforms,
         batch_size=config.batch_size,
     )
