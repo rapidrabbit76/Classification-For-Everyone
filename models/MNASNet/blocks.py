@@ -171,7 +171,7 @@ class MBConvBlock(nn.Module):
         if self.use_res_connection is True and self.use_se is True:
             identity = x
             x = self.first_block(x)
-            x = torch.mul(x, self.SEBlock(x))
+            x = self.SEBlock(x)
 
             return identity + self.second_block(x)
 
@@ -183,7 +183,7 @@ class MBConvBlock(nn.Module):
 
         elif self.use_res_connection is False and self.use_se is True:
             x = self.first_block(x)
-            x = torch.mul(x, self.SEBlock(x))
+            x = self.SEBlock(x)
 
             return self.second_block(x)
 
