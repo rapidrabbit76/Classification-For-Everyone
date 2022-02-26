@@ -1,10 +1,11 @@
 import torch
 import torch.nn as nn
 import numpy as np
-from .block import ConvBlock, SepConvBlock, MBConvBlock, Classifier
-
+from .blocks import *
 
 MODEL_TYPE = {
+    # input, output, expansion ratio, kernel size, padding, stride, reduction ratio, use SEBlock or not
+    # fmt: off
     'SepConv': {
         0: [32, 16, 1.0, 1, 1],
     },
@@ -43,7 +44,7 @@ class MNASNet(nn.Module):
     def __init__(
             self,
             image_channels: int,
-            n_classes: int,
+            num_classes: int,
             alpha: float = 1.0,
             dropout_rate: float = 0.5
     ) -> None:
@@ -121,7 +122,7 @@ class MNASNet(nn.Module):
         self.feature_extractor = nn.Sequential(*layers)
         self.classifier = Classifier(
             in_features=self.multiply_width(1280),
-            out_features=n_classes,
+            out_features=num_classes,
             dropout_rate=dropout_rate
         )
 
@@ -131,20 +132,32 @@ class MNASNet(nn.Module):
         logits = self.classifier(x)
         return logits
 
-    def initialize_weights(self):
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(
-                    m.weight,
-                    mode='fan_out',
-                    nonlinearity='relu',
-                )
-            elif isinstance(m, nn.BatchNorm2d):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.Linear):
-                nn.init.normal_(m.weight, 0, 0.01)
-                nn.init.constant_(m.bias, 0)
-
     def multiply_width(self, dim: int) -> int:
-        return int(np.ceil(self.alpha*dim))
+        return int(np.ceil(self.alpha * dim))
+
+
+def mnasnet1_0(
+        image_channels: int,
+        num_classes: int,
+        alpha: float = 1.0,
+        dropout_rate: float = 0.5
+):
+    return MNASNet(image_channels, num_classes, alpha, dropout_rate)
+
+
+def mnasnet0_75(
+        image_channels: int,
+        num_classes: int,
+        alpha: float = 0.75,
+        dropout_rate: float = 0.5
+):
+    return MNASNet(image_channels, num_classes, alpha, dropout_rate)
+
+
+def mnasnet0_5(
+        image_channels: int,
+        num_classes: int,
+        alpha: float = 0.5,
+        dropout_rate: float = 0.5
+):
+    return MNASNet(image_channels, num_classes, alpha, dropout_rate)

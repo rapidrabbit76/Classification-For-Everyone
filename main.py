@@ -27,7 +27,8 @@ DATAMODULE_TABLE: Final[Dict] = {
 
 MODEL_TABLE = {
     "VGG": LitVGG,
-    "EFFICIENTNETV1": LitEfficientNet
+    "EFFICIENTNETV1": LitEfficientNet,
+    "MNASNET": LitMNASNet,
 }
 
 TRANSFORMS_TABLE = {
@@ -71,13 +72,13 @@ def hyperparameters():
     add("--callbacks_save_top_k", type=int, default=3)
     add("--callbacks_monitor", type=str, default="val/acc")
     add("--callbacks_mode", type=str, default="max")
-    add("--earlystooping_min_delta", type=float, default=0.02)
-    add("--earlystooping_patience", type=int, default=10)
+    add("--earlystooping_min_delta", type=float, default=0.01)
+    add("--earlystooping_patience", type=int, default=20)
 
     ## optimizer
     add("--lr", type=float, default=0.1)
     add("--scheduler_factor", type=float, default=0.1),
-    add("--scheduler_patience", type=int, default=3)
+    add("--scheduler_patience", type=int, default=5)
 
     ### SGD
     add("--momentum", type=float, default=0)
