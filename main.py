@@ -20,6 +20,7 @@ from transforms import *
 
 DATAMODULE_TABLE: Final[Dict] = {
     "MNIST": MnistDataModule,
+    "FMNIST": FashionMnistDataModule,
     "CIFAR10": CIFAR10DataModule,
     "CIFAR100": CIFAR100DataModule,
 }
@@ -30,6 +31,7 @@ MODEL_TABLE = {
     "LeNet5": LitLeNet5,
     "SqueezeNet": LitSqueezeNet,
     "DenseNet": LitDenseNet,
+    "ResNeXt": LitResNeXt,
 }
 
 TRANSFORMS_TABLE = {

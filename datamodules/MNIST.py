@@ -1,11 +1,9 @@
-from typing import Optional, Callable
+from typing import *
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader, Subset
-from torchvision.datasets import MNIST
+from torchvision.datasets import MNIST, FashionMNIST
 from sklearn.model_selection import train_test_split
 import numpy as np
-
-__all__ = ["MnistDataModule"]
 
 
 class MnistDataModule(pl.LightningDataModule):
@@ -97,3 +95,49 @@ class MnistDataModule(pl.LightningDataModule):
             shuffle=False,
             num_workers=self.hparams.num_workers,
         )
+
+
+class FashionMnistDataModule(MnistDataModule):
+    def prepare_data(self) -> None:
+        """Dataset download"""
+        FashionMNIST(self.hparams.root_dir, train=True, download=True)
+        FashionMNIST(self.hparams.root_dir, train=False, download=True)
+
+    def setup(self, stage: Optional[str] = None) -> None:
+        if stage == "fit" or stage is None:
+            # split dataset to train, val
+            ds = FashionMNIST(self.hparams.root_dir, train=True, download=False)
+            targets = ds.targets
+            train_idx, val_idx = train_test_split(
+                np.arange(len(targets)),
+                test_size=0.2,
+                shuffle=True,
+                stratify=targets,
+            )
+
+            # build dataset, different transforms
+            self.train_ds = Subset(
+                FashionMNIST(
+                    self.hparams.root_dir,
+                    train=True,
+                    transform=self.train_transforms,
+                    download=False,
+                ),
+                train_idx,
+            )
+            self.val_ds = Subset(
+                FashionMNIST(
+                    self.hparams.root_dir,
+                    train=True,
+                    transform=self.val_transforms,
+                    download=False,
+                ),
+                val_idx,
+            )
+
+        if stage == "test" or stage is None:
+            self.test_ds = FashionMNIST(
+                self.hparams.root_dir,
+                train=False,
+                transform=self.test_transforms,
+            )
