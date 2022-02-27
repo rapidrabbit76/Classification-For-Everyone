@@ -35,6 +35,7 @@ class BaseTransforms:
                     width=image_size,
                     p=1.0 if train else 0.0,
                 ),
+                A.Resize(image_size, image_size),
                 A.HorizontalFlip(p=1.0 if train else 0.0),
                 A.Normalize(
                     mean=mean,
@@ -47,4 +48,5 @@ class BaseTransforms:
 
     def __call__(self, image: Union[np.ndarray, Image.Image]) -> torch.Tensor:
         image = np.array(image)
-        return self.transforms(image=image)["image"]
+        image = self.transforms(image=image)["image"]
+        return image
