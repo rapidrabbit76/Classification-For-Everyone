@@ -25,7 +25,6 @@ def train_transforms(config):
         config.image_size,
         config.image_size,
     ]
-    print(image_shape)
     return BaseTransforms(
         image_shape=image_shape,
         train=False,
@@ -35,9 +34,8 @@ def train_transforms(config):
 @pytest.fixture(
     scope="module",
     params=[
-        # MnistDataModule,
         CIFAR10DataModule,
-        # CIFAR100DataModule,
+        CIFAR100DataModule,
     ],
 )
 def datamodule(request, config, train_transforms):
@@ -47,6 +45,7 @@ def datamodule(request, config, train_transforms):
         val_transforms=train_transforms,
         test_transforms=train_transforms,
         batch_size=config.batch_size,
+        num_workers=1,
     )
     dm.setup("fit")
     return dm
