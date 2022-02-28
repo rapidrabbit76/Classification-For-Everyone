@@ -1,4 +1,4 @@
-from typing import Callable, Optional
+from typing import *
 
 import pytorch_lightning as pl
 from sklearn.model_selection import train_test_split
@@ -9,9 +9,10 @@ import numpy as np
 __all__ = ["CIFAR10DataModule", "CIFAR100DataModule"]
 
 
-class CIFAR10DataModule(pl.LightningDataModule):
+class CIFARDataModuleBase(pl.LightningDataModule):
     def __init__(
         self,
+        DATASET: Union[CIFAR10, CIFAR100],
         root_dir: str,
         train_transforms: Callable,
         val_transforms: Callable,
@@ -27,19 +28,20 @@ class CIFAR10DataModule(pl.LightningDataModule):
                 "num_workers": num_workers,
             },
         )
+        self.Dataset = DATASET
         self.train_transforms = train_transforms
         self.val_transforms = val_transforms
         self.test_transforms = test_transforms
 
     def prepare_data(self) -> None:
         """Dataset download"""
-        CIFAR10(self.hparams.root_dir, train=True, download=True)
-        CIFAR10(self.hparams.root_dir, train=False, download=True)
+        self.Dataset(self.hparams.root_dir, train=True, download=True)
+        self.Dataset(self.hparams.root_dir, train=False, download=True)
 
     def setup(self, stage: Optional[str] = None) -> None:
         if stage == "fit" or stage is None:
-            # split dstaset to train, val
-            ds = CIFAR10(self.hparams.root_dir, train=True)
+            # split dataset to train, val
+            ds = self.Dataset(self.hparams.root_dir, train=True)
             targets = ds.targets
             train_idx, val_idx = train_test_split(
                 np.arange(len(targets)),
@@ -50,7 +52,7 @@ class CIFAR10DataModule(pl.LightningDataModule):
 
             # build dataset, different transforms
             self.train_ds = Subset(
-                CIFAR10(
+                self.Dataset(
                     self.hparams.root_dir,
                     train=True,
                     transform=self.train_transforms,
@@ -58,7 +60,7 @@ class CIFAR10DataModule(pl.LightningDataModule):
                 train_idx,
             )
             self.val_ds = Subset(
-                CIFAR10(
+                self.Dataset(
                     self.hparams.root_dir,
                     train=True,
                     transform=self.test_transforms,
@@ -67,7 +69,7 @@ class CIFAR10DataModule(pl.LightningDataModule):
             )
 
         if stage == "test" or stage is None:
-            self.test_ds = CIFAR10(
+            self.test_ds = self.Dataset(
                 self.hparams.root_dir,
                 train=False,
                 transform=self.test_transforms,
@@ -96,47 +98,3 @@ class CIFAR10DataModule(pl.LightningDataModule):
             shuffle=False,
             num_workers=self.hparams.num_workers,
         )
-
-
-class CIFAR100DataModule(CIFAR10DataModule):
-    def prepare_data(self) -> None:
-        """Dataset download"""
-        CIFAR100(self.hparams.root_dir, train=True, download=True)
-        CIFAR100(self.hparams.root_dir, train=False, download=True)
-
-    def setup(self, stage: Optional[str] = None) -> None:
-        if stage == "fit" or stage is None:
-            # split dataset to train, val
-            ds = CIFAR100(self.hparams.root_dir, train=True)
-            targets = ds.targets
-            train_idx, val_idx = train_test_split(
-                np.arange(len(targets)),
-                test_size=0.2,
-                shuffle=True,
-                stratify=targets,
-            )
-
-            # build dataset, different transforms
-            self.train_ds = Subset(
-                CIFAR100(
-                    self.hparams.root_dir,
-                    train=True,
-                    transform=self.train_transforms,
-                ),
-                train_idx,
-            )
-            self.val_ds = Subset(
-                CIFAR100(
-                    self.hparams.root_dir,
-                    train=True,
-                    transform=self.test_transforms,
-                ),
-                val_idx,
-            )
-
-        if stage == "test" or stage is None:
-            self.test_ds = CIFAR10(
-                self.hparams.root_dir,
-                train=False,
-                transform=self.test_transforms,
-            )
