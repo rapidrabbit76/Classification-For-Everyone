@@ -106,3 +106,8 @@ def MnistDataModule(**kwargs):
 def FashionMnistDataModule(**kwargs):
     return MnistDataModuleBase(FashionMNIST, **kwargs)
 
+
+def EmnistDataModule(**kwargs):
+    DATASET = lambda root, **kwargs: EMNIST(root, "byclass", **kwargs)
+    return MnistDataModuleBase(DATASET, **kwargs)
+

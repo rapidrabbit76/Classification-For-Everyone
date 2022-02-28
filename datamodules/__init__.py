@@ -6,6 +6,7 @@ __all__ = [
     # MNIST
     "MnistDataModule",
     "FashionMnistDataModule",
+    "EmnistDataModule",
     # CIFAR
     "CIFAR10DataModule",
     "CIFAR100DataModule",
