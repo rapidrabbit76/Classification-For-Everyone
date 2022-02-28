@@ -5,7 +5,7 @@ from datamodules.CIFAR import *
 __all__ = [
     # MNIST
     "MnistDataModule",
-    "FashionMnistDataModule"
+    "FashionMnistDataModule",
     # CIFAR
     "CIFAR10DataModule",
     "CIFAR100DataModule",

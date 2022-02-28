@@ -102,3 +102,7 @@ class MnistDataModuleBase(pl.LightningDataModule):
 def MnistDataModule(**kwargs):
     return MnistDataModuleBase(MNIST, **kwargs)
 
+
+def FashionMnistDataModule(**kwargs):
+    return MnistDataModuleBase(FashionMNIST, **kwargs)
+
