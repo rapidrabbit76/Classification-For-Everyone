@@ -10,4 +10,5 @@ __all__ = [
     "KMnistDataModule",
     # CIFAR
     "CIFAR10DataModule",
+    "CIFAR100DataModule",
 ]

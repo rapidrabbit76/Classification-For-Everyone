@@ -104,3 +104,5 @@ def CIFAR10DataModule(**kwargs):
     return CIFARDataModuleBase(CIFAR10, **kwargs)
 
 
+def CIFAR100DataModule(**kwargs):
+    return CIFARDataModuleBase(CIFAR100, **kwargs)
