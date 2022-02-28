@@ -30,6 +30,7 @@ MODEL_TABLE = {
     "EfficientNetV1": LitEfficientNet,
     "MNASNet": LitMNASNet,
     "MobileNetV3": LitMobileNetV3,
+    "MobileNetV2": LitMobileNetV2,
 }
 
 TRANSFORMS_TABLE = {
