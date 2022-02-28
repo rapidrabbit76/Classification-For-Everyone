@@ -111,3 +111,6 @@ def EmnistDataModule(**kwargs):
     DATASET = lambda root, **kwargs: EMNIST(root, "byclass", **kwargs)
     return MnistDataModuleBase(DATASET, **kwargs)
 
+
+def KMnistDataModule(**kwargs):
+    return MnistDataModuleBase(KMNIST, **kwargs)
