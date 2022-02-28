@@ -22,9 +22,6 @@ class LitEfficientNet(pl.LightningModule):
             self,
             config: Dict[str, Union[str, int, float, bool]],
     ):
-        """
-
-        """
         super().__init__()
         self.save_hyperparameters(config)
 
