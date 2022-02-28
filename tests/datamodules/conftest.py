@@ -34,6 +34,10 @@ def train_transforms(config):
 @pytest.fixture(
     scope="module",
     params=[
+        MnistDataModule,
+        FashionMnistDataModule,
+        EmnistDataModule,
+        KMnistDataModule,
         CIFAR10DataModule,
         CIFAR100DataModule,
     ],
@@ -47,5 +51,6 @@ def datamodule(request, config, train_transforms):
         batch_size=config.batch_size,
         num_workers=1,
     )
+    dm.prepare_data()
     dm.setup("fit")
     return dm
