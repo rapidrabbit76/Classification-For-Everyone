@@ -4,6 +4,7 @@ import numpy as np
 import torch
 from albumentations.pytorch import ToTensorV2 as ToTensor
 from PIL import Image
+import cv2
 
 __all__ = ["BaseTransforms"]
 
@@ -19,6 +20,7 @@ class BaseTransforms:
         mean: Tuple[float, float, float] = None,
         std: Tuple[float, float, float] = None,
     ) -> None:
+        self.image_shape = image_shape
         c, image_size, _ = image_shape
         train = True if isinstance(train, str) and train == "train" else False
 
@@ -48,5 +50,8 @@ class BaseTransforms:
 
     def __call__(self, image: Union[np.ndarray, Image.Image]) -> torch.Tensor:
         image = np.array(image)
+        if self.image_shape[0] == 3 and len(image.shape) < 3:
+            image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+
         image = self.transforms(image=image)["image"]
         return image
