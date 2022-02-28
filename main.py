@@ -22,6 +22,7 @@ DATAMODULE_TABLE: Final[Dict] = {
     "MNIST": MnistDataModule,
     "FMNIST": FashionMnistDataModule,
     "EMNIST": EmnistDataModule,
+    "KMNIST": KMnistDataModule,
     "CIFAR10": CIFAR10DataModule,
     "CIFAR100": CIFAR100DataModule,
 }
