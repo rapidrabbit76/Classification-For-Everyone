@@ -21,6 +21,7 @@ from transforms import *
 DATAMODULE_TABLE: Final[Dict] = {
     "MNIST": MnistDataModule,
     "FMNIST": FashionMnistDataModule,
+    "EMNIST": EmnistDataModule,
     "CIFAR10": CIFAR10DataModule,
     "CIFAR100": CIFAR100DataModule,
 }
