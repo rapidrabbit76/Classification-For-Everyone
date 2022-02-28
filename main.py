@@ -18,7 +18,7 @@ from datamodules import *
 from models import *
 from transforms import *
 
-DATAMODULE_TABLE: Final[Dict] = {
+DATAMODULE_TABLE: Dict["str", pl.LightningDataModule] = {
     "MNIST": MnistDataModule,
     "FMNIST": FashionMnistDataModule,
     "EMNIST": EmnistDataModule,
@@ -28,7 +28,7 @@ DATAMODULE_TABLE: Final[Dict] = {
 }
 
 
-MODEL_TABLE = {
+MODEL_TABLE: Dict["str", pl.LightningModule] = {
     "VGG": LitVGG,
     "LeNet5": LitLeNet5,
     "SqueezeNet": LitSqueezeNet,
@@ -37,7 +37,7 @@ MODEL_TABLE = {
     "WidResNet": LitWideResNet,
 }
 
-TRANSFORMS_TABLE = {
+TRANSFORMS_TABLE: Dict["str", Callable] = {
     "BASE": BaseTransforms,
 }
 
