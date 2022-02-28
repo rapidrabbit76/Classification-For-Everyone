@@ -3,6 +3,7 @@ from .LeNet5 import *
 from .Squeezenet import *
 from .DenseNet import *
 from .ResNeXt import *
+from .WideResNet import *
 
 __all__ = [
     "LitVGG",
@@ -10,4 +11,5 @@ __all__ = [
     "LitSqueezeNet",
     "LitDenseNet",
     "LitResNeXt",
+    "LitWideResNet",
 ]

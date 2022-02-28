@@ -1,6 +1,6 @@
 import os
 from argparse import ArgumentParser
-from typing import Dict, Final
+from typing import *
 from unicodedata import name
 
 import pytorch_lightning as pl
@@ -32,6 +32,7 @@ MODEL_TABLE = {
     "SqueezeNet": LitSqueezeNet,
     "DenseNet": LitDenseNet,
     "ResNeXt": LitResNeXt,
+    "WidResNet": LitWideResNet,
 }
 
 TRANSFORMS_TABLE = {
@@ -68,6 +69,8 @@ def hyperparameters():
     add("--model_type", type=str)
     add("--num_classes", type=int)
     add("--dropout_rate", type=float, default=0.5)
+    add("--depth", type=int, default=40)
+    add("--K", type=int, default=10)
 
     ## Densenet
     add("--growth_rate", type=int, default=12)
