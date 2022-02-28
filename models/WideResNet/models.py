@@ -28,14 +28,11 @@ class WideResNet(nn.Module):
         self.conv2 = self._make_layer(16 * K, N, 1, dropout_rate)
         self.conv3 = self._make_layer(32 * K, N, 2, dropout_rate)
         self.conv4 = self._make_layer(64 * K, N, 2, dropout_rate)
-        self.bn = Normalization(64 * K)
+        self.bn = Normalization(self.in_channels)
         self.act = Activation(inplace=True)
 
         self.avg = nn.AdaptiveAvgPool2d(1)
-        self.classifier = Classifier(
-            inp=64 * K,
-            outp=num_classes,
-        )
+        self.classifier = Classifier(inp=self.in_channels, outp=num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.conv1(x)
@@ -48,12 +45,12 @@ class WideResNet(nn.Module):
         return self.classifier(x)
 
     def _make_layer(self, out_channels: int, num_block: int, s: int, dr: float):
-        layers = [
-            WideResNetBlock(self.in_channels, out_channels, s, dr),
-        ]
+        layers = [WideResNetBlock(self.in_channels, out_channels, s, dr)]
         self.in_channels = out_channels
 
-        for _ in range(1, num_block):
-            layers += [WideResNetBlock(self.in_channels, out_channels, 1, dr)]
+        layers += [
+            WideResNetBlock(self.in_channels, out_channels, 1, dr)
+            for _ in range(1, num_block)
+        ]
 
         return nn.Sequential(*layers)
