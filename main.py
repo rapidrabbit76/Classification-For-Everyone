@@ -27,8 +27,8 @@ DATAMODULE_TABLE: Final[Dict] = {
 
 MODEL_TABLE = {
     "VGG": LitVGG,
-    "EFFICIENTNETV1": LitEfficientNet,
-    "MNASNET": LitMNASNet,
+    "EfficientNetV1": LitEfficientNet,
+    "MNASNet": LitMNASNet,
     "MobileNetV3": LitMobileNetV3,
 }
 
@@ -93,7 +93,7 @@ def hyperparameters():
 def main(args):
     transforms = TRANSFORMS_TABLE[args.transforms.upper()]
     datamodule = DATAMODULE_TABLE[args.dataset.upper()]
-    model = MODEL_TABLE[args.model.upper()]
+    model = MODEL_TABLE[args.model]
 
     seed_everything(args.seed)
 
