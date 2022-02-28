@@ -98,3 +98,9 @@ class CIFARDataModuleBase(pl.LightningDataModule):
             shuffle=False,
             num_workers=self.hparams.num_workers,
         )
+
+
+def CIFAR10DataModule(**kwargs):
+    return CIFARDataModuleBase(CIFAR10, **kwargs)
+
+

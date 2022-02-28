@@ -9,4 +9,5 @@ __all__ = [
     "EmnistDataModule",
     "KMnistDataModule",
     # CIFAR
+    "CIFAR10DataModule",
 ]
