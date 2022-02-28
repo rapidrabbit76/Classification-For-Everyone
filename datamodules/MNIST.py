@@ -1,7 +1,7 @@
 from typing import *
 import pytorch_lightning as pl
 from torch.utils.data import DataLoader, Subset, Dataset
-from torchvision.datasets import MNIST
+from torchvision.datasets import MNIST, FashionMNIST, EMNIST, KMNIST
 from sklearn.model_selection import train_test_split
 import numpy as np
 
@@ -97,3 +97,8 @@ class MnistDataModuleBase(pl.LightningDataModule):
             shuffle=False,
             num_workers=self.hparams.num_workers,
         )
+
+
+def MnistDataModule(**kwargs):
+    return MnistDataModuleBase(MNIST, **kwargs)
+
