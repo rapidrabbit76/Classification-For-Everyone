@@ -42,7 +42,7 @@ class ShuffleNetV2(nn.Module):
         super().__init__()
         if model_type not in list(MODEL_TYPES.keys()):
             raise Exception(
-                f"{model_type} not supported select one onf {MODEL_TYPES.key()}"
+                f"{model_type} not supported select one onf {MODEL_TYPES.keys()}"
             )
 
         model_type = MODEL_TYPES[model_type]
