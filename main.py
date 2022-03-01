@@ -35,6 +35,7 @@ MODEL_TABLE: Dict["str", pl.LightningModule] = {
     "DenseNet": LitDenseNet,
     "ResNeXt": LitResNeXt,
     "WidResNet": LitWideResNet,
+    "ShuffleNetV2": LitShuffleNetV2,
 }
 
 TRANSFORMS_TABLE: Dict["str", Callable] = {
@@ -71,6 +72,8 @@ def hyperparameters():
     add("--model_type", type=str)
     add("--num_classes", type=int)
     add("--dropout_rate", type=float, default=0.5)
+
+    ## WideResNet
     add("--depth", type=int, default=40)
     add("--K", type=int, default=10)
 
@@ -88,6 +91,9 @@ def hyperparameters():
 
     ## optimizer
     add("--lr", type=float, default=0.1)
+    add("--lr_scheduler_gamma", type=float, default=0.2)
+    add("--scheduler_interval", type=str, default="epoch")
+    add("--scheduler_frequency", type=int, default=10)
 
     ### SGD
     add("--momentum", type=float, default=0)
