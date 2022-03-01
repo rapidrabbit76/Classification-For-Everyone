@@ -1,13 +1,16 @@
-from black import out
+from typing import *
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from .blocks import *
-from typing import List, Union
 
 
 __all__ = [
     "ShuffleNetV2",
+    "ShuffleNetV2_x05",
+    "ShuffleNetV2_x10",
+    "ShuffleNetV2_x15",
+    "ShuffleNetV2_x20",
 ]
 
 
@@ -18,17 +21,15 @@ class ModelType:
         out_channels: List[int],
     ) -> None:
         self.repeat = repeat
-        self.out_chaanels = out_channels
+        self.out_channels = out_channels
 
 
-class ModelTypes:
-    x05 = ModelType([4, 8, 4], [24, 48, 96, 192, 1024])
-    x10 = ModelType([4, 8, 4], [24, 116, 232, 464, 1024])
-    x15 = ModelType([4, 8, 4], [24, 176, 352, 704, 1024])
-    x20 = ModelType([4, 8, 4], [24, 244, 488, 976, 2048])
-
-
-MODEL_LIST = dir(ModelTypes)[26:]
+MODEL_TYPES: Dict[str, ModelType] = {
+    "x05": ModelType([4, 8, 4], [24, 48, 96, 192, 1024]),
+    "x10": ModelType([4, 8, 4], [24, 116, 232, 464, 1024]),
+    "x15": ModelType([4, 8, 4], [24, 176, 352, 704, 1024]),
+    "x20": ModelType([4, 8, 4], [24, 244, 488, 976, 2048]),
+}
 
 
 class ShuffleNetV2(nn.Module):
@@ -39,68 +40,31 @@ class ShuffleNetV2(nn.Module):
         num_classes: int,
     ):
         super().__init__()
-        if model_type not in MODEL_LIST:
-            print("ERR")
-            raise Exception(f"{model_type} not supported sellect one onf {MODEL_LIST}")
+        if model_type not in list(MODEL_TYPES.keys()):
+            raise Exception(
+                f"{model_type} not supported select one onf {MODEL_TYPES.key()}"
+            )
 
-        repeat = getattr(ModelTypes, model_type).repeat
-        out_chaanels = getattr(ModelTypes, model_type).out_chaanels
+        model_type = MODEL_TYPES[model_type]
 
-        self.conv1 = ConvBlock(
-            in_channels=image_channels,
-            out_channels=out_chaanels[0],
-            kernel_size=3,
-            stride=2,
-            padding=1,
-        )
-        self.max_pool = nn.MaxPool2d(
-            kernel_size=3,
-            stride=2,
-            padding=1,
-        )
+        repeat = model_type.repeat
+        out_channels = model_type.out_channels
 
-        in_channels = out_chaanels[0]
+        self.conv1 = ConvBlock(image_channels, out_channels[0], 3, 2, 1)
+        self.max_pool = nn.MaxPool2d(3, 2, 1)
 
         # build model
-        self.stage2 = self._make_layer(
-            in_channels,
-            out_chaanels[1],
-            repeat[0],
-        )
-        in_channels = out_chaanels[1]
-        self.stage3 = self._make_layer(
-            in_channels,
-            out_chaanels[2],
-            repeat[1],
-        )
-        in_channels = out_chaanels[2]
-        self.stage4 = self._make_layer(
-            in_channels,
-            out_chaanels[3],
-            repeat[2],
-        )
+        self.stage2 = self._make_layer(out_channels[0], out_channels[1], repeat[0])
+        self.stage3 = self._make_layer(out_channels[1], out_channels[2], repeat[1])
+        self.stage4 = self._make_layer(out_channels[2], out_channels[3], repeat[2])
 
-        in_channels = out_chaanels[3]
-        self.conv2 = ConvBlock(
-            in_channels=in_channels,
-            out_channels=out_chaanels[-1],
-            kernel_size=1,
-        )
-        self.classifier = Classifier(
-            in_features=out_chaanels[-1],
-            num_classes=num_classes,
-        )
+        self.conv2 = ConvBlock(out_channels[3], out_channels[-1], 1)
+        self.classifier = Classifier(out_channels[-1], num_classes)
 
-    def _make_layer(
-        self,
-        in_channels: int,
-        out_channels: int,
-        repeat: int,
-    ) -> nn.Sequential:
-        layer = [ShuffleNetUnit(in_channels, out_channels, 2)]
-        in_channels = out_channels
-        for _ in range(repeat - 1):
-            layer += [ShuffleNetUnit(in_channels, out_channels, 1)]
+    @classmethod
+    def _make_layer(cls, inp: int, outp: int, r: int) -> nn.Sequential:
+        layer = [ShuffleNetUnit(inp, outp, 2)]
+        layer += [ShuffleNetUnit(outp, outp, 1) for _ in range(1, r)]
         return nn.Sequential(*layer)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -114,17 +78,18 @@ class ShuffleNetV2(nn.Module):
         x = self.classifier(x)
         return x
 
-    def initialize_weights(self):
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(
-                    m.weight,
-                    mode="fan_out",
-                    nonlinearity="relu",
-                )
-            elif isinstance(m, nn.BatchNorm2d):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.Linear):
-                nn.init.normal_(m.weight, 0, 0.01)
-                nn.init.constant_(m.bias, 0)
+
+def ShuffleNetV2_x05(image_channels: int, num_classes: int):
+    return ShuffleNetV2("x05", image_channels, num_classes)
+
+
+def ShuffleNetV2_x10(image_channels: int, num_classes: int):
+    return ShuffleNetV2("x10", image_channels, num_classes)
+
+
+def ShuffleNetV2_x15(image_channels: int, num_classes: int):
+    return ShuffleNetV2("x15", image_channels, num_classes)
+
+
+def ShuffleNetV2_x20(image_channels: int, num_classes: int):
+    return ShuffleNetV2("x20", image_channels, num_classes)
