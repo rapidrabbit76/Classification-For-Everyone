@@ -1,34 +1,19 @@
-import os
-import sys
-from typing import Dict, Tuple
+from typing import *
 
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torchsummary
-import torchvision
-from pytorch_lightning.callbacks import (
-    EarlyStopping,
-    LearningRateMonitor,
-    TQDMProgressBar,
-)
-from pytorch_lightning.loggers import WandbLogger
-from pytorch_lightning.utilities.seed import seed_everything
 from torch.nn import functional as F
-from torchmetrics import Accuracy
+from torchmetrics import functional as tmf
 
-import datamodule
-from model import ShuffleNetV2
-
-sys.path.insert(1, os.path.abspath(".."))
-import utils
+from .models import ShuffleNetV2
 
 _batch_type = Tuple[torch.Tensor, torch.Tensor]
 _step_return_type = Tuple[torch.Tensor, torch.Tensor]
 
 
-class ShuffleNetV2Module(pl.LightningModule):
+class LitShuffleNetV2(pl.LightningModule):
     def __init__(
         self,
         config,
@@ -44,63 +29,8 @@ class ShuffleNetV2Module(pl.LightningModule):
 
         # Metrics
         self.loss = nn.CrossEntropyLoss()
-        self.accuracy = Accuracy()
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.model(x)
-
-    def step(self, batch: _batch_type) -> _step_return_type:
-        x, y = batch
-        logits = self(x)
-        loss = self.loss(logits, y)
-        pred = torch.argmax(logits, dim=1)
-        acc = self.accuracy(pred, y)
-        return loss, acc
-
-    def training_step(
-        self,
-        batch: _batch_type,
-        batch_idx: int,
-    ) -> torch.Tensor:
-        loss, acc = self.step(batch)
-
-        self.log_dict(
-            {
-                "train_loss": loss,
-                "train_acc": acc,
-            }
-        )
-
-        return loss
-
-    def validation_step(
-        self,
-        batch: _batch_type,
-        batch_idx: int,
-    ) -> torch.Tensor:
-        loss, acc = self.step(batch)
-        self.log_dict(
-            {
-                "val_loss": loss,
-                "val_acc": acc,
-            }
-        )
-
-        return loss
-
-    def test_step(
-        self,
-        batch: _batch_type,
-        batch_idx: int,
-    ) -> torch.Tensor:
-        loss, acc = self.step(batch)
-        self.log_dict(
-            {
-                "test_loss": loss,
-                "test_acc": acc,
-            }
-        )
-        return loss
+        self.validation_step = self._validation_test_common_step
+        self.test_step = self._validation_test_common_step
 
     def configure_optimizers(self):
         optimizer = optim.SGD(
@@ -116,92 +46,89 @@ class ShuffleNetV2Module(pl.LightningModule):
 
         scheduler_dict = {
             "scheduler": scheduler,
-            "interval": "epoch",
-            "frequency": self.hparams.epochs // 3,
+            "interval": self.hparams.scheduler_interval,
+            "frequency": self.hparams.scheduler_frequency,
         }
         return {
             "optimizer": optimizer,
             "lr_scheduler": scheduler_dict,
         }
 
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.model(x)
 
-def train():
-    # Hyperparameters
-    config = utils.get_config()
-    seed_everything(config.seed)
+    def initialize_weights(self):
+        for m in self.model.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(
+                    m.weight,
+                    mode="fan_out",
+                    nonlinearity="relu",
+                )
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.Linear):
+                nn.init.normal_(m.weight, 0, 0.01)
+                nn.init.constant_(m.bias, 0)
 
-    # Dataloader
-    if config.dataset == "CIFAR10":
-        dm = datamodule.CIFAR10DataModule(
-            config.data_dir,
-            image_size=config.image_size,
-            batch_size=config.batch_size,
+    def training_step(
+        self,
+        batch: _batch_type,
+        batch_idx: int,
+    ) -> torch.Tensor:
+        x, y = batch
+        logit = self(x)
+        loss = self.loss(logit, y)
+        self.log_dict(
+            {
+                "train/loss": loss,
+                "train/acc": tmf.accuracy(logit, y),
+                "train/acc_top_3": tmf.accuracy(logit, y, top_k=3),
+                "train/acc_top_5": tmf.accuracy(logit, y, top_k=5),
+            },
+            prog_bar=True,
         )
-    else:
-        dm = datamodule.CIFAR100DataModule(
-            config.data_dir,
-            image_size=config.image_size,
-            batch_size=config.batch_size,
-        )
 
-    # Model
-    model = ShuffleNetV2Module(config)
+        return loss
 
-    # Logger
-    wandb_logger = WandbLogger(
-        name=f"{config.project_name}-{config.dataset}",
-        project=config.project_name,
-        save_dir=config.save_dir,
-        log_model="all",
-    )
+    def _validation_test_common_step(
+        self,
+        batch: _batch_type,
+        batch_idx: int,
+    ) -> _batch_type:
+        x, y = batch
+        logit = self(x)
+        return (logit, y)
 
-    wandb_logger.watch(
-        model,
-        log="all",
-        log_freq=config.log_every_n_steps,
-    )
+    def _validation_test_common_epoch_end(
+        self,
+        outputs: List[Tuple[torch.Tensor, torch.Tensor]],
+        mode: str,
+    ) -> Dict[str, Union[torch.Tensor, float]]:
+        # concatnation every loggit, target
+        logits = torch.cat([logit for logit, _ in outputs])
+        targets = torch.cat([target for _, target in outputs])
 
-    # Trainer setting
-    callbacks = [
-        TQDMProgressBar(refresh_rate=1),
-        LearningRateMonitor(logging_interval="epoch"),
-        EarlyStopping(
-            monitor="val_acc",
-            min_delta=0.1,
-            patience=10,
-            verbose=False,
-            mode="max",
-        ),
-    ]
+        # calcuration metrics
+        metric_dict = {
+            f"{mode}/loss": self.loss(logits, targets),
+            f"{mode}/acc": tmf.accuracy(logits, targets),
+            f"{mode}/acc_top_3": tmf.accuracy(logits, targets, top_k=3),
+            f"{mode}/acc_top_5": tmf.accuracy(logits, targets, top_k=5),
+        }
 
-    max_epochs = config.epochs * config.accumulate_grad_batches
-    trainer: pl.Trainer = pl.Trainer(
-        logger=wandb_logger,
-        log_every_n_steps=config.log_every_n_steps,
-        gpus=1,
-        precision=config.precision,
-        max_epochs=max_epochs,
-        callbacks=callbacks,
-        accumulate_grad_batches=config.accumulate_grad_batches,
-        gradient_clip_val=config.gradient_clip_val,
-    )
+        self.log_dict(metric_dict, prog_bar=True)
+        return metric_dict
 
-    # Train
-    trainer.fit(model, datamodule=dm)
-    trainer.test(model, datamodule=dm)
+    def validation_epoch_end(
+        self, outputs: List[torch.Tensor]
+    ) -> Dict[str, Union[torch.Tensor, float]]:
 
-    # Finish
-    wandb_logger.experiment.unwatch(model)
+        return self._validation_test_common_epoch_end(outputs, "val")
 
-    # Model to Torchscript
-    saved_model_path = utils.model_save(
-        model,
-        config.torchscript_model_save_path,
-    )
+    def test_epoch_end(
+        self, outputs: List[torch.Tensor]
+    ) -> Dict[str, Union[torch.Tensor, float]]:
 
-    # Save artifacts
-    wandb_logger.experiment.save(saved_model_path)
-
-
-if __name__ == "__main__":
-    train()
+        return self._validation_test_common_epoch_end(outputs, "test")
