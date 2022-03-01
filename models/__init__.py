@@ -5,6 +5,7 @@ from .DenseNet import *
 from .ResNeXt import *
 from .WideResNet import *
 from .ShuffleNet import *
+from .EfficientNetV2 import *
 
 __all__ = [
     "LitVGG",
@@ -14,4 +15,5 @@ __all__ = [
     "LitResNeXt",
     "LitWideResNet",
     "LitShuffleNetV2",
+    "LitEfficientNetV2",
 ]

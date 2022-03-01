@@ -36,6 +36,7 @@ MODEL_TABLE: Dict["str", pl.LightningModule] = {
     "ResNeXt": LitResNeXt,
     "WidResNet": LitWideResNet,
     "ShuffleNetV2": LitShuffleNetV2,
+    "EfficientNetV2": LitEfficientNetV2,
 }
 
 TRANSFORMS_TABLE: Dict["str", Callable] = {
