@@ -27,7 +27,6 @@ DATAMODULE_TABLE: Dict["str", pl.LightningDataModule] = {
     "CIFAR100": CIFAR100DataModule,
 }
 
-
 MODEL_TABLE: Dict["str", pl.LightningModule] = {
     "VGG": LitVGG,
     "LeNet5": LitLeNet5,
@@ -38,6 +37,7 @@ MODEL_TABLE: Dict["str", pl.LightningModule] = {
     "ShuffleNetV2": LitShuffleNetV2,
     "EfficientNetV2": LitEfficientNetV2,
     "XceptionNet": LitXceptionNet,
+    "Inception": LitInceptionV3,
 }
 
 TRANSFORMS_TABLE: Dict["str", Callable] = {
@@ -78,6 +78,10 @@ def hyperparameters():
     ## WideResNet
     add("--depth", type=int, default=40)
     add("--K", type=int, default=10)
+
+    ## Inception
+    add("--loss_w", type=float, default=0.5)
+    add("--aux_loss_w", type=float, default=0.5)
 
     ## Densenet
     add("--growth_rate", type=int, default=12)
