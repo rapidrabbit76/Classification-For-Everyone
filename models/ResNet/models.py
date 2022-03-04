@@ -2,6 +2,11 @@ import torch
 import torch.nn as nn
 from .blocks import *
 
+__all__ = [
+    "ResNet", "resnet_18", "resnet_34",
+    "resnet_50", "resnet_101", "resnet_152"
+]
+
 
 RESNET_TYPE = {
     '18': [2, 2, 2, 2],
@@ -55,46 +60,46 @@ class ResNet(nn.Module):
         return logits
 
 
-def ResNet_18(
+def resnet_18(
         image_channels: int,
         num_classes: int,
         model_type: str = '18',
         dropout_rate: float = 0.5
-):
+) -> ResNet:
     return ResNet(image_channels, num_classes, model_type, dropout_rate)
 
 
-def ResNet_34(
+def resnet_34(
         image_channels: int,
         num_classes: int,
         model_type: str = '34',
         dropout_rate: float = 0.5
-):
+) -> ResNet:
     return ResNet(image_channels, num_classes, model_type, dropout_rate)
 
 
-def ResNet_50(
+def resnet_50(
         image_channels: int,
         num_classes: int,
         model_type: str = '50',
         dropout_rate: float = 0.5
-):
+) -> ResNet:
     return ResNet(image_channels, num_classes, model_type, dropout_rate)
 
 
-def ResNet_101(
+def resnet_101(
         image_channels: int,
         num_classes: int,
         model_type: str = '101',
         dropout_rate: float = 0.5
-):
+) -> ResNet:
     return ResNet(image_channels, num_classes, model_type, dropout_rate)
 
 
-def ResNet_152(
+def resnet_152(
         image_channels: int,
         num_classes: int,
         model_type: str = '152',
         dropout_rate: float = 0.5
-):
+) -> ResNet:
     return ResNet(image_channels, num_classes, model_type, dropout_rate)
