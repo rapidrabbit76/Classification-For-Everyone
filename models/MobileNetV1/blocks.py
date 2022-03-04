@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 from typing import List
 
+__all__ = ["ConvBlock", "DepthWiseSeparableBlock", "Classifier"]
+
 
 class ConvBlock(nn.Module):
 
@@ -16,23 +18,25 @@ class ConvBlock(nn.Module):
             bias: bool = False,
     ) -> None:
         super().__init__()
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            groups=groups,
-            bias=bias,
-        )
-        self.bn = nn.BatchNorm2d(num_features=out_channels)
-        self.act = nn.ReLU()
+
+        layers = [
+            nn.Conv2d(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                kernel_size=kernel_size,
+                stride=stride,
+                padding=padding,
+                groups=groups,
+                bias=bias
+            ),
+            nn.BatchNorm2d(num_features=out_channels),
+            nn.ReLU()
+        ]
+
+        self.conv2d = nn.Sequential(*layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.conv(x)
-        x = self.bn(x)
-
-        return self.act(x)
+        return self.conv2d(x)
 
 
 class DepthWiseSeparableBlock(nn.Module):
@@ -139,10 +143,12 @@ class Classifier(nn.Module):
             self,
             in_features: int,
             out_features: int,
+            dropout_rate: float,
     ) -> None:
         super().__init__()
 
         self.classifier = nn.Sequential(
+            nn.Dropout(dropout_rate),
             nn.Linear(in_features, out_features),
         )
 

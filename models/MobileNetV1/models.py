@@ -1,6 +1,10 @@
 import torch
 import torch.nn as nn
-from .block import ConvBlock, DepthWiseSeparableBlock, Classifier
+from .blocks import *
+
+__all__ = [
+    "MobileNetV1", "MobileNetV1_10", "MobileNetV1_075", "MobileNetV1_05"
+]
 
 
 class MobileNetV1(nn.Module):
@@ -8,8 +12,9 @@ class MobileNetV1(nn.Module):
     def __init__(
             self,
             image_channels: int,
-            n_classes: int,
+            num_classes: int,
             alpha: float = 1.0,
+            dropout_rate: float = 0.5
     ) -> None:
         super().__init__()
         self.feature_extractor = nn.Sequential(
@@ -48,7 +53,11 @@ class MobileNetV1(nn.Module):
             ),
             nn.AdaptiveAvgPool2d(1)
         )
-        self.classifier = Classifier(in_features=int(alpha*1024), out_features=n_classes)
+        self.classifier = Classifier(
+            in_features=int(alpha*1024),
+            out_features=num_classes,
+            dropout_rate=dropout_rate
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.feature_extractor(x)
@@ -56,17 +65,29 @@ class MobileNetV1(nn.Module):
         logits = self.classifier(x)
         return logits
 
-    def initialize_weights(self):
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(
-                    m.weight,
-                    mode='fan_out',
-                    nonlinearity='relu',
-                )
-            elif isinstance(m, nn.BatchNorm2d):
-                nn.init.constant_(m.weight, 1)
-                nn.init.constant_(m.bias, 0)
-            elif isinstance(m, nn.Linear):
-                nn.init.normal_(m.weight, 0, 0.01)
-                nn.init.constant_(m.bias, 0)
+
+def MobileNetV1_10(
+        image_channels: int,
+        num_classes: int,
+        alpha: float = 1.0,
+        dropout_rate: float = 0.5
+) -> MobileNetV1:
+    return MobileNetV1(image_channels, num_classes, alpha, dropout_rate)
+
+
+def MobileNetV1_075(
+        image_channels: int,
+        num_classes: int,
+        alpha: float = 0.75,
+        dropout_rate: float = 0.5
+) -> MobileNetV1:
+    return MobileNetV1(image_channels, num_classes, alpha, dropout_rate)
+
+
+def MobileNetV1_05(
+        image_channels: int,
+        num_classes: int,
+        alpha: float = 0.5,
+        dropout_rate: float = 0.5
+) -> MobileNetV1:
+    return MobileNetV1(image_channels, num_classes, alpha, dropout_rate)
