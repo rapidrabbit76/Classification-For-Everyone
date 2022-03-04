@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from .blocks import *
 
-__all__ = ['AlexNet', 'alexnet']
+__all__ = ['AlexNet']
 
 
 class AlexNet(nn.Module):
@@ -67,11 +67,3 @@ class AlexNet(nn.Module):
         x = torch.flatten(x, 1)
         logits = self.classifier(x)
         return logits
-
-
-def alexnet(
-        image_channels: int,
-        num_classes: int,
-        dropout_rate: float = 0.5
-) -> AlexNet:
-    return AlexNet(image_channels, num_classes, dropout_rate)
