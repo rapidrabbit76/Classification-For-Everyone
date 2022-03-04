@@ -56,10 +56,10 @@ class MobileNetV3(nn.Module):
 
     def __init__(
             self,
+            model_type: str,
             image_channels: int,
             num_classes: int,
             alpha: float = 1.0,
-            model_type: str = 'large',
             dropout_rate: float = 0.5
     ) -> None:
         super().__init__()

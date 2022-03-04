@@ -26,9 +26,9 @@ class LitMobileNetV3(pl.LightningModule):
         self.save_hyperparameters(config)
 
         self.model = MobileNetV3(
+            model_type=self.hparams.model_type,
             image_channels=self.hparams.image_channels,
             num_classes=self.hparams.num_classes,
-            model_type=self.hparams.model_type,
             dropout_rate=self.hparams.dropout_rate
         )
 
