@@ -30,7 +30,7 @@ class ConvBlock(nn.Module):
                 bias=bias
             ),
             nn.BatchNorm2d(num_features=out_channels),
-            nn.ReLU()
+            nn.ReLU(inplace=True)
         ]
 
         self.conv2d = nn.Sequential(*layers)

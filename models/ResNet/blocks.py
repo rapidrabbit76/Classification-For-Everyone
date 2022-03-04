@@ -33,7 +33,7 @@ class ConvBlock(nn.Module):
         ]
 
         if act == 'ReLU':
-            layers.append(nn.ReLU())
+            layers.append(nn.ReLU(inplace=True))
 
         self.conv2d = nn.Sequential(*layers)
 
@@ -84,7 +84,7 @@ class BasicBlock(nn.Module):
             act='None',
         )
 
-        self.act = nn.ReLU()
+        self.act = nn.ReLU(inplace=True)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         identity = x
@@ -196,7 +196,7 @@ class BottleNeckBlock(nn.Module):
             act='None',
         )
 
-        self.act = nn.ReLU()
+        self.act = nn.ReLU(inplace=True)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         identity = x

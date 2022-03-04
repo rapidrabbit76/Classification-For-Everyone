@@ -30,7 +30,7 @@ class ConvBlock(nn.Module):
                 bias=bias
             ),
             nn.BatchNorm2d(num_features=out_channels),
-            nn.ReLU()
+            nn.ReLU(inplace=True)
         ]
 
         self.conv2d = nn.Sequential(*layers)
@@ -51,10 +51,10 @@ class Classifier(nn.Module):
         self.classifier = nn.Sequential(
             nn.Dropout(dropout_rate),
             nn.Linear(dim[0], dim[1]),
-            nn.ReLU(),
+            nn.ReLU(inplace=True),
             nn.Dropout(dropout_rate),
             nn.Linear(dim[1], dim[1]),
-            nn.ReLU(),
+            nn.ReLU(inplace=True),
             nn.Linear(dim[1], dim[2]),
         )
 

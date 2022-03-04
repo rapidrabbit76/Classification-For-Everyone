@@ -37,7 +37,7 @@ class ConvBlock(nn.Module):
             layers.append(nn.BatchNorm2d(num_features=out_channels))
 
         if act == 'SiLU':
-            layers.append(nn.SiLU())
+            layers.append(nn.SiLU(inplace=True))
         elif act == 'Sigmoid':
             layers.append(nn.Sigmoid())
 
@@ -69,7 +69,7 @@ class SEBlock(nn.Module):
                 ),
                 kernel_size=1
             ),
-            nn.SiLU(),
+            nn.SiLU(inplace=True),
             nn.Conv2d(
                 in_channels=expand_width(
                     dim=dim[0],

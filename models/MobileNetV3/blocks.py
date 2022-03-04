@@ -34,9 +34,9 @@ class ConvBlock(nn.Module):
         ]
 
         if act == 'HS':
-            layers.append(nn.Hardswish())
+            layers.append(nn.Hardswish(inplace=True))
         elif act == 'RE':
-            layers.append((nn.ReLU()))
+            layers.append((nn.ReLU(inplace=True)))
 
         self.conv2d = nn.Sequential(*layers)
 
@@ -66,7 +66,7 @@ class SEBlock(nn.Module):
                 ),
                 kernel_size=1
             ),
-            nn.SiLU(),
+            nn.SiLU(inplace=True),
             nn.Conv2d(
                 in_channels=expand_width(
                     dim=dim[0],
@@ -77,7 +77,7 @@ class SEBlock(nn.Module):
                 out_channels=expand_width(dim[0], factor),
                 kernel_size=1
             ),
-            nn.Hardsigmoid()
+            nn.Hardsigmoid(inplace=True)
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
