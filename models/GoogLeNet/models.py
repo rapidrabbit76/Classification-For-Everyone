@@ -2,6 +2,10 @@ import torch
 import torch.nn as nn
 from .blocks import *
 
+__all__ = [
+    "GoogLeNet", "googlenet"
+]
+
 
 class GoogLeNet(nn.Module):
 
@@ -129,9 +133,9 @@ class GoogLeNet(nn.Module):
         return logits
 
 
-def GoogLeNet(
+def googlenet(
         image_channels: int,
         num_classes: int,
         dropout_rate: float = 0.5
-):
+) -> GoogLeNet:
     return GoogLeNet(image_channels, num_classes, dropout_rate)
