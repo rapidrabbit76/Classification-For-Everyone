@@ -28,20 +28,20 @@ class ResNet(nn.Module):
     ):
         super().__init__()
         dim = 64
-        model_type = int(model_type)
+        num_layers = int(model_type)
         layers = []
         layers += [ConvBlock(image_channels, dim, kernel_size=7, stride=2, padding=3)]
         layers += [nn.MaxPool2d(kernel_size=3, stride=2, padding=1)]
 
         # stack blocks
         listBlocks = RESNET_TYPE[model_type]
-        for idx, nblock in enumerate(listBlocks):
-            layers += [ResidualBlock(model_type, idx, nblock, dim)]
+        for idx_layer, nblock in enumerate(listBlocks):
+            layers += [ResidualBlock(num_layers, idx_layer, nblock, dim)]
             dim *= 2
 
         layers += [nn.AvgPool2d(kernel_size=7)]
 
-        if model_type < 50:
+        if num_layers < 50:
             dim = dim // 2
         else:
             dim = dim * 2
