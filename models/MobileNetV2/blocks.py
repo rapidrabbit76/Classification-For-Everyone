@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 from typing import List
 
+__all__ = ["ConvBlock", "BottleNeckS1Block", "BottleNeckS2Block", "BottleNeck", "Classifier"]
+
 
 class ConvBlock(nn.Module):
 
@@ -13,21 +15,33 @@ class ConvBlock(nn.Module):
             stride: int = 1,
             padding: int = 0,
             groups: int = 1,
+            act: str = 'ReLU6',
             bias: bool = False,
     ) -> None:
         super().__init__()
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            groups=groups,
-            bias=bias,
-        )
+
+        layers = [
+            nn.Conv2d(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                kernel_size=kernel_size,
+                stride=stride,
+                padding=padding,
+                groups=groups,
+                bias=bias,
+            ),
+            nn.BatchNorm2d(num_features=out_channels)
+        ]
+
+        if act == 'ReLU6':
+            layers.append(nn.ReLU6())
+        else:
+            pass
+
+        self.conv2d = nn.Sequential(*layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.conv(x)
+        return self.conv2d(x)
 
 
 class BottleNeckS1Block(nn.Module):
@@ -38,36 +52,33 @@ class BottleNeckS1Block(nn.Module):
             factor: int,
     ) -> None:
         super().__init__()
+        self.use_res_connection = dim[0] == dim[1]
 
         self.blocks = nn.Sequential(
             # Conv 1x1, ReLU6
             ConvBlock(
                 in_channels=dim[0],
-                out_channels=dim[0]*factor,
+                out_channels=expand_width(dim[0], factor),
                 kernel_size=1,
+                act='ReLU6',
             ),
-            nn.BatchNorm2d(num_features=dim[0]*factor),
-            nn.ReLU6(),
             # Dwise 3x3, ReLU6
             ConvBlock(
-                in_channels=dim[0]*factor,
-                out_channels=dim[0]*factor,
+                in_channels=expand_width(dim[0], factor),
+                out_channels=expand_width(dim[0], factor),
                 kernel_size=3,
                 padding=1,
-                groups=dim[0]*factor,
+                groups=expand_width(dim[0], factor),
+                act='ReLU6',
             ),
-            nn.BatchNorm2d(num_features=dim[0]*factor),
-            nn.ReLU6(),
             # Conv 1x1, linear act
             ConvBlock(
-                in_channels=dim[0]*factor,
+                in_channels=expand_width(dim[0], factor),
                 out_channels=dim[1],
                 kernel_size=1,
+                act='None',
             ),
-            nn.BatchNorm2d(num_features=dim[1]),
         )
-
-        self.use_res_connection = dim[0] == dim[1]
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         if self.use_res_connection is True:
@@ -90,29 +101,27 @@ class BottleNeckS2Block(nn.Module):
             # Conv 1x1, ReLU6
             ConvBlock(
                 in_channels=dim[0],
-                out_channels=dim[0]*factor,
+                out_channels=expand_width(dim[0], factor),
                 kernel_size=1,
+                act='ReLU6',
             ),
-            nn.BatchNorm2d(num_features=dim[0]*factor),
-            nn.ReLU6(),
             # Dwise 3x3, ReLU6
             ConvBlock(
-                in_channels=dim[0]*factor,
-                out_channels=dim[0]*factor,
+                in_channels=expand_width(dim[0], factor),
+                out_channels=expand_width(dim[0], factor),
                 kernel_size=3,
                 stride=2,
                 padding=1,
-                groups=dim[0]*factor,
+                groups=expand_width(dim[0], factor),
+                act='ReLU6',
             ),
-            nn.BatchNorm2d(num_features=dim[0]*factor),
-            nn.ReLU6(),
             # Conv 1x1, linear act
             ConvBlock(
-                in_channels=dim[0]*factor,
+                in_channels=expand_width(dim[0], factor),
                 out_channels=dim[1],
                 kernel_size=1,
+                act='None',
             ),
-            nn.BatchNorm2d(num_features=dim[1]),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -151,17 +160,25 @@ class BottleNeck(nn.Module):
         return self.blocks(x)
 
 
+def expand_width(
+        dim: int,
+        factor: float,
+) -> int:
+    return int(dim*factor)
+
+
 class Classifier(nn.Module):
 
     def __init__(
             self,
             in_features: int,
             out_features: int,
+            dropout_rate: float,
     ) -> None:
         super().__init__()
 
         self.classifier = nn.Sequential(
-            nn.Dropout(0.2),
+            nn.Dropout(dropout_rate),
             nn.Linear(in_features, out_features),
         )
 
