@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 from typing import List
 
+__all__ = ["ConvBlock", "SepConvBlock", "SEBlock", "MBConvBlock", "Classifier"]
+
 
 class ConvBlock(nn.Module):
 
@@ -13,21 +15,33 @@ class ConvBlock(nn.Module):
             stride: int = 1,
             padding: int = 0,
             groups: int = 1,
+            act: str = 'ReLU',
             bias: bool = False,
     ) -> None:
         super().__init__()
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            groups=groups,
-            bias=bias,
-        )
+
+        layers = [
+            nn.Conv2d(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                kernel_size=kernel_size,
+                stride=stride,
+                padding=padding,
+                groups=groups,
+                bias=bias,
+            ),
+            nn.BatchNorm2d(num_features=out_channels)
+        ]
+
+        if act == 'ReLU':
+            layers.append(nn.ReLU())
+        else:
+            pass
+
+        self.conv2d = nn.Sequential(*layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.conv(x)
+        return self.conv2d(x)
 
 
 class SepConvBlock(nn.Module):
@@ -50,18 +64,56 @@ class SepConvBlock(nn.Module):
                 padding=padding,
                 groups=dim[0],
             ),
-            nn.BatchNorm2d(num_features=expand_width(dim[0], factor)),
-            nn.ReLU(),
             ConvBlock(
                 in_channels=expand_width(dim[0], factor),
                 out_channels=expand_width(dim[1], factor),
                 kernel_size=1,
-            ),
-            nn.BatchNorm2d(num_features=expand_width(dim[1], factor))
+                act='None'
+            )
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.blocks(x)
+
+
+class SEBlock(nn.Module):
+
+    def __init__(
+            self,
+            dim: List[int],
+            factor: float,
+            reduction_ratio: int = 4
+    ) -> None:
+        super().__init__()
+
+        self.CE_block = nn.Sequential(
+            nn.AdaptiveAvgPool2d(1),
+            nn.Conv2d(
+                in_channels=expand_width(dim[0], factor),
+                out_channels=expand_width(
+                    dim=dim[0],
+                    factor=factor,
+                    ratio=reduction_ratio,
+                    use_ratio=True
+                ),
+                kernel_size=1
+            ),
+            nn.SiLU(),
+            nn.Conv2d(
+                in_channels=expand_width(
+                    dim=dim[0],
+                    factor=factor,
+                    ratio=reduction_ratio,
+                    use_ratio=True
+                ),
+                out_channels=expand_width(dim[0], factor),
+                kernel_size=1
+            ),
+            nn.Hardsigmoid()
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return torch.mul(x, self.CE_block(x))
 
 
 class MBConvBlock(nn.Module):
@@ -73,7 +125,7 @@ class MBConvBlock(nn.Module):
             kernel: int,
             padding: int,
             stride: int,
-            reduction_ratio: int = 3,
+            reduction_ratio: int = 4,
             use_se: bool = False,
     ) -> None:
         super().__init__()
@@ -87,8 +139,6 @@ class MBConvBlock(nn.Module):
                 out_channels=expand_width(dim[0], factor),
                 kernel_size=1,
             ),
-            nn.BatchNorm2d(expand_width(dim[0], factor)),
-            nn.ReLU(),
             # Dwise kernel x kennel
             ConvBlock(
                 in_channels=expand_width(dim[0], factor),
@@ -97,43 +147,23 @@ class MBConvBlock(nn.Module):
                 stride=stride,
                 padding=padding,
                 groups=expand_width(dim[0], factor),
-            ),
-            nn.BatchNorm2d(num_features=expand_width(dim[0], factor)),
-            nn.ReLU()
+            )
         )
+
         self.second_block = nn.Sequential(
             # Conv 1x1, linear act.
             ConvBlock(
                 in_channels=expand_width(dim[0], factor),
                 out_channels=dim[1],
                 kernel_size=1,
-            ),
-            nn.BatchNorm2d(num_features=dim[1]),
+                act='None'
+            )
         )
-        self.CE_block = nn.Sequential(
-            nn.AdaptiveAvgPool2d(1),
-            nn.Conv2d(
-                in_channels=expand_width(dim[0], factor),
-                out_channels=expand_width(
-                    dim=dim[0],
-                    factor=factor,
-                    ratio=reduction_ratio,
-                    use_ratio=True
-                ),
-                kernel_size=1,
-            ),
-            nn.ReLU(),
-            nn.Conv2d(
-                in_channels=expand_width(
-                    dim=dim[0],
-                    factor=factor,
-                    ratio=reduction_ratio,
-                    use_ratio=True
-                ),
-                out_channels=expand_width(dim[0], factor),
-                kernel_size=1,
-            ),
-            nn.Hardsigmoid(),
+
+        self.SEBlock = SEBlock(
+            dim=dim,
+            factor=factor,
+            reduction_ratio=reduction_ratio
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -141,7 +171,7 @@ class MBConvBlock(nn.Module):
         if self.use_res_connection is True and self.use_se is True:
             identity = x
             x = self.first_block(x)
-            x = torch.mul(x, self.CE_block(x))
+            x = self.SEBlock(x)
 
             return identity + self.second_block(x)
 
@@ -153,7 +183,7 @@ class MBConvBlock(nn.Module):
 
         elif self.use_res_connection is False and self.use_se is True:
             x = self.first_block(x)
-            x = torch.mul(x, self.CE_block(x))
+            x = self.SEBlock(x)
 
             return self.second_block(x)
 
@@ -166,11 +196,11 @@ class MBConvBlock(nn.Module):
 def expand_width(
         dim: int,
         factor: float,
-        ratio: int = 3,
+        ratio: int = 4,
         use_ratio: bool = False,
 ) -> int:
     if use_ratio is True:
-        return int((dim*factor)/ratio)
+        return int(dim//ratio)
     else:
         return int(dim*factor)
 
