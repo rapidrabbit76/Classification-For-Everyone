@@ -39,7 +39,7 @@ class ResNet(nn.Module):
             layers += [ResidualBlock(num_layers, idx_layer, nblock, dim)]
             dim *= 2
 
-        layers += [nn.AvgPool2d(kernel_size=7)]
+        layers += [nn.AdaptiveAvgPool2d(1)]
 
         if num_layers < 50:
             dim = dim // 2
