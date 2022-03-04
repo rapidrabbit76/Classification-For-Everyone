@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 
+__all__ = ["ConvBlock", "BasicBlock", "BottleNeckBlock", "ResidualBlock", "Classifier"]
+
 
 class ConvBlock(nn.Module):
 
@@ -11,24 +13,34 @@ class ConvBlock(nn.Module):
             kernel_size: int,
             stride: int = 1,
             padding: int = 0,
+            groups: int = 1,
+            act: str = 'ReLU',
             bias: bool = False,
-    ):
+    ) -> None:
         super().__init__()
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=bias,
-        )
-        self.bn = nn.BatchNorm2d(num_features=out_channels)
+
+        layers = [
+            nn.Conv2d(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                kernel_size=kernel_size,
+                stride=stride,
+                padding=padding,
+                groups=groups,
+                bias=bias,
+            ),
+            nn.BatchNorm2d(num_features=out_channels)
+        ]
+
+        if act == 'ReLU':
+            layers.append(nn.ReLU())
+        else:
+            pass
+
+        self.conv2d = nn.Sequential(*layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.conv(x)
-        x = self.bn(x)
-
-        return x
+        return self.conv2d(x)
 
 
 class BasicBlock(nn.Module):
@@ -43,31 +55,53 @@ class BasicBlock(nn.Module):
         self.is_first_layer = is_first_layer
         self.is_first_block = is_first_block
 
-        self.conv_3by3_1 = ConvBlock(dim, dim, kernel_size=3, padding=1)
-        self.conv_3by3_2 = ConvBlock(dim, dim, kernel_size=3, padding=1)
+        self.conv_3by3_1 = ConvBlock(
+            in_channels=dim,
+            out_channels=dim,
+            kernel_size=3,
+            padding=1,
+            act='ReLU',
+        )
+        self.conv_3by3_2 = ConvBlock(
+            in_channels=dim,
+            out_channels=dim,
+            kernel_size=3,
+            padding=1,
+            act='None',
+        )
 
-        self.conv_3by3_3 = ConvBlock(dim//2, dim, kernel_size=3, stride=2, padding=1)
-        self.downsample = ConvBlock(dim//2, dim, kernel_size=1, stride=2)
+        self.conv_3by3_3 = ConvBlock(
+            in_channels=dim//2,
+            out_channels=dim,
+            kernel_size=3,
+            stride=2,
+            padding=1,
+            act='ReLU',
+        )
+        self.downsample = ConvBlock(
+            in_channels=dim//2,
+            out_channels=dim,
+            kernel_size=1,
+            stride=2,
+            act='None',
+        )
+
         self.act = nn.ReLU()
-        self.bn = nn.BatchNorm2d(num_features=dim)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         identity = x
 
         if self.is_first_layer is False and self.is_first_block is True:
             x = self.conv_3by3_3(x)
-            x = self.act(x)
             x = self.conv_3by3_2(x)
 
             identity = self.downsample(identity)
-            identity = self.bn(identity)
 
             x = x + identity
 
             return self.act(x)
 
         x = self.conv_3by3_1(x)
-        x = self.act(x)
         x = self.conv_3by3_2(x)
 
         x = x + identity
@@ -88,37 +122,93 @@ class BottleNeckBlock(nn.Module):
         self.is_first_block = is_first_block
 
         # 두 상황 제외하고 공통으로 사용 가능한 Conv2D layer
-        self.conv_1by1_1_common = ConvBlock(dim*4, dim, kernel_size=1)
-        self.conv_3by3_common = ConvBlock(dim, dim, kernel_size=3, padding=1)
-        self.conv_1by1_2_common = ConvBlock(dim, dim*4, kernel_size=1)
+        self.conv_1by1_1_common = ConvBlock(
+            in_channels=dim*4,
+            out_channels=dim,
+            kernel_size=1,
+            act='ReLU',
+        )
+        self.conv_3by3_common = ConvBlock(
+            in_channels=dim,
+            out_channels=dim,
+            kernel_size=3,
+            padding=1,
+            act='ReLU',
+        )
+        self.conv_1by1_2_common = ConvBlock(
+            in_channels=dim,
+            out_channels=dim*4,
+            kernel_size=1,
+            act='None',
+        )
 
         # Conv2_1, dim=64 -> 첫 conv layer & 첫 conv block
-        self.conv2_1_1by1_1 = ConvBlock(dim, dim, kernel_size=1)
-        self.conv2_1_3by3 = ConvBlock(dim, dim, kernel_size=3, padding=1)
-        self.conv2_1_1by1_2 = ConvBlock(dim, dim*4, kernel_size=1)
-        self.scale = ConvBlock(dim, dim*4, kernel_size=1)
+        self.conv2_1_1by1_1 = ConvBlock(
+            in_channels=dim,
+            out_channels=dim,
+            kernel_size=1,
+            act='ReLU',
+        )
+        self.conv2_1_3by3 = ConvBlock(
+            in_channels=dim,
+            out_channels=dim,
+            kernel_size=3,
+            padding=1,
+            act='ReLU',
+        )
+        self.conv2_1_1by1_2 = ConvBlock(
+            in_channels=dim,
+            out_channels=dim*4,
+            kernel_size=1,
+            act='None',
+        )
+        self.scale = ConvBlock(
+            in_channels=dim,
+            out_channels=dim*4,
+            kernel_size=1,
+            act='None',
+        )
 
         # Conv3_1, dim=128 -> 이외 conv layer & 첫 conv block
-        self.conv3_1_1by1_1 = ConvBlock(dim*2, dim, kernel_size=1, stride=2)
-        self.conv3_1_3by3 = ConvBlock(dim, dim, kernel_size=3, padding=1)
-        self.conv3_1_1by1_2 = ConvBlock(dim, dim*4, kernel_size=1)
-        self.downsample = ConvBlock(dim*2, dim*4, kernel_size=1, stride=2)
+        self.conv3_1_1by1_1 = ConvBlock(
+            in_channels=dim*2,
+            out_channels=dim,
+            kernel_size=1,
+            stride=2,
+            act='ReLU',
+        )
+        self.conv3_1_3by3 = ConvBlock(
+            in_channels=dim,
+            out_channels=dim,
+            kernel_size=3,
+            padding=1,
+            act='ReLU',
+        )
+        self.conv3_1_1by1_2 = ConvBlock(
+            in_channels=dim,
+            out_channels=dim*4,
+            kernel_size=1,
+            act='None',
+        )
+        self.downsample = ConvBlock(
+            in_channels=dim*2,
+            out_channels=dim*4,
+            kernel_size=1,
+            stride=2,
+            act='None',
+        )
 
         self.act = nn.ReLU()
-        self.bn = nn.BatchNorm2d(num_features=dim*4)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         identity = x
 
         if self.is_first_layer is True and self.is_first_block is True:
             x = self.conv2_1_1by1_1(x)
-            x = self.act(x)
             x = self.conv2_1_3by3(x)
-            x = self.act(x)
             x = self.conv2_1_1by1_2(x)
 
             identity = self.scale(identity)
-            identity = self.bn(identity)
 
             x = x + identity
 
@@ -126,22 +216,17 @@ class BottleNeckBlock(nn.Module):
 
         elif self.is_first_layer is False and self.is_first_block is True:
             x = self.conv3_1_1by1_1(x)
-            x = self.act(x)
             x = self.conv3_1_3by3(x)
-            x = self.act(x)
             x = self.conv3_1_1by1_2(x)
 
             identity = self.downsample(identity)
-            identity = self.bn(identity)
 
             x = x + identity
 
             return self.act(x)
 
         x = self.conv_1by1_1_common(x)
-        x = self.act(x)
         x = self.conv_3by3_common(x)
-        x = self.act(x)
         x = self.conv_1by1_2_common(x)
 
         x = x + identity
@@ -190,10 +275,12 @@ class Classifier(nn.Module):
             self,
             in_features: int,
             out_features: int,
+            dropout_rate: float,
     ):
         super().__init__()
 
         self.classifier = nn.Sequential(
+            nn.Dropout(dropout_rate),
             nn.Linear(in_features, out_features),
         )
 
