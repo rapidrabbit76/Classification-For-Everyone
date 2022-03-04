@@ -21,9 +21,9 @@ class ResNet(nn.Module):
 
     def __init__(
             self,
+            model_type: str,
             image_channels: int,
             num_classes: int,
-            model_type: str,
             dropout_rate: float = 0.5
     ):
         super().__init__()
