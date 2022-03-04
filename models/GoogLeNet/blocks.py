@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 
+__all__ = ["ConvBlock", "InceptionBlock", "Classifier"]
+
 
 class ConvBlock(nn.Module):
 
@@ -11,24 +13,29 @@ class ConvBlock(nn.Module):
             kernel_size: int,
             stride: int = 1,
             padding: int = 0,
-            bias: bool = True,
-    ):
+            groups: int = 1,
+            bias: bool = False,
+    ) -> None:
         super().__init__()
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=bias,
-        )
-        self.bn = nn.BatchNorm2d(num_features=out_channels, eps=1e-3)
-        self.act = nn.ReLU()
+
+        layers = [
+            nn.Conv2d(
+                in_channels=in_channels,
+                out_channels=out_channels,
+                kernel_size=kernel_size,
+                stride=stride,
+                padding=padding,
+                groups=groups,
+                bias=bias
+            ),
+            nn.BatchNorm2d(num_features=out_channels),
+            nn.ReLU()
+        ]
+
+        self.conv2d = nn.Sequential(*layers)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.conv(x)
-        x = self.bn(x)
-        return self.act(x)
+        return self.conv2d(x)
 
 
 class InceptionBlock(nn.Module):
@@ -67,36 +74,13 @@ class InceptionBlock(nn.Module):
         return torch.cat([x1, x2, x3, x4], dim=1)
 
 
-class AuxClassifier(nn.Module):
-
-    def __init__(
-            self,
-            in_features: int,
-            dim: int,
-            out_features: int,
-            dropout_rate: float = 0.4,
-    ):
-        super().__init__()
-
-        self.classifier = nn.Sequential(
-            nn.Dropout(dropout_rate),
-            nn.Linear(in_features, dim),
-            nn.ReLU(),
-            nn.Dropout(dropout_rate),
-            nn.Linear(dim, out_features)
-        )
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.classifier(x)
-
-
 class Classifier(nn.Module):
 
     def __init__(
             self,
             in_features: int,
             out_features: int,
-            dropout_rate: float = 0.4,
+            dropout_rate: float,
     ):
         super().__init__()
 
