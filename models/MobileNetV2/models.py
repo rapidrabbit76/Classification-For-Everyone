@@ -3,6 +3,10 @@ import torch.nn as nn
 import numpy as np
 from .blocks import *
 
+__all__ = [
+    "MobileNetV2", "mobilenetv2_10", "mobilenetv2_075", "mobilenetv2_05"
+]
+
 
 class MobileNetV2(nn.Module):
 
@@ -91,28 +95,28 @@ class MobileNetV2(nn.Module):
         return int(np.ceil(self.alpha*dim))
 
 
-def MobileNetV2_10(
+def mobilenetv2_10(
         image_channels: int,
         num_classes: int,
         alpha: float = 1.0,
         dropout_rate: float = 0.5
-):
+) -> MobileNetV2:
     return MobileNetV2(image_channels, num_classes, alpha, dropout_rate)
 
 
-def MobileNetV2_075(
+def mobilenetv2_075(
         image_channels: int,
         num_classes: int,
         alpha: float = 0.75,
         dropout_rate: float = 0.5
-):
+) -> MobileNetV2:
     return MobileNetV2(image_channels, num_classes, alpha, dropout_rate)
 
 
-def MobileNetV2_05(
+def mobilenetv2_05(
         image_channels: int,
         num_classes: int,
         alpha: float = 0.5,
         dropout_rate: float = 0.5
-):
+) -> MobileNetV2:
     return MobileNetV2(image_channels, num_classes, alpha, dropout_rate)
