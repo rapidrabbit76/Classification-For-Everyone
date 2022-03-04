@@ -117,7 +117,7 @@ class GoogLeNet(nn.Module):
                 out_channels_5by5=128,
                 out_channels_pool_proj=128,
             ),
-            nn.AvgPool2d(kernel_size=7, stride=1, padding=0)
+            nn.AdaptiveAvgPool2d(1)
         )
 
         self.classifier = Classifier(
