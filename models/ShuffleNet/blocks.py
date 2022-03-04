@@ -9,29 +9,19 @@ __all__ = [
 ]
 
 
+Normalization = nn.BatchNorm2d
+Activation = nn.ReLU
+
+
 class ConvBlock(nn.Module):
     def __init__(
-        self,
-        in_channels: int,
-        out_channels: int,
-        **kwargs: Any,
+        self, inp: int, outp: int, k: int, s: int = 1, p: int = 0, act: bool = True
     ):
         super().__init__()
-        layer = []
-        layer += [
-            nn.Conv2d(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=kwargs.get("kernel_size"),
-                stride=kwargs.get("stride", 1),
-                padding=kwargs.get("padding", 0),
-                groups=kwargs.get("groups", 1),
-                bias=kwargs.get("bias", False),
-            )
-        ]
-        layer += [nn.BatchNorm2d(out_channels)]
-        if kwargs.get("act", True):
-            layer += [nn.ReLU(inplace=True)]
+        layer = [nn.Conv2d(inp, outp, k, s, p, bias=False)]
+        layer += [Normalization(outp)]
+        if act:
+            layer += [Activation(inplace=True)]
 
         self.block = nn.Sequential(*layer)
 
@@ -53,74 +43,38 @@ class ChannelShuffle(nn.Module):
 
 
 class DepthWiseConvBlock(nn.Module):
-    def __init__(
-        self,
-        in_channels: int,
-        kernel_size: int,
-        stride: int = 1,
-        **kwargs: Any,
-    ) -> None:
+    def __init__(self, inp: int, k: int, s: int = 1, p: int = 0) -> None:
         super().__init__()
-        out_channels = in_channels
-        self.conv = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            groups=in_channels,
-            padding=kwargs.get("padding", 0),
-            bias=kwargs.get("bias", False),
-        )
-        self.norm = nn.BatchNorm2d(out_channels)
+        outp = inp
+        layer = [nn.Conv2d(inp, outp, k, s, p, groups=inp, bias=False)]
+        layer += [Normalization(outp)]
+        self.block = nn.Sequential(*layer)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        x = self.conv(x)
-        return self.norm(x)
+        return self.block(x)
 
 
 class ShuffleNetUnit(nn.Module):
     def __init__(
         self,
-        in_channels: int,
-        out_channels: int,
-        stride: int,
+        inp: int,
+        outp: int,
+        s: int,
     ) -> None:
         super().__init__()
         self.sc = nn.Identity()
 
-        out_channels = out_channels // 2
-        if stride > 1:
+        outp = outp // 2
+        if s > 1:
             self.sc = nn.Sequential(
-                DepthWiseConvBlock(
-                    in_channels=in_channels,
-                    kernel_size=3,
-                    stride=stride,
-                    padding=1,
-                ),
-                ConvBlock(
-                    in_channels=in_channels,
-                    out_channels=out_channels,
-                    kernel_size=1,
-                ),
+                DepthWiseConvBlock(inp, 3, s, 1),
+                ConvBlock(inp, outp, 1),
             )
 
         self.conv = nn.Sequential(
-            ConvBlock(
-                in_channels=in_channels if stride > 1 else out_channels,
-                out_channels=out_channels,
-                kernel_size=1,
-            ),
-            DepthWiseConvBlock(
-                in_channels=out_channels,
-                kernel_size=3,
-                stride=stride,
-                padding=1,
-            ),
-            ConvBlock(
-                in_channels=out_channels,
-                out_channels=out_channels,
-                kernel_size=1,
-            ),
+            ConvBlock(inp=inp if s > 1 else outp, outp=outp, k=1),
+            DepthWiseConvBlock(outp, 3, s, 1),
+            ConvBlock(outp, outp, 1),
         )
         self.channel_shuffle = ChannelShuffle(groups=2)
 
@@ -136,15 +90,12 @@ class ShuffleNetUnit(nn.Module):
 class Classifier(nn.Module):
     def __init__(
         self,
-        in_features: int,
-        num_classes: int,
+        inp: int,
+        outp: int,
     ) -> None:
         super().__init__()
         self.flatten = nn.Flatten()
-        self.fc = nn.Linear(
-            in_features=in_features,
-            out_features=num_classes,
-        )
+        self.fc = nn.Linear(inp, outp)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.flatten(x)

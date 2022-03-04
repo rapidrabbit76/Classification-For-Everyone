@@ -1,22 +1,21 @@
-from typing import Optional, Callable
+from typing import *
 import pytorch_lightning as pl
-from torch.utils.data import DataLoader, Subset
-from torchvision.datasets import MNIST
+from torch.utils.data import DataLoader, Subset, Dataset
+from torchvision.datasets import MNIST, FashionMNIST, EMNIST, KMNIST
 from sklearn.model_selection import train_test_split
 import numpy as np
 
-__all__ = ["MnistDataModule"]
 
-
-class MnistDataModule(pl.LightningDataModule):
+class MnistDataModuleBase(pl.LightningDataModule):
     def __init__(
         self,
+        DATASET: Dataset,
         root_dir: str,
         train_transforms: Callable,
         val_transforms: Callable,
         test_transforms: Callable,
-        batch_size: int = 1,
-        num_workers: int = 8,
+        batch_size: int,
+        num_workers: int,
     ):
         super().__init__()
         self.save_hyperparameters(
@@ -26,19 +25,20 @@ class MnistDataModule(pl.LightningDataModule):
                 "num_workers": num_workers,
             },
         )
+        self.Dataset = DATASET
         self.train_transforms = train_transforms
         self.val_transforms = val_transforms
         self.test_transforms = test_transforms
 
     def prepare_data(self) -> None:
         """Dataset download"""
-        MNIST(self.hparams.root_dir, train=True, download=True)
-        MNIST(self.hparams.root_dir, train=False, download=True)
+        self.Dataset(self.hparams.root_dir, train=True, download=True)
+        self.Dataset(self.hparams.root_dir, train=False, download=True)
 
     def setup(self, stage: Optional[str] = None) -> None:
         if stage == "fit" or stage is None:
             # split dataset to train, val
-            ds = MNIST(self.hparams.root_dir, train=True, download=False)
+            ds = self.Dataset(self.hparams.root_dir, train=True, download=False)
             targets = ds.targets
             train_idx, val_idx = train_test_split(
                 np.arange(len(targets)),
@@ -49,7 +49,7 @@ class MnistDataModule(pl.LightningDataModule):
 
             # build dataset, different transforms
             self.train_ds = Subset(
-                MNIST(
+                self.Dataset(
                     self.hparams.root_dir,
                     train=True,
                     transform=self.train_transforms,
@@ -58,7 +58,7 @@ class MnistDataModule(pl.LightningDataModule):
                 train_idx,
             )
             self.val_ds = Subset(
-                MNIST(
+                self.Dataset(
                     self.hparams.root_dir,
                     train=True,
                     transform=self.val_transforms,
@@ -97,3 +97,20 @@ class MnistDataModule(pl.LightningDataModule):
             shuffle=False,
             num_workers=self.hparams.num_workers,
         )
+
+
+def MnistDataModule(**kwargs):
+    return MnistDataModuleBase(MNIST, **kwargs)
+
+
+def FashionMnistDataModule(**kwargs):
+    return MnistDataModuleBase(FashionMNIST, **kwargs)
+
+
+def EmnistDataModule(**kwargs):
+    DATASET = lambda root, **kwargs: EMNIST(root, "byclass", **kwargs)
+    return MnistDataModuleBase(DATASET, **kwargs)
+
+
+def KMnistDataModule(**kwargs):
+    return MnistDataModuleBase(KMNIST, **kwargs)

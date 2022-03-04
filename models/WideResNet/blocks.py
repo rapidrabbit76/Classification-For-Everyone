@@ -8,31 +8,15 @@ __all__ = ["ConvBlock", "WideResNetBlock", "Classifier"]
 
 class ConvBlock(nn.Module):
     def __init__(
-        self,
-        in_channels: int,
-        out_channels: int,
-        **kwargs: Any,
+        self, inp: int, outp: int, k: int, s: int = 1, p: int = 0, dr: int = 0
     ):
         super().__init__()
-        dropout_rate = kwargs.get("dropout_rate", 0)
-        layer = []
         # WRN use BN->ReLU->Conv
-        layer += [nn.BatchNorm2d(in_channels)]
+        layer = [nn.BatchNorm2d(inp)]
         layer += [nn.ReLU(inplace=True)]
-        if dropout_rate > 0:
-            layer += [nn.Dropout2d(dropout_rate)]
-        layer += [
-            nn.Conv2d(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=kwargs.get("kernel_size"),
-                stride=kwargs.get("stride", 1),
-                padding=kwargs.get("padding", 0),
-                groups=kwargs.get("groups", 1),
-                bias=kwargs.get("bias", False),
-            )
-        ]
-
+        if dr > 0:
+            layer += [nn.Dropout2d(dr)]
+        layer += [nn.Conv2d(inp, outp, k, s, p, bias=False)]
         self.block = nn.Sequential(*layer)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -40,47 +24,17 @@ class ConvBlock(nn.Module):
 
 
 class WideResNetBlock(nn.Module):
-    def __init__(
-        self,
-        in_channels: int,
-        out_channels: int,
-        stride: int,
-        dropout_rate: int,
-        **kwargs: Any,
-    ):
+    def __init__(self, inp: int, outp: int, s: int, dr: int):
         super().__init__()
 
         self.residual = nn.Sequential(
-            ConvBlock(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=3,
-                stride=stride,
-                padding=1,
-                **kwargs,
-            ),
-            ConvBlock(
-                in_channels=out_channels,
-                out_channels=out_channels,
-                kernel_size=3,
-                stride=1,
-                padding=1,
-                dropout_rate=dropout_rate,
-                **kwargs,
-            ),
+            ConvBlock(inp, outp, 3, s, 1),
+            ConvBlock(outp, outp, 3, 1, 1, dr=dr),
         )
 
         self.shortcut = nn.Sequential()
-
-        if stride != 1 or in_channels != out_channels:
-            self.shortcut = nn.Conv2d(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                kernel_size=1,
-                stride=stride,
-                padding=0,
-                bias=False,
-            )
+        if s != 1 or inp != outp:
+            self.shortcut = nn.Conv2d(inp, outp, 1, s, bias=False)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         residual = self.residual(x)
@@ -89,16 +43,12 @@ class WideResNetBlock(nn.Module):
 
 
 class Classifier(nn.Module):
-    def __init__(
-        self,
-        in_features: int,
-        num_classes: int,
-    ) -> None:
+    def __init__(self, inp: int, outp: int) -> None:
         super().__init__()
         self.flatten = nn.Flatten()
         self.fc = nn.Linear(
-            in_features=in_features,
-            out_features=num_classes,
+            in_features=inp,
+            out_features=outp,
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

@@ -1,21 +1,21 @@
-from .VGG import LitVGG
-from .EfficientNetV1 import LitEfficientNet
-from .MNASNet import LitMNASNet
-from .MobileNetV3 import LitMobileNetV3
-from .MobileNetV2 import LitMobileNetV2
-from .MobileNetV1 import LitMobileNetV1
-from .GoogLeNet import LitGoogLeNet
-from .ResNet import LitResNet
-from .AlexNet import LitAlexNet
+from .VGG import *
+from .LeNet5 import *
+from .Squeezenet import *
+from .DenseNet import *
+from .ResNeXt import *
+from .WideResNet import *
+from .ShuffleNet import *
+from .EfficientNetV2 import *
+from .Xception import *
 
 __all__ = [
     "LitVGG",
-    "LitEfficientNet",
-    "LitMNASNet",
-    "LitMobileNetV3",
-    "LitMobileNetV2",
-    "LitMobileNetV1",
-    "LitGoogLeNet",
-    "LitResNet",
-    "LitAlexNet",
+    "LitLeNet5",
+    "LitSqueezeNet",
+    "LitDenseNet",
+    "LitResNeXt",
+    "LitWideResNet",
+    "LitShuffleNetV2",
+    "LitEfficientNetV2",
+    "LitXceptionNet",
 ]

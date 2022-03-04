@@ -1,6 +1,6 @@
 import os
 from argparse import ArgumentParser
-from typing import Dict, Final
+from typing import *
 from unicodedata import name
 
 import pytorch_lightning as pl
@@ -18,26 +18,29 @@ from datamodules import *
 from models import *
 from transforms import *
 
-DATAMODULE_TABLE: Final[Dict] = {
+DATAMODULE_TABLE: Dict["str", pl.LightningDataModule] = {
     "MNIST": MnistDataModule,
+    "FMNIST": FashionMnistDataModule,
+    "EMNIST": EmnistDataModule,
+    "KMNIST": KMnistDataModule,
     "CIFAR10": CIFAR10DataModule,
     "CIFAR100": CIFAR100DataModule,
 }
 
 
-MODEL_TABLE = {
+MODEL_TABLE: Dict["str", pl.LightningModule] = {
     "VGG": LitVGG,
-    "EfficientNetV1": LitEfficientNet,
-    "MNASNet": LitMNASNet,
-    "MobileNetV3": LitMobileNetV3,
-    "MobileNetV2": LitMobileNetV2,
-    "MobileNetV1": LitMobileNetV1,
-    "GoogLeNet": LitGoogLeNet,
-    "ResNet": LitResNet,
-    "AlexNet": LitAlexNet,
+    "LeNet5": LitLeNet5,
+    "SqueezeNet": LitSqueezeNet,
+    "DenseNet": LitDenseNet,
+    "ResNeXt": LitResNeXt,
+    "WidResNet": LitWideResNet,
+    "ShuffleNetV2": LitShuffleNetV2,
+    "EfficientNetV2": LitEfficientNetV2,
+    "XceptionNet": LitXceptionNet,
 }
 
-TRANSFORMS_TABLE = {
+TRANSFORMS_TABLE: Dict["str", Callable] = {
     "BASE": BaseTransforms,
 }
 
@@ -63,7 +66,7 @@ def hyperparameters():
     add("--transforms", type=str, choices=transfoms_candidate)
     add("--num_workers", type=int, default=16)
     add("--image_channels", type=int, default=3)
-    add("--image_size", type=int, default=224)
+    add("--image_size", type=int)
     add("--batch_size", type=int, default=64)
 
     ## each model
@@ -72,23 +75,31 @@ def hyperparameters():
     add("--num_classes", type=int)
     add("--dropout_rate", type=float, default=0.5)
 
+    ## WideResNet
+    add("--depth", type=int, default=40)
+    add("--K", type=int, default=10)
+
+    ## Densenet
+    add("--growth_rate", type=int, default=12)
+
     ## callbacks
     add("--callbacks_verbose", action="store_true")
     add("--callbacks_refresh_rate", type=int, default=5)
     add("--callbacks_save_top_k", type=int, default=3)
     add("--callbacks_monitor", type=str, default="val/acc")
     add("--callbacks_mode", type=str, default="max")
-    add("--earlystooping_min_delta", type=float, default=0.01)
-    add("--earlystooping_patience", type=int, default=20)
+    add("--earlystooping_min_delta", type=float, default=0.02)
+    add("--earlystooping_patience", type=int, default=10)
 
     ## optimizer
     add("--lr", type=float, default=0.1)
-    add("--scheduler_factor", type=float, default=0.1),
-    add("--scheduler_patience", type=int, default=5)
+    add("--lr_scheduler_gamma", type=float, default=0.2)
+    add("--scheduler_interval", type=str, default="epoch")
+    add("--scheduler_frequency", type=int, default=10)
 
     ### SGD
     add("--momentum", type=float, default=0)
-    add("--weight_decay", type=float, default=0.0)
+    add("--weight_decay", type=float, default=0)
     add("--nesterov", action="store_true")
 
     args = pl.Trainer.parse_argparser(parser.parse_args())
@@ -96,8 +107,8 @@ def hyperparameters():
 
 
 def main(args):
-    transforms = TRANSFORMS_TABLE[args.transforms.upper()]
-    datamodule = DATAMODULE_TABLE[args.dataset.upper()]
+    transforms = TRANSFORMS_TABLE[args.transforms]
+    datamodule = DATAMODULE_TABLE[args.dataset]
     model = MODEL_TABLE[args.model]
 
     seed_everything(args.seed)
@@ -150,7 +161,7 @@ def main(args):
             monitor=args.callbacks_monitor,
             mode=args.callbacks_mode,
             dirpath=os.path.join(save_dir, "ckpt"),
-            filename="[{epoch04d}]-[{step06d}]-[{val/acc:.2f}]",
+            filename="[{epoch:04d}]-[{step:06d}]-[{val/acc:.4f}]",
             auto_insert_metric_name=False,
             save_top_k=args.callbacks_save_top_k,
             save_last=True,
@@ -170,7 +181,7 @@ def main(args):
     wandb_logger.experiment.unwatch(model)
 
     ############################# TEST  START ###############################
-    test_info = trainer.test(model, datamodule=datamodule)[-1]
+    test_info = trainer.test(model, datamodule=datamodule)
 
     ############################# MODEL SAVE ################################
     example_inputs = torch.rand([1] + image_shape)

@@ -4,6 +4,7 @@ import numpy as np
 import torch
 from albumentations.pytorch import ToTensorV2 as ToTensor
 from PIL import Image
+import cv2
 
 __all__ = ["BaseTransforms"]
 
@@ -19,6 +20,7 @@ class BaseTransforms:
         mean: Tuple[float, float, float] = None,
         std: Tuple[float, float, float] = None,
     ) -> None:
+        self.image_shape = image_shape
         c, image_size, _ = image_shape
         train = True if isinstance(train, str) and train == "train" else False
 
@@ -35,8 +37,8 @@ class BaseTransforms:
                     width=image_size,
                     p=1.0 if train else 0.0,
                 ),
-                A.HorizontalFlip(p=0.5 if train else 0.0),
-                A.VerticalFlip(p=0.5 if train else 0.0),
+                A.Resize(image_size, image_size),
+                A.HorizontalFlip(p=1.0 if train else 0.0),
                 A.Normalize(
                     mean=mean,
                     std=std,
@@ -48,4 +50,8 @@ class BaseTransforms:
 
     def __call__(self, image: Union[np.ndarray, Image.Image]) -> torch.Tensor:
         image = np.array(image)
-        return self.transforms(image=image)["image"]
+        if self.image_shape[0] == 3 and len(image.shape) < 3:
+            image = cv2.cvtColor(image, cv2.COLOR_GRAY2RGB)
+
+        image = self.transforms(image=image)["image"]
+        return image

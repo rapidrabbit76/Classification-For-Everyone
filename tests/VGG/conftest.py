@@ -10,7 +10,7 @@ import torch
 def config():
     return EasyDict(
         {
-            "image_channals": 3,
+            "image_channels": 3,
             "num_classes": 10,
             "dropout_rate": 0.5,
             "image_size": 224,
@@ -22,7 +22,7 @@ def config():
     scope="module",
 )
 def batch(config):
-    c = config.image_channals
+    c = config.image_channels
     w = h = config.image_size
     return (
         torch.rand(1, c, w, h),
@@ -36,7 +36,7 @@ def batch(config):
 )
 def model(request, config):
     return request.param(
-        config.image_channals,
+        config.image_channels,
         config.num_classes,
         config.dropout_rate,
     )

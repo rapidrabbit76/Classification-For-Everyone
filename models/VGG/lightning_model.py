@@ -1,11 +1,10 @@
-from typing import Any, Dict, List, Optional, Type, Union, Tuple, Final
+from typing import *
 
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.nn import functional as F
-from torchmetrics import Accuracy
 from torchmetrics import functional as tmf
 
 from .models import VGGModel
@@ -17,10 +16,7 @@ _batch_type: Final[Type] = Tuple[torch.Tensor, torch.Tensor]
 
 
 class LitVGG(pl.LightningModule):
-    def __init__(
-        self,
-        config: Dict[str, Union[str, int, float, bool]],
-    ):
+    def __init__(self, args):
         """
         model_type: str,
         image_channals: int,
@@ -33,7 +29,7 @@ class LitVGG(pl.LightningModule):
 
         """
         super().__init__()
-        self.save_hyperparameters(config)
+        self.save_hyperparameters(args)
         self.model = VGGModel(
             model_type=self.hparams.model_type,
             image_channels=self.hparams.image_channels,
