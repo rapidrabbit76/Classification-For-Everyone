@@ -32,6 +32,7 @@ MODEL_TABLE = {
     "MobileNetV3": LitMobileNetV3,
     "MobileNetV2": LitMobileNetV2,
     "MobileNetV1": LitMobileNetV1,
+    "LitGoogLeNet": LitGoogLeNet,
 }
 
 TRANSFORMS_TABLE = {
