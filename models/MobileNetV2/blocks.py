@@ -35,8 +35,6 @@ class ConvBlock(nn.Module):
 
         if act == 'ReLU6':
             layers.append(nn.ReLU6())
-        else:
-            pass
 
         self.conv2d = nn.Sequential(*layers)
 

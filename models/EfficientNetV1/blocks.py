@@ -35,15 +35,11 @@ class ConvBlock(nn.Module):
 
         if use_bn is True:
             layers.append(nn.BatchNorm2d(num_features=out_channels))
-        else:
-            pass
 
         if act == 'SiLU':
             layers.append(nn.SiLU())
         elif act == 'Sigmoid':
             layers.append(nn.Sigmoid())
-        else:
-            pass
 
         self.Conv2d = nn.Sequential(*layers)
 
