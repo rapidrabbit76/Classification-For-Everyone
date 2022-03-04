@@ -6,6 +6,7 @@ from .MobileNetV2 import LitMobileNetV2
 from .MobileNetV1 import LitMobileNetV1
 from .GoogLeNet import LitGoogLeNet
 from .ResNet import LitResNet
+from .AlexNet import LitAlexNet
 
 __all__ = [
     "LitVGG",
@@ -16,4 +17,5 @@ __all__ = [
     "LitMobileNetV1",
     "LitGoogLeNet",
     "LitResNet",
+    "LitAlexNet",
 ]
