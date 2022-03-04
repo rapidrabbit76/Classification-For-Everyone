@@ -13,7 +13,7 @@ class AlexNet(nn.Module):
             self,
             image_channels: int,
             num_classes: int,
-            dropout_rate: float,
+            dropout_rate: float = 0.5,
     ) -> None:
         super().__init__()
 
@@ -55,7 +55,6 @@ class AlexNet(nn.Module):
                 stride=1,
                 padding=1,
             ),
-            nn.MaxPool2d(kernel_size=3, stride=2),
             nn.AdaptiveAvgPool2d(6),
         )
 
