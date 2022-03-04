@@ -3,7 +3,7 @@ import torch.nn as nn
 from .blocks import *
 
 __all__ = [
-    "GoogLeNet", "googlenet"
+    "GoogLeNet"
 ]
 
 
@@ -131,11 +131,3 @@ class GoogLeNet(nn.Module):
         x = torch.flatten(x, 1)
         logits = self.classifier(x)
         return logits
-
-
-def googlenet(
-        image_channels: int,
-        num_classes: int,
-        dropout_rate: float = 0.5
-) -> GoogLeNet:
-    return GoogLeNet(image_channels, num_classes, dropout_rate)
