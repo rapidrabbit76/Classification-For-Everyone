@@ -63,43 +63,38 @@ class ResNet(nn.Module):
 def ResNet_18(
         image_channels: int,
         num_classes: int,
-        model_type: str = '18',
         dropout_rate: float = 0.5
 ) -> ResNet:
-    return ResNet(image_channels, num_classes, model_type, dropout_rate)
+    return ResNet('18', image_channels, num_classes, dropout_rate)
 
 
 def ResNet_34(
         image_channels: int,
         num_classes: int,
-        model_type: str = '34',
         dropout_rate: float = 0.5
 ) -> ResNet:
-    return ResNet(image_channels, num_classes, model_type, dropout_rate)
+    return ResNet('34', image_channels, num_classes, dropout_rate)
 
 
 def ResNet_50(
         image_channels: int,
         num_classes: int,
-        model_type: str = '50',
         dropout_rate: float = 0.5
 ) -> ResNet:
-    return ResNet(image_channels, num_classes, model_type, dropout_rate)
+    return ResNet('50', image_channels, num_classes, dropout_rate)
 
 
 def ResNet_101(
         image_channels: int,
         num_classes: int,
-        model_type: str = '101',
         dropout_rate: float = 0.5
 ) -> ResNet:
-    return ResNet(image_channels, num_classes, model_type, dropout_rate)
+    return ResNet('101', image_channels, num_classes, dropout_rate)
 
 
 def ResNet_152(
         image_channels: int,
         num_classes: int,
-        model_type: str = '152',
         dropout_rate: float = 0.5
 ) -> ResNet:
-    return ResNet(image_channels, num_classes, model_type, dropout_rate)
+    return ResNet('152', image_channels, num_classes, dropout_rate)

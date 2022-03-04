@@ -69,25 +69,22 @@ class MobileNetV1(nn.Module):
 def MobileNetV1_10(
         image_channels: int,
         num_classes: int,
-        alpha: float = 1.0,
         dropout_rate: float = 0.5
 ) -> MobileNetV1:
-    return MobileNetV1(image_channels, num_classes, alpha, dropout_rate)
+    return MobileNetV1(image_channels, num_classes, 1.0, dropout_rate)
 
 
 def MobileNetV1_075(
         image_channels: int,
         num_classes: int,
-        alpha: float = 0.75,
         dropout_rate: float = 0.5
 ) -> MobileNetV1:
-    return MobileNetV1(image_channels, num_classes, alpha, dropout_rate)
+    return MobileNetV1(image_channels, num_classes, 0.75, dropout_rate)
 
 
 def MobileNetV1_05(
         image_channels: int,
         num_classes: int,
-        alpha: float = 0.5,
         dropout_rate: float = 0.5
 ) -> MobileNetV1:
-    return MobileNetV1(image_channels, num_classes, alpha, dropout_rate)
+    return MobileNetV1(image_channels, num_classes, 0.5, dropout_rate)

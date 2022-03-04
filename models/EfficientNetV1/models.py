@@ -116,71 +116,63 @@ class EfficientNet(nn.Module):
 
 def EfficientNet_b0(
         image_channels: int,
-        n_classes: int,
-        model_type: str = 'b0',
+        num_classes: int,
         dropout_rate: float = 0.5
 ) -> EfficientNet:
-    return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
+    return EfficientNet('b0', image_channels, num_classes, dropout_rate)
 
 
 def EfficientNet_b1(
         image_channels: int,
-        n_classes: int,
-        model_type: str = 'b1',
+        num_classes: int,
         dropout_rate: float = 0.5
 ) -> EfficientNet:
-    return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
+    return EfficientNet('b1', image_channels, num_classes, dropout_rate)
 
 
 def EfficientNet_b2(
         image_channels: int,
-        n_classes: int,
-        model_type: str = 'b2',
+        num_classes: int,
         dropout_rate: float = 0.5
 ) -> EfficientNet:
-    return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
+    return EfficientNet('b2', image_channels, num_classes, dropout_rate)
 
 
 def EfficientNet_b3(
         image_channels: int,
-        n_classes: int,
-        model_type: str = 'b3',
+        num_classes: int,
         dropout_rate: float = 0.5
 ) -> EfficientNet:
-    return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
+    return EfficientNet('b3', image_channels, num_classes, dropout_rate)
 
 
 def EfficientNet_b4(
         image_channels: int,
-        n_classes: int,
-        model_type: str = 'b4',
+        num_classes: int,
         dropout_rate: float = 0.5
 ) -> EfficientNet:
-    return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
+    return EfficientNet('b4', image_channels, num_classes, dropout_rate)
 
 
 def EfficientNet_b5(
         image_channels: int,
-        n_classes: int,
-        model_type: str = 'b5',
+        num_classes: int,
         dropout_rate: float = 0.5
 ) -> EfficientNet:
-    return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
+    return EfficientNet('b5', image_channels, num_classes, dropout_rate)
 
 
 def EfficientNet_b6(
         image_channels: int,
-        n_classes: int,
-        model_type: str = 'b6',
+        num_classes: int,
         dropout_rate: float = 0.5
 ) -> EfficientNet:
-    return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
+    return EfficientNet('b6', image_channels, num_classes, dropout_rate)
 
 
 def EfficientNet_b7(
         image_channels: int,
-        n_classes: int,
-        model_type: str = 'b7',
+        num_classes: int,
         dropout_rate: float = 0.5
 ) -> EfficientNet:
-    return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
+    return EfficientNet('b7', image_channels, num_classes, dropout_rate)

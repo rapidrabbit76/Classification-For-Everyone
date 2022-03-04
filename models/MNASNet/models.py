@@ -144,25 +144,22 @@ class MNASNet(nn.Module):
 def MNASNet_10(
         image_channels: int,
         num_classes: int,
-        alpha: float = 1.0,
         dropout_rate: float = 0.5
 ) -> MNASNet:
-    return MNASNet(image_channels, num_classes, alpha, dropout_rate)
+    return MNASNet(image_channels, num_classes, 1.0, dropout_rate)
 
 
 def MNASNet_075(
         image_channels: int,
         num_classes: int,
-        alpha: float = 0.75,
         dropout_rate: float = 0.5
 ) -> MNASNet:
-    return MNASNet(image_channels, num_classes, alpha, dropout_rate)
+    return MNASNet(image_channels, num_classes, 0.75, dropout_rate)
 
 
 def MNASNet_05(
         image_channels: int,
         num_classes: int,
-        alpha: float = 0.5,
         dropout_rate: float = 0.5
 ) -> MNASNet:
-    return MNASNet(image_channels, num_classes, alpha, dropout_rate)
+    return MNASNet(image_channels, num_classes, 0.5, dropout_rate)

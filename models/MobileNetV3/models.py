@@ -136,18 +136,14 @@ class MobileNetV3(nn.Module):
 def MobileNetV3_large(
         image_channels: int,
         num_classes: int,
-        alpha: float = 1.0,
-        model_type: str = 'large',
         dropout_rate: float = 0.5
 ) -> MobileNetV3:
-    return MobileNetV3(image_channels, num_classes, alpha, model_type, dropout_rate)
+    return MobileNetV3('large', image_channels, num_classes, 1.0, dropout_rate)
 
 
 def MobileNetV3_small(
         image_channels: int,
         num_classes: int,
-        alpha: float = 1.0,
-        model_type: str = 'small',
         dropout_rate: float = 0.5
 ) -> MobileNetV3:
-    return MobileNetV3(image_channels, num_classes, alpha, model_type, dropout_rate)
+    return MobileNetV3('small', image_channels, num_classes, 1.0, dropout_rate)
