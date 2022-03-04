@@ -31,6 +31,7 @@ MODEL_TABLE = {
     "MNASNet": LitMNASNet,
     "MobileNetV3": LitMobileNetV3,
     "MobileNetV2": LitMobileNetV2,
+    "MobileNetV1": LitMobileNetV1,
 }
 
 TRANSFORMS_TABLE = {
