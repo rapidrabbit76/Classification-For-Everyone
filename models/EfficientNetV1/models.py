@@ -119,7 +119,7 @@ def efficientnet_b0(
         n_classes: int,
         model_type: str = 'b0',
         dropout_rate: float = 0.5
-):
+) -> EfficientNet:
     return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
 
 
@@ -128,7 +128,7 @@ def efficientnet_b1(
         n_classes: int,
         model_type: str = 'b1',
         dropout_rate: float = 0.5
-):
+) -> EfficientNet:
     return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
 
 
@@ -137,7 +137,7 @@ def efficientnet_b2(
         n_classes: int,
         model_type: str = 'b2',
         dropout_rate: float = 0.5
-):
+) -> EfficientNet:
     return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
 
 
@@ -146,7 +146,7 @@ def efficientnet_b3(
         n_classes: int,
         model_type: str = 'b3',
         dropout_rate: float = 0.5
-):
+) -> EfficientNet:
     return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
 
 
@@ -155,7 +155,7 @@ def efficientnet_b4(
         n_classes: int,
         model_type: str = 'b4',
         dropout_rate: float = 0.5
-):
+) -> EfficientNet:
     return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
 
 
@@ -164,7 +164,7 @@ def efficientnet_b5(
         n_classes: int,
         model_type: str = 'b5',
         dropout_rate: float = 0.5
-):
+) -> EfficientNet:
     return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
 
 
@@ -173,7 +173,7 @@ def efficientnet_b6(
         n_classes: int,
         model_type: str = 'b6',
         dropout_rate: float = 0.5
-):
+) -> EfficientNet:
     return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
 
 
@@ -182,5 +182,5 @@ def efficientnet_b7(
         n_classes: int,
         model_type: str = 'b7',
         dropout_rate: float = 0.5
-):
+) -> EfficientNet:
     return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
