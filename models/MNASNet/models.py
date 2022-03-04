@@ -3,6 +3,11 @@ import torch.nn as nn
 import numpy as np
 from .blocks import *
 
+__all__ = [
+    "MNASNet", "mnasnet1_0", "mnasnet0_75", "mnasnet0_5"
+]
+
+
 MODEL_TYPE = {
     # input, output, expansion ratio, kernel size, padding, stride, reduction ratio, use SEBlock or not
     # fmt: off
@@ -141,7 +146,7 @@ def mnasnet1_0(
         num_classes: int,
         alpha: float = 1.0,
         dropout_rate: float = 0.5
-):
+) -> MNASNet:
     return MNASNet(image_channels, num_classes, alpha, dropout_rate)
 
 
@@ -150,7 +155,7 @@ def mnasnet0_75(
         num_classes: int,
         alpha: float = 0.75,
         dropout_rate: float = 0.5
-):
+) -> MNASNet:
     return MNASNet(image_channels, num_classes, alpha, dropout_rate)
 
 
@@ -159,5 +164,5 @@ def mnasnet0_5(
         num_classes: int,
         alpha: float = 0.5,
         dropout_rate: float = 0.5
-):
+) -> MNASNet:
     return MNASNet(image_channels, num_classes, alpha, dropout_rate)
