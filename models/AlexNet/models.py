@@ -2,7 +2,9 @@ import torch
 import torch.nn as nn
 from .blocks import *
 
-__all__ = ['AlexNet']
+__all__ = [
+    "AlexNet"
+]
 
 
 class AlexNet(nn.Module):

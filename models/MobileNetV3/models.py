@@ -4,7 +4,7 @@ import numpy as np
 from .blocks import *
 
 __all__ = [
-    "MobileNetV3", "mobilenetv3_large", "mobilenetv3_small"
+    "MobileNetV3", "MobileNetV3_large", "MobileNetV3_small"
 ]
 
 
@@ -133,7 +133,7 @@ class MobileNetV3(nn.Module):
         return int(np.ceil(self.alpha*dim))
 
 
-def mobilenetv3_large(
+def MobileNetV3_large(
         image_channels: int,
         num_classes: int,
         alpha: float = 1.0,
@@ -143,7 +143,7 @@ def mobilenetv3_large(
     return MobileNetV3(image_channels, num_classes, alpha, model_type, dropout_rate)
 
 
-def mobilenetv3_small(
+def MobileNetV3_small(
         image_channels: int,
         num_classes: int,
         alpha: float = 1.0,

@@ -4,7 +4,7 @@ import numpy as np
 from .blocks import *
 
 __all__ = [
-    "MNASNet", "mnasnet1_0", "mnasnet0_75", "mnasnet0_5"
+    "MNASNet", "MNASNet_10", "MNASNet_075", "MNASNet_05"
 ]
 
 
@@ -141,7 +141,7 @@ class MNASNet(nn.Module):
         return int(np.ceil(self.alpha * dim))
 
 
-def mnasnet1_0(
+def MNASNet_10(
         image_channels: int,
         num_classes: int,
         alpha: float = 1.0,
@@ -150,7 +150,7 @@ def mnasnet1_0(
     return MNASNet(image_channels, num_classes, alpha, dropout_rate)
 
 
-def mnasnet0_75(
+def MNASNet_075(
         image_channels: int,
         num_classes: int,
         alpha: float = 0.75,
@@ -159,7 +159,7 @@ def mnasnet0_75(
     return MNASNet(image_channels, num_classes, alpha, dropout_rate)
 
 
-def mnasnet0_5(
+def MNASNet_05(
         image_channels: int,
         num_classes: int,
         alpha: float = 0.5,

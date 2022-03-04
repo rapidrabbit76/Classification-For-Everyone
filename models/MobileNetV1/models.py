@@ -3,7 +3,7 @@ import torch.nn as nn
 from .blocks import *
 
 __all__ = [
-    "MobileNetV1", "mobilenetv1_10", "mobilenetv1_075", "mobilenetv1_05"
+    "MobileNetV1", "MobileNetV1_10", "MobileNetV1_075", "MobileNetV1_05"
 ]
 
 
@@ -66,7 +66,7 @@ class MobileNetV1(nn.Module):
         return logits
 
 
-def mobilenetv1_10(
+def MobileNetV1_10(
         image_channels: int,
         num_classes: int,
         alpha: float = 1.0,
@@ -75,7 +75,7 @@ def mobilenetv1_10(
     return MobileNetV1(image_channels, num_classes, alpha, dropout_rate)
 
 
-def mobilenetv1_075(
+def MobileNetV1_075(
         image_channels: int,
         num_classes: int,
         alpha: float = 0.75,
@@ -84,7 +84,7 @@ def mobilenetv1_075(
     return MobileNetV1(image_channels, num_classes, alpha, dropout_rate)
 
 
-def mobilenetv1_05(
+def MobileNetV1_05(
         image_channels: int,
         num_classes: int,
         alpha: float = 0.5,

@@ -5,9 +5,9 @@ from .blocks import *
 from typing import Final, Dict
 
 __all__ = [
-    "EfficientNet", "efficientnet_b0", "efficientnet_b1", "efficientnet_b2",
-    "efficientnet_b3", "efficientnet_b4", "efficientnet_b5", "efficientnet_b6",
-    "efficientnet_b7"
+    "EfficientNet", "EfficientNet_b0", "EfficientNet_b1", "EfficientNet_b2",
+    "EfficientNet_b3", "EfficientNet_b4", "EfficientNet_b5", "EfficientNet_b6",
+    "EfficientNet_b7"
 ]
 
 MODEL_BLOCKS: Final[Dict] = {
@@ -114,7 +114,7 @@ class EfficientNet(nn.Module):
         return int(np.ceil(self.depth_coefficient*numLayer))
 
 
-def efficientnet_b0(
+def EfficientNet_b0(
         image_channels: int,
         n_classes: int,
         model_type: str = 'b0',
@@ -123,7 +123,7 @@ def efficientnet_b0(
     return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
 
 
-def efficientnet_b1(
+def EfficientNet_b1(
         image_channels: int,
         n_classes: int,
         model_type: str = 'b1',
@@ -132,7 +132,7 @@ def efficientnet_b1(
     return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
 
 
-def efficientnet_b2(
+def EfficientNet_b2(
         image_channels: int,
         n_classes: int,
         model_type: str = 'b2',
@@ -141,7 +141,7 @@ def efficientnet_b2(
     return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
 
 
-def efficientnet_b3(
+def EfficientNet_b3(
         image_channels: int,
         n_classes: int,
         model_type: str = 'b3',
@@ -150,7 +150,7 @@ def efficientnet_b3(
     return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
 
 
-def efficientnet_b4(
+def EfficientNet_b4(
         image_channels: int,
         n_classes: int,
         model_type: str = 'b4',
@@ -159,7 +159,7 @@ def efficientnet_b4(
     return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
 
 
-def efficientnet_b5(
+def EfficientNet_b5(
         image_channels: int,
         n_classes: int,
         model_type: str = 'b5',
@@ -168,7 +168,7 @@ def efficientnet_b5(
     return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
 
 
-def efficientnet_b6(
+def EfficientNet_b6(
         image_channels: int,
         n_classes: int,
         model_type: str = 'b6',
@@ -177,7 +177,7 @@ def efficientnet_b6(
     return EfficientNet(image_channels, n_classes, model_type, dropout_rate)
 
 
-def efficientnet_b7(
+def EfficientNet_b7(
         image_channels: int,
         n_classes: int,
         model_type: str = 'b7',
