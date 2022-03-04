@@ -105,6 +105,12 @@ def hyperparameters():
     add("--scheduler_interval", type=str, default="epoch")
     add("--scheduler_frequency", type=int, default=10)
 
+    ## ReduceLROnPlateau
+    add("--scheduler_mode", type=str, default="min")
+    add("--scheduler_factor", type=float, default=0.1)
+    add("--scheduler_patience", type=int, default=5)
+    add("--scheduler_monitor", type=str, default="val/loss")
+
     ### SGD
     add("--momentum", type=float, default=0)
     add("--weight_decay", type=float, default=0)

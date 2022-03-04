@@ -46,12 +46,12 @@ class LitAlexNet(pl.LightningModule):
         scheduler_dict = {
             'scheduler': ReduceLROnPlateau(
                 optimizer,
-                mode='min',
+                mode=self.hparams.scheduler_mode,
                 factor=self.hparams.scheduler_factor,
                 patience=self.hparams.scheduler_patience,
                 verbose=True,
             ),
-            'monitor': 'val/loss',
+            'monitor': self.hparams.scheduler_monitor,
         }
         return {'optimizer': optimizer, 'lr_scheduler': scheduler_dict}
 
