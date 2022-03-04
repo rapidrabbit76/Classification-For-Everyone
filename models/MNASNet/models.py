@@ -65,15 +65,8 @@ class MNASNet(nn.Module):
                 kernel_size=3,
                 stride=2,
                 padding=1,
+                act='ReLU',
             )
-        ),
-        layers.append(
-            nn.BatchNorm2d(
-                num_features=self.multiply_width(32)
-            )
-        ),
-        layers.append(
-            nn.ReLU()
         ),
 
         for key in blockKeys:
@@ -111,15 +104,8 @@ class MNASNet(nn.Module):
                 in_channels=self.multiply_width(MODEL_TYPE['MBConv6_3'][0][1]),
                 out_channels=self.multiply_width(1280),
                 kernel_size=1,
+                act='ReLU',
             )
-        ),
-        layers.append(
-            nn.BatchNorm2d(
-                num_features=self.multiply_width(1280)
-            )
-        ),
-        layers.append(
-            nn.ReLU()
         ),
 
         layers.append(nn.AdaptiveAvgPool2d(1))
