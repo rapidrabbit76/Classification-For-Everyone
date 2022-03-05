@@ -1,2 +1,2 @@
-from .models import DenseNet
-from .lightning_model import LitDenseNet
+from .models import *
+from .lightning_model import *

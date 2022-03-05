@@ -1,2 +1,2 @@
-from .model import MobileNetV2
+from .models import *
 from .lightning_model import *

@@ -1,1 +1,2 @@
-from .lightning_model import LitResNeXt
+from .models import *
+from .lightning_model import *

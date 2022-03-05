@@ -1,2 +1,2 @@
-from .model import GoogLeNet
+from .models import *
 from .lightning_model import *

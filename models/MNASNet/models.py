@@ -3,9 +3,7 @@ import torch.nn as nn
 import numpy as np
 from .blocks import *
 
-__all__ = [
-    "MNASNet", "MNASNet_10", "MNASNet_075", "MNASNet_05"
-]
+__all__ = ["MNASNet", "MNASNet_10", "MNASNet_075", "MNASNet_05"]
 
 
 MODEL_TYPE = {
@@ -45,13 +43,12 @@ MODEL_TYPE = {
 
 
 class MNASNet(nn.Module):
-
     def __init__(
-            self,
-            image_channels: int,
-            num_classes: int,
-            alpha: float = 1.0,
-            dropout_rate: float = 0.5
+        self,
+        image_channels: int,
+        num_classes: int,
+        alpha: float = 1.0,
+        dropout_rate: float = 0.5,
     ) -> None:
         super().__init__()
         self.alpha = alpha
@@ -65,18 +62,18 @@ class MNASNet(nn.Module):
                 kernel_size=3,
                 stride=2,
                 padding=1,
-                act='ReLU',
+                act="ReLU",
             )
         ),
 
         for key in blockKeys:
             for block_idx in MODEL_TYPE[key]:
-                if key == 'SepConv':
+                if key == "SepConv":
                     layers.append(
                         SepConvBlock(
                             dim=[
                                 self.multiply_width(MODEL_TYPE[key][block_idx][0]),
-                                self.multiply_width(MODEL_TYPE[key][block_idx][1])
+                                self.multiply_width(MODEL_TYPE[key][block_idx][1]),
                             ],
                             factor=MODEL_TYPE[key][block_idx][2],
                             stride=MODEL_TYPE[key][block_idx][3],
@@ -88,23 +85,23 @@ class MNASNet(nn.Module):
                         MBConvBlock(
                             dim=[
                                 self.multiply_width(MODEL_TYPE[key][block_idx][0]),
-                                self.multiply_width(MODEL_TYPE[key][block_idx][1])
+                                self.multiply_width(MODEL_TYPE[key][block_idx][1]),
                             ],
                             factor=MODEL_TYPE[key][block_idx][2],
                             kernel=MODEL_TYPE[key][block_idx][3],
                             padding=MODEL_TYPE[key][block_idx][4],
                             stride=MODEL_TYPE[key][block_idx][5],
                             reduction_ratio=MODEL_TYPE[key][block_idx][6],
-                            use_se=MODEL_TYPE[key][block_idx][7]
+                            use_se=MODEL_TYPE[key][block_idx][7],
                         )
                     )
 
         layers.append(
             ConvBlock(
-                in_channels=self.multiply_width(MODEL_TYPE['MBConv6_3'][0][1]),
+                in_channels=self.multiply_width(MODEL_TYPE["MBConv6_3"][0][1]),
                 out_channels=self.multiply_width(1280),
                 kernel_size=1,
-                act='ReLU',
+                act="ReLU",
             )
         ),
 
@@ -114,7 +111,7 @@ class MNASNet(nn.Module):
         self.classifier = Classifier(
             in_features=self.multiply_width(1280),
             out_features=num_classes,
-            dropout_rate=dropout_rate
+            dropout_rate=dropout_rate,
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -128,24 +125,18 @@ class MNASNet(nn.Module):
 
 
 def MNASNet_10(
-        image_channels: int,
-        num_classes: int,
-        dropout_rate: float = 0.5
+    image_channels: int, num_classes: int, dropout_rate: float = 0.5
 ) -> MNASNet:
     return MNASNet(image_channels, num_classes, 1.0, dropout_rate)
 
 
 def MNASNet_075(
-        image_channels: int,
-        num_classes: int,
-        dropout_rate: float = 0.5
+    image_channels: int, num_classes: int, dropout_rate: float = 0.5
 ) -> MNASNet:
     return MNASNet(image_channels, num_classes, 0.75, dropout_rate)
 
 
 def MNASNet_05(
-        image_channels: int,
-        num_classes: int,
-        dropout_rate: float = 0.5
+    image_channels: int, num_classes: int, dropout_rate: float = 0.5
 ) -> MNASNet:
     return MNASNet(image_channels, num_classes, 0.5, dropout_rate)

@@ -2,18 +2,15 @@ import torch
 import torch.nn as nn
 from .blocks import *
 
-__all__ = [
-    "AlexNet"
-]
+__all__ = ["AlexNet"]
 
 
 class AlexNet(nn.Module):
-
     def __init__(
-            self,
-            image_channels: int,
-            num_classes: int,
-            dropout_rate: float = 0.5,
+        self,
+        image_channels: int,
+        num_classes: int,
+        dropout_rate: float = 0.5,
     ) -> None:
         super().__init__()
 
@@ -60,7 +57,7 @@ class AlexNet(nn.Module):
         )
 
         self.classifier = Classifier(
-            dim=[256*6*6, 4096, num_classes],
+            dim=[256 * 6 * 6, 4096, num_classes],
             dropout_rate=dropout_rate,
         )
 

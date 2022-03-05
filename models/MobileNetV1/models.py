@@ -2,61 +2,55 @@ import torch
 import torch.nn as nn
 from .blocks import *
 
-__all__ = [
-    "MobileNetV1", "MobileNetV1_10", "MobileNetV1_075", "MobileNetV1_05"
-]
+__all__ = ["MobileNetV1", "MobileNetV1_10", "MobileNetV1_075", "MobileNetV1_05"]
 
 
 class MobileNetV1(nn.Module):
-
     def __init__(
-            self,
-            image_channels: int,
-            num_classes: int,
-            alpha: float = 1.0,
-            dropout_rate: float = 0.5
+        self,
+        image_channels: int,
+        num_classes: int,
+        alpha: float = 1.0,
+        dropout_rate: float = 0.5,
     ) -> None:
         super().__init__()
         self.feature_extractor = nn.Sequential(
             ConvBlock(
                 in_channels=image_channels,
-                out_channels=int(alpha*32),
+                out_channels=int(alpha * 32),
                 kernel_size=3,
                 stride=2,
-                padding=1
+                padding=1,
             ),
             DepthWiseSeparableBlock(
-                dim=[int(alpha*32), int(alpha*64), int(alpha*128)],
+                dim=[int(alpha * 32), int(alpha * 64), int(alpha * 128)],
                 stride=[1, 1, 2, 1],
-                is_common=True
+                is_common=True,
             ),
             DepthWiseSeparableBlock(
-                dim=[int(alpha*128), int(alpha*128), int(alpha*256)],
+                dim=[int(alpha * 128), int(alpha * 128), int(alpha * 256)],
                 stride=[1, 1, 2, 1],
-                is_common=True
+                is_common=True,
             ),
             DepthWiseSeparableBlock(
-                dim=[int(alpha*256), int(alpha*256), int(alpha*512)],
+                dim=[int(alpha * 256), int(alpha * 256), int(alpha * 512)],
                 stride=[1, 1, 2, 1],
-                is_common=True
+                is_common=True,
             ),
             DepthWiseSeparableBlock(
-                dim=[int(alpha*512)],
-                stride=[1],
-                iterate=5,
-                is_repeat=True
+                dim=[int(alpha * 512)], stride=[1], iterate=5, is_repeat=True
             ),
             DepthWiseSeparableBlock(
-                dim=[int(alpha*512), int(alpha*1024), int(alpha*1024)],
+                dim=[int(alpha * 512), int(alpha * 1024), int(alpha * 1024)],
                 stride=[2, 1, 2, 1],
-                is_last=True
+                is_last=True,
             ),
-            nn.AdaptiveAvgPool2d(1)
+            nn.AdaptiveAvgPool2d(1),
         )
         self.classifier = Classifier(
-            in_features=int(alpha*1024),
+            in_features=int(alpha * 1024),
             out_features=num_classes,
-            dropout_rate=dropout_rate
+            dropout_rate=dropout_rate,
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -67,24 +61,18 @@ class MobileNetV1(nn.Module):
 
 
 def MobileNetV1_10(
-        image_channels: int,
-        num_classes: int,
-        dropout_rate: float = 0.5
+    image_channels: int, num_classes: int, dropout_rate: float = 0.5
 ) -> MobileNetV1:
     return MobileNetV1(image_channels, num_classes, 1.0, dropout_rate)
 
 
 def MobileNetV1_075(
-        image_channels: int,
-        num_classes: int,
-        dropout_rate: float = 0.5
+    image_channels: int, num_classes: int, dropout_rate: float = 0.5
 ) -> MobileNetV1:
     return MobileNetV1(image_channels, num_classes, 0.75, dropout_rate)
 
 
 def MobileNetV1_05(
-        image_channels: int,
-        num_classes: int,
-        dropout_rate: float = 0.5
+    image_channels: int, num_classes: int, dropout_rate: float = 0.5
 ) -> MobileNetV1:
     return MobileNetV1(image_channels, num_classes, 0.5, dropout_rate)

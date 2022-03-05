@@ -3,19 +3,16 @@ import torch.nn as nn
 import numpy as np
 from .blocks import *
 
-__all__ = [
-    "MobileNetV2", "MobileNetV2_10", "MobileNetV2_075", "MobileNetV2_05"
-]
+__all__ = ["MobileNetV2", "MobileNetV2_10", "MobileNetV2_075", "MobileNetV2_05"]
 
 
 class MobileNetV2(nn.Module):
-
     def __init__(
-            self,
-            image_channels: int,
-            num_classes: int,
-            alpha: float = 1.0,
-            dropout_rate: float = 0.5
+        self,
+        image_channels: int,
+        num_classes: int,
+        alpha: float = 1.0,
+        dropout_rate: float = 0.5,
     ) -> None:
         super().__init__()
         self.alpha = alpha
@@ -27,7 +24,7 @@ class MobileNetV2(nn.Module):
                 kernel_size=3,
                 stride=2,
                 padding=1,
-                act='ReLU6',
+                act="ReLU6",
             ),
             BottleNeck(
                 dim=[self._multiply_width(32), self._multiply_width(16)],
@@ -75,14 +72,14 @@ class MobileNetV2(nn.Module):
                 in_channels=self._multiply_width(320),
                 out_channels=self._multiply_width(1280),
                 kernel_size=1,
-                act='ReLU6',
+                act="ReLU6",
             ),
             nn.AdaptiveAvgPool2d(1),
         )
         self.classifier = Classifier(
             in_features=self._multiply_width(1280),
             out_features=num_classes,
-            dropout_rate=dropout_rate
+            dropout_rate=dropout_rate,
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -92,28 +89,22 @@ class MobileNetV2(nn.Module):
         return logits
 
     def _multiply_width(self, dim: int) -> int:
-        return int(np.ceil(self.alpha*dim))
+        return int(np.ceil(self.alpha * dim))
 
 
 def MobileNetV2_10(
-        image_channels: int,
-        num_classes: int,
-        dropout_rate: float = 0.5
+    image_channels: int, num_classes: int, dropout_rate: float = 0.5
 ) -> MobileNetV2:
     return MobileNetV2(image_channels, num_classes, 1.0, dropout_rate)
 
 
 def MobileNetV2_075(
-        image_channels: int,
-        num_classes: int,
-        dropout_rate: float = 0.5
+    image_channels: int, num_classes: int, dropout_rate: float = 0.5
 ) -> MobileNetV2:
     return MobileNetV2(image_channels, num_classes, 0.75, dropout_rate)
 
 
 def MobileNetV2_05(
-        image_channels: int,
-        num_classes: int,
-        dropout_rate: float = 0.5
+    image_channels: int, num_classes: int, dropout_rate: float = 0.5
 ) -> MobileNetV2:
     return MobileNetV2(image_channels, num_classes, 0.5, dropout_rate)

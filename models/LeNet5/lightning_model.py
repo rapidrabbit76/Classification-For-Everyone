@@ -7,7 +7,7 @@ import torch.optim as optim
 from torch.nn import functional as F
 from torchmetrics import Accuracy
 from torchmetrics import functional as tmf
-from .model import LeNet5
+from .models import LeNet5
 
 __all__ = ["LitLeNet5"]
 _batch_type: Final[Type] = Tuple[torch.Tensor, torch.Tensor]

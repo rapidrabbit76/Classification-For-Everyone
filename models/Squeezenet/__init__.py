@@ -1,2 +1,2 @@
-from models.Squeezenet.lightning_model import LitSqueezeNet
-from models.Squeezenet.models import SqueezeNet
+from .models import *
+from .lightning_model import *

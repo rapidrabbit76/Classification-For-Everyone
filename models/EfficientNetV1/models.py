@@ -5,9 +5,15 @@ from .blocks import *
 from typing import Final, Dict
 
 __all__ = [
-    "EfficientNet", "EfficientNet_b0", "EfficientNet_b1", "EfficientNet_b2",
-    "EfficientNet_b3", "EfficientNet_b4", "EfficientNet_b5", "EfficientNet_b6",
-    "EfficientNet_b7"
+    "EfficientNet",
+    "EfficientNet_b0",
+    "EfficientNet_b1",
+    "EfficientNet_b2",
+    "EfficientNet_b3",
+    "EfficientNet_b4",
+    "EfficientNet_b5",
+    "EfficientNet_b6",
+    "EfficientNet_b7",
 ]
 
 MODEL_BLOCKS: Final[Dict] = {
@@ -43,13 +49,12 @@ MODEL_TYPES: Final[Dict] = {
 
 
 class EfficientNet(nn.Module):
-
     def __init__(
-            self,
-            model_type: str,
-            image_channels: int,
-            num_classes: int,
-            dropout_rate: float = 0.5
+        self,
+        model_type: str,
+        image_channels: int,
+        num_classes: int,
+        dropout_rate: float = 0.5,
     ) -> None:
         super().__init__()
         layers = []
@@ -74,21 +79,21 @@ class EfficientNet(nn.Module):
                     numLayer=self.multiply_depth(numLayer=MODEL_BLOCKS[key][0]),
                     dim=[
                         self.multiply_width(MODEL_BLOCKS[key][1]),
-                        self.multiply_width(MODEL_BLOCKS[key][2])
+                        self.multiply_width(MODEL_BLOCKS[key][2]),
                     ],
                     factor=MODEL_BLOCKS[key][3],
                     kernel_size=MODEL_BLOCKS[key][4],
                     padding=MODEL_BLOCKS[key][5],
                     stride=MODEL_BLOCKS[key][6],
-                    reduction_ratio=MODEL_BLOCKS[key][7]
+                    reduction_ratio=MODEL_BLOCKS[key][7],
                 )
             )
 
         layers.append(
             ConvBlock(
-                in_channels=self.multiply_width(MODEL_BLOCKS['MBConv6_6'][2]),
+                in_channels=self.multiply_width(MODEL_BLOCKS["MBConv6_6"][2]),
                 out_channels=self.multiply_width(1280),
-                kernel_size=1
+                kernel_size=1,
             )
         )
 
@@ -98,7 +103,7 @@ class EfficientNet(nn.Module):
         self.classifier = Classifier(
             in_features=self.multiply_width(1280),
             out_features=num_classes,
-            dropout_rate=dropout_rate
+            dropout_rate=dropout_rate,
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -108,71 +113,55 @@ class EfficientNet(nn.Module):
         return logits
 
     def multiply_width(self, dim: int) -> int:
-        return int(np.ceil(self.width_coefficient*dim))
+        return int(np.ceil(self.width_coefficient * dim))
 
     def multiply_depth(self, numLayer: int) -> int:
-        return int(np.ceil(self.depth_coefficient*numLayer))
+        return int(np.ceil(self.depth_coefficient * numLayer))
 
 
 def EfficientNet_b0(
-        image_channels: int,
-        num_classes: int,
-        dropout_rate: float = 0.5
+    image_channels: int, num_classes: int, dropout_rate: float = 0.5
 ) -> EfficientNet:
-    return EfficientNet('b0', image_channels, num_classes, dropout_rate)
+    return EfficientNet("b0", image_channels, num_classes, dropout_rate)
 
 
 def EfficientNet_b1(
-        image_channels: int,
-        num_classes: int,
-        dropout_rate: float = 0.5
+    image_channels: int, num_classes: int, dropout_rate: float = 0.5
 ) -> EfficientNet:
-    return EfficientNet('b1', image_channels, num_classes, dropout_rate)
+    return EfficientNet("b1", image_channels, num_classes, dropout_rate)
 
 
 def EfficientNet_b2(
-        image_channels: int,
-        num_classes: int,
-        dropout_rate: float = 0.5
+    image_channels: int, num_classes: int, dropout_rate: float = 0.5
 ) -> EfficientNet:
-    return EfficientNet('b2', image_channels, num_classes, dropout_rate)
+    return EfficientNet("b2", image_channels, num_classes, dropout_rate)
 
 
 def EfficientNet_b3(
-        image_channels: int,
-        num_classes: int,
-        dropout_rate: float = 0.5
+    image_channels: int, num_classes: int, dropout_rate: float = 0.5
 ) -> EfficientNet:
-    return EfficientNet('b3', image_channels, num_classes, dropout_rate)
+    return EfficientNet("b3", image_channels, num_classes, dropout_rate)
 
 
 def EfficientNet_b4(
-        image_channels: int,
-        num_classes: int,
-        dropout_rate: float = 0.5
+    image_channels: int, num_classes: int, dropout_rate: float = 0.5
 ) -> EfficientNet:
-    return EfficientNet('b4', image_channels, num_classes, dropout_rate)
+    return EfficientNet("b4", image_channels, num_classes, dropout_rate)
 
 
 def EfficientNet_b5(
-        image_channels: int,
-        num_classes: int,
-        dropout_rate: float = 0.5
+    image_channels: int, num_classes: int, dropout_rate: float = 0.5
 ) -> EfficientNet:
-    return EfficientNet('b5', image_channels, num_classes, dropout_rate)
+    return EfficientNet("b5", image_channels, num_classes, dropout_rate)
 
 
 def EfficientNet_b6(
-        image_channels: int,
-        num_classes: int,
-        dropout_rate: float = 0.5
+    image_channels: int, num_classes: int, dropout_rate: float = 0.5
 ) -> EfficientNet:
-    return EfficientNet('b6', image_channels, num_classes, dropout_rate)
+    return EfficientNet("b6", image_channels, num_classes, dropout_rate)
 
 
 def EfficientNet_b7(
-        image_channels: int,
-        num_classes: int,
-        dropout_rate: float = 0.5
+    image_channels: int, num_classes: int, dropout_rate: float = 0.5
 ) -> EfficientNet:
-    return EfficientNet('b7', image_channels, num_classes, dropout_rate)
+    return EfficientNet("b7", image_channels, num_classes, dropout_rate)

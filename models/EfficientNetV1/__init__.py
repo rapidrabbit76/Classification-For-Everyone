@@ -1,2 +1,2 @@
-from .model import EfficientNet
+from .models import *
 from .lightning_model import *
