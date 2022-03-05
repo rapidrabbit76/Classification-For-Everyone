@@ -1,4 +1,11 @@
-from .base import BaseTransforms
+from .base import *
 
 
-__all__ = ["BaseTransforms"]
+TRANSFORMS_TABLE: Dict["str", Callable] = {
+    "BASE": BaseTransforms,
+}
+
+__all__ = [
+    "BaseTransforms",
+    "TRANSFORMS_TABLE",
+]
