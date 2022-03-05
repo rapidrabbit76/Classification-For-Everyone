@@ -38,6 +38,14 @@ MODEL_TABLE: Dict["str", pl.LightningModule] = {
     "ShuffleNetV2": LitShuffleNetV2,
     "EfficientNetV2": LitEfficientNetV2,
     "XceptionNet": LitXceptionNet,
+    "AlexNet": LitAlexNet,
+    "GoogLeNet": LitGoogLeNet,
+    "ResNet": LitResNet,
+    "MobileNetV1": LitMobileNetV1,
+    "MobileNetV2": LitMobileNetV2,
+    "MobileNetV3": LitMobileNetV3,
+    "MNASNet": LitMNASNet,
+    "EfficientNetV1": LitEfficientNet,
 }
 
 TRANSFORMS_TABLE: Dict["str", Callable] = {
@@ -96,6 +104,12 @@ def hyperparameters():
     add("--lr_scheduler_gamma", type=float, default=0.2)
     add("--scheduler_interval", type=str, default="epoch")
     add("--scheduler_frequency", type=int, default=10)
+
+    ## ReduceLROnPlateau
+    add("--scheduler_mode", type=str, default="min")
+    add("--scheduler_factor", type=float, default=0.1)
+    add("--scheduler_patience", type=int, default=5)
+    add("--scheduler_monitor", type=str, default="val/loss")
 
     ### SGD
     add("--momentum", type=float, default=0)
