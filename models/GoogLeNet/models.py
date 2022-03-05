@@ -2,18 +2,15 @@ import torch
 import torch.nn as nn
 from .blocks import *
 
-__all__ = [
-    "GoogLeNet"
-]
+__all__ = ["GoogLeNet"]
 
 
 class GoogLeNet(nn.Module):
-
     def __init__(
-            self,
-            image_channels: int,
-            num_classes: int,
-            dropout_rate: float = 0.5,
+        self,
+        image_channels: int,
+        num_classes: int,
+        dropout_rate: float = 0.5,
     ):
         super().__init__()
 
@@ -117,13 +114,11 @@ class GoogLeNet(nn.Module):
                 out_channels_5by5=128,
                 out_channels_pool_proj=128,
             ),
-            nn.AdaptiveAvgPool2d(1)
+            nn.AdaptiveAvgPool2d(1),
         )
 
         self.classifier = Classifier(
-            in_features=1024,
-            out_features=num_classes,
-            dropout_rate=dropout_rate
+            in_features=1024, out_features=num_classes, dropout_rate=dropout_rate
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
