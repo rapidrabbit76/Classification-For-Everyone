@@ -18,40 +18,6 @@ from datamodules import *
 from models import *
 from transforms import *
 
-DATAMODULE_TABLE: Dict["str", pl.LightningDataModule] = {
-    "MNIST": MnistDataModule,
-    "FMNIST": FashionMnistDataModule,
-    "EMNIST": EmnistDataModule,
-    "KMNIST": KMnistDataModule,
-    "CIFAR10": CIFAR10DataModule,
-    "CIFAR100": CIFAR100DataModule,
-}
-
-MODEL_TABLE: Dict["str", pl.LightningModule] = {
-    "VGG": LitVGG,
-    "LeNet5": LitLeNet5,
-    "SqueezeNet": LitSqueezeNet,
-    "DenseNet": LitDenseNet,
-    "ResNeXt": LitResNeXt,
-    "WidResNet": LitWideResNet,
-    "ShuffleNetV2": LitShuffleNetV2,
-    "EfficientNetV2": LitEfficientNetV2,
-    "XceptionNet": LitXceptionNet,
-    "Inception": LitInceptionV3,
-    "AlexNet": LitAlexNet,
-    "GoogLeNet": LitGoogLeNet,
-    "ResNet": LitResNet,
-    "MobileNetV1": LitMobileNetV1,
-    "MobileNetV2": LitMobileNetV2,
-    "MobileNetV3": LitMobileNetV3,
-    "MNASNet": LitMNASNet,
-    "EfficientNetV1": LitEfficientNet,
-}
-
-TRANSFORMS_TABLE: Dict["str", Callable] = {
-    "BASE": BaseTransforms,
-}
-
 
 def hyperparameters():
     parser = ArgumentParser()
