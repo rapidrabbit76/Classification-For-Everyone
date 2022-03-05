@@ -17,6 +17,28 @@ from .MobileNetV3 import *
 from .MNASNet import *
 from .EfficientNetV1 import *
 
+
+MODEL_TABLE: Dict["str", pl.LightningModule] = {
+    "VGG": LitVGG,
+    "LeNet5": LitLeNet5,
+    "SqueezeNet": LitSqueezeNet,
+    "DenseNet": LitDenseNet,
+    "ResNeXt": LitResNeXt,
+    "WidResNet": LitWideResNet,
+    "ShuffleNetV2": LitShuffleNetV2,
+    "EfficientNetV2": LitEfficientNetV2,
+    "XceptionNet": LitXceptionNet,
+    "Inception": LitInceptionV3,
+    "AlexNet": LitAlexNet,
+    "GoogLeNet": LitGoogLeNet,
+    "ResNet": LitResNet,
+    "MobileNetV1": LitMobileNetV1,
+    "MobileNetV2": LitMobileNetV2,
+    "MobileNetV3": LitMobileNetV3,
+    "MNASNet": LitMNASNet,
+    "EfficientNetV1": LitEfficientNet,
+}
+
 __all__ = [
     "LitVGG",
     "LitLeNet5",
@@ -36,4 +58,5 @@ __all__ = [
     "LitMobileNetV3",
     "LitMNASNet",
     "LitEfficientNet",
+    "MODEL_TABLE",
 ]
