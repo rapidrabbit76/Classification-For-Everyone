@@ -1,5 +1,5 @@
 import pytest
-from models.LeNet5.model import LeNet5
+from models.LeNet5.models import *
 from easydict import EasyDict
 import torch
 

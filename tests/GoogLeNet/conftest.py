@@ -1,6 +1,5 @@
 import pytest
-from models.InceptionNet.models import *
-
+from models.GoogLeNet import *
 from easydict import EasyDict
 import torch
 
@@ -32,7 +31,7 @@ def batch(config):
 
 @pytest.fixture(
     scope="module",
-    params=[Inception_v3],
+    params=[GoogLeNet],
 )
 def model(request, config):
     return request.param(
