@@ -1,0 +1,29 @@
+# IDE
+.vscode/
+.idea/
+venv/
+.git/
+
+# Cache
+**/__pycache__/**
+.testmondata
+
+# Dataset
+**/DATASET/**
+DATASET/
+
+# Logging file
+**/experiment/**
+**/lightning_logs/**
+**/wandb/**
+
+# Models
+*.pt
+*.onnx
+*.ckpt
+*pth
+*zip
+
+# Jupyter notebooks
+*.ipynb
+
