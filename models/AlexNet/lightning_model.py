@@ -2,7 +2,6 @@ from typing import *
 
 import torch.nn as nn
 import torch.optim as optim
-from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from models.LitBase import LitBase
 
@@ -27,7 +26,7 @@ class LitAlexNet(LitBase):
             weight_decay=self.hparams.weight_decay,
         )
         scheduler_dict = {
-            "scheduler": ReduceLROnPlateau(
+            "scheduler": optim.lr_scheduler.ReduceLROnPlateau(
                 optimizer,
                 mode=self.hparams.scheduler_mode,
                 factor=self.hparams.scheduler_factor,
