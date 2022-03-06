@@ -31,7 +31,7 @@ def batch(config):
 
 @pytest.fixture(
     scope="module",
-    params=[MobileNetV3_small, MobileNetV3_large],
+    params=[MobileNetV3_s, MobileNetV3_l],
 )
 def model(request, config):
     return request.param(
