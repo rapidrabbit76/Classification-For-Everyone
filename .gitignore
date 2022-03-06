@@ -1,11 +1,15 @@
 # IDE
 .vscode/
+.idea/
+venv/
 
 # Cache
 **/__pycache__/**
+.testmondata
 
 # Dataset
-**/data/**
+**/DATASET/**
+DATASET
 
 # Logging file
 **/experiments/**
@@ -18,3 +22,7 @@
 *.ckpt
 *pth
 *zip
+
+# Jupyter notebooks
+*.ipynb
+
