@@ -12,7 +12,7 @@ venv/
 DATASET
 
 # Logging file
-**/experiments/**
+**/experiment/**
 **/lightning_logs/**
 **/wandb/**
 
