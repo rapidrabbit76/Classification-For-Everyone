@@ -5,7 +5,7 @@ import torch.optim as optim
 
 from models.LitBase import LitBase
 
-from models.Squeezenet.models import SqueezeNet
+from models.SqueezeNet.models import SqueezeNet
 
 
 class LitSqueezeNet(LitBase):

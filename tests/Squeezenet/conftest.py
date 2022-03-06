@@ -1,5 +1,5 @@
 import pytest
-from models.Squeezenet.models import SqueezeNet
+from models.SqueezeNet.models import SqueezeNet
 from easydict import EasyDict
 import torch
 

@@ -2,7 +2,7 @@ import pytorch_lightning as pl
 
 from .VGG import *
 from .LeNet5 import *
-from .Squeezenet import *
+from .SqueezeNet import *
 from .DenseNet import *
 from .ResNeXt import *
 from .WideResNet import *
