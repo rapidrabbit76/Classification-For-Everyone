@@ -8,16 +8,16 @@ __all__ = ["VGGModel", "VGG11", "VGG13", "VGG16", "VGG19"]
 
 MODEL_TYPES: Final[Dict] = {
     # fmt: off
-    "VGG11": [64,  "M", 128, "M", 256, 256, "M", 512, 512, "M", 
-              512, 512, "M"],
+    "11": [64,  "M", 128, "M", 256, 256, "M", 512, 512, "M", 
+           512, 512, "M"],
     
-    "VGG13": [64,   64, "M", 128, 128, "M", 256, 256, "M", 
-              512, 512, "M", 512, 512, "M"],
+    "13": [64,   64, "M", 128, 128, "M", 256, 256, "M", 
+           512, 512, "M", 512, 512, "M"],
     
-    "VGG16": [64,   64, "M", 128, 128, "M", 256, 256, 256, "M", 
-              512, 512, 512, "M", 512, 512, 512, "M"],
+    "16": [64,   64, "M", 128, 128, "M", 256, 256, 256, "M", 
+           512, 512, 512, "M", 512, 512, 512, "M"],
     
-    "VGG19": [64,   64, "M", 128, 128, "M", 256, 256, 256, 256, "M", 
+    "19": [64,   64, "M", 128, 128, "M", 256, 256, 256, 256, "M", 
               512, 512, 512, 512, "M", 512, 512, 512, 512, "M"],
 }
 
@@ -63,7 +63,7 @@ def VGG11(
     num_classes: int,
     dropout_rate: int = 0.5,
 ):
-    return VGGModel("VGG11", image_channals, num_classes, dropout_rate)
+    return VGGModel("11", image_channals, num_classes, dropout_rate)
 
 
 def VGG13(
@@ -71,7 +71,7 @@ def VGG13(
     num_classes: int,
     dropout_rate: int = 0.5,
 ):
-    return VGGModel("VGG13", image_channals, num_classes, dropout_rate)
+    return VGGModel("13", image_channals, num_classes, dropout_rate)
 
 
 def VGG16(
@@ -79,7 +79,7 @@ def VGG16(
     num_classes: int,
     dropout_rate: int = 0.5,
 ):
-    return VGGModel("VGG16", image_channals, num_classes, dropout_rate)
+    return VGGModel("16", image_channals, num_classes, dropout_rate)
 
 
 def VGG19(
@@ -87,4 +87,4 @@ def VGG19(
     num_classes: int,
     dropout_rate: int = 0.5,
 ):
-    return VGGModel("VGG19", image_channals, num_classes, dropout_rate)
+    return VGGModel("19", image_channals, num_classes, dropout_rate)

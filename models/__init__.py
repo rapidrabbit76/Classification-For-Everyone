@@ -1,3 +1,5 @@
+import pytorch_lightning as pl
+
 from .VGG import *
 from .LeNet5 import *
 from .Squeezenet import *
@@ -24,7 +26,7 @@ MODEL_TABLE: Dict["str", pl.LightningModule] = {
     "SqueezeNet": LitSqueezeNet,
     "DenseNet": LitDenseNet,
     "ResNeXt": LitResNeXt,
-    "WidResNet": LitWideResNet,
+    "WideResNet": LitWideResNet,
     "ShuffleNetV2": LitShuffleNetV2,
     "EfficientNetV2": LitEfficientNetV2,
     "XceptionNet": LitXceptionNet,

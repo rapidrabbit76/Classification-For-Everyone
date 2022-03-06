@@ -3,16 +3,14 @@ import torch.nn as nn
 import numpy as np
 from .blocks import *
 
-__all__ = [
-    "MobileNetV3", "MobileNetV3_large", "MobileNetV3_small"
-]
+__all__ = ["MobileNetV3", "MobileNetV3_l", "MobileNetV3_s"]
 
 
 MODEL_TYPE = {
     # input, output, expansion ratio, kernel size, padding, stride,
     # activation, reduction ratio, use SEBlock or not
     # fmt: off
-    'large': {
+    'l': {
         0:  [16,   16, 1.0, 3, 1, 1, 'RE', 2, False],
         1:  [16,   24, 4.0, 3, 1, 2, 'RE', 2, False],
         2:  [24,   24, 3.0, 3, 1, 1, 'RE', 2, False],
@@ -33,7 +31,7 @@ MODEL_TYPE = {
         17: [960, 1280, 1]
     },
     # fmt: off
-    'small': {
+    's': {
         0:  [16, 16, 1.0, 3, 1, 2, 'RE', 2, True],
         1:  [16, 24, 6.0, 3, 1, 2, 'RE', 2, False],
         2:  [24, 24, 3.7, 3, 1, 1, 'RE', 2, False],
@@ -53,14 +51,13 @@ MODEL_TYPE = {
 
 
 class MobileNetV3(nn.Module):
-
     def __init__(
-            self,
-            model_type: str,
-            image_channels: int,
-            num_classes: int,
-            alpha: float = 1.0,
-            dropout_rate: float = 0.5
+        self,
+        model_type: str,
+        image_channels: int,
+        num_classes: int,
+        alpha: float = 1.0,
+        dropout_rate: float = 0.5,
     ) -> None:
         super().__init__()
         self.alpha = alpha
@@ -75,7 +72,7 @@ class MobileNetV3(nn.Module):
                 kernel_size=3,
                 stride=2,
                 padding=1,
-                act='HS'
+                act="HS",
             )
         ),
 
@@ -85,7 +82,7 @@ class MobileNetV3(nn.Module):
                     BNeckBlock(
                         dim=[
                             self.multiply_width(MODEL_TYPE[model_type][idx][0]),
-                            self.multiply_width(MODEL_TYPE[model_type][idx][1])
+                            self.multiply_width(MODEL_TYPE[model_type][idx][1]),
                         ],
                         factor=MODEL_TYPE[model_type][idx][2],
                         kernel=MODEL_TYPE[model_type][idx][3],
@@ -93,7 +90,7 @@ class MobileNetV3(nn.Module):
                         stride=MODEL_TYPE[model_type][idx][5],
                         act=MODEL_TYPE[model_type][idx][6],
                         reduction_ratio=MODEL_TYPE[model_type][idx][7],
-                        use_se=MODEL_TYPE[model_type][idx][8]
+                        use_se=MODEL_TYPE[model_type][idx][8],
                     )
                 )
             elif idx == bneck_size + 1:
@@ -102,25 +99,27 @@ class MobileNetV3(nn.Module):
                         in_channels=MODEL_TYPE[model_type][idx][0],
                         out_channels=MODEL_TYPE[model_type][idx][1],
                         kernel_size=MODEL_TYPE[model_type][idx][2],
-                        act='HS',
+                        act="HS",
                     )
                 ),
-                layers.append(nn.AdaptiveAvgPool2d(MODEL_TYPE[model_type][idx+1][0]))
+                layers.append(nn.AdaptiveAvgPool2d(MODEL_TYPE[model_type][idx + 1][0]))
             elif idx == bneck_size + 3:
                 layers.append(
                     ConvBlock(
                         in_channels=MODEL_TYPE[model_type][idx][0],
                         out_channels=MODEL_TYPE[model_type][idx][1],
                         kernel_size=MODEL_TYPE[model_type][idx][2],
-                        act='HS',
+                        act="HS",
                     )
                 ),
 
         self.feature_extractor = nn.Sequential(*layers)
         self.classifier = Classifier(
-            in_features=self.multiply_width(MODEL_TYPE[model_type][max_bneck_size-1][1]),
+            in_features=self.multiply_width(
+                MODEL_TYPE[model_type][max_bneck_size - 1][1]
+            ),
             out_features=num_classes,
-            dropout_rate=dropout_rate
+            dropout_rate=dropout_rate,
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -130,20 +129,16 @@ class MobileNetV3(nn.Module):
         return logits
 
     def multiply_width(self, dim: int) -> int:
-        return int(np.ceil(self.alpha*dim))
+        return int(np.ceil(self.alpha * dim))
 
 
-def MobileNetV3_large(
-        image_channels: int,
-        num_classes: int,
-        dropout_rate: float = 0.5
+def MobileNetV3_l(
+    image_channels: int, num_classes: int, dropout_rate: float = 0.5
 ) -> MobileNetV3:
-    return MobileNetV3('large', image_channels, num_classes, 1.0, dropout_rate)
+    return MobileNetV3("l", image_channels, num_classes, 1.0, dropout_rate)
 
 
-def MobileNetV3_small(
-        image_channels: int,
-        num_classes: int,
-        dropout_rate: float = 0.5
+def MobileNetV3_s(
+    image_channels: int, num_classes: int, dropout_rate: float = 0.5
 ) -> MobileNetV3:
-    return MobileNetV3('small', image_channels, num_classes, 1.0, dropout_rate)
+    return MobileNetV3("s", image_channels, num_classes, 1.0, dropout_rate)
