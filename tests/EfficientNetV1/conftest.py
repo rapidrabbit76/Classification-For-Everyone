@@ -40,6 +40,7 @@ def batch(config):
         EfficientNet_b4,
         EfficientNet_b5,
         EfficientNet_b6,
+        EfficientNet_b7,
     ],
 )
 def model(request, config):
