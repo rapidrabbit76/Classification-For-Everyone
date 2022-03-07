@@ -1,5 +1,6 @@
 from datamodules.MNIST import *
 from datamodules.CIFAR import *
+from datamodules.ImageNet import *
 
 DATAMODULE_TABLE: Dict["str", pl.LightningDataModule] = {
     "MNIST": MnistDataModule,
@@ -8,6 +9,7 @@ DATAMODULE_TABLE: Dict["str", pl.LightningDataModule] = {
     "KMNIST": KMnistDataModule,
     "CIFAR10": CIFAR10DataModule,
     "CIFAR100": CIFAR100DataModule,
+    "ImageNet": ImageNetDataModule,
 }
 
 __all__ = [
@@ -19,6 +21,8 @@ __all__ = [
     # CIFAR
     "CIFAR10DataModule",
     "CIFAR100DataModule",
+    # ImageNet
+    "ImageNetDataModule",
     # TABLE
     "DATAMODULE_TABLE",
 ]
