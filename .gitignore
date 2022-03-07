@@ -26,7 +26,3 @@ DATASET
 # Jupyter notebooks
 *.ipynb
 
-# wandb sweep
-**/sweep.yaml
-sweep.yaml
-

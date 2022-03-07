@@ -125,7 +125,7 @@ def main(args):
 
     wandb_logger = WandbLogger(
         project=args.model,
-        experiment=args.experiment_name,
+        name=args.experiment_name,
         save_dir=save_dir,
     )
     wandb_logger.watch(model, log="all", log_freq=args.log_every_n_steps)
