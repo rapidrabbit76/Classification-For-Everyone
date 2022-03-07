@@ -1,119 +1,126 @@
+# Pytorch-lightning classification
+
+Classification with pytorch lightning(as PL)
+
 # **Requirements**
 
-- torch==1.10.0
-- pytorch-lightning==1.5.7
-- wandb==0.12.9
-- albumentations==0.16.1
-
-# **Rules**
-
-- [Repository Rules](./Rules.md)
+- [pip freeze](./requirements.txt)
+- [conda env](./environment.yaml)
 
 # Repository Tutorial
 
-## 1. Code Structure
-
-각 구현체의 경우 디렉터리로 구분되어 있으며 각 구현체 디렉터리의 경우 아래와 같은 구조를 기본으로 합니다.
-
-별도의 구성요소가 포함되면 각 구현체 README.md에 설명을 포함합니다.
+## Project Structure
 
 ```bash
-# [*]       : 학습에 꼭 필요 혹은 기본 구성요소
 RepoRootPath
-├── LeNet-5
-│   ├── config.yml          # Hyperparameters[*]
-│   ├── datamodule.py       # Pytorch-Lightning Data Module[*]
-│   ├── model.py            # Model[*]
-│   ├── sweep.yaml          # Sweep config for hyperparameter tuning
-│   ├── train.py            # Pytorch-Lightning LightningModule & train script
-├── utils.py                # Utility script
-├── environment.yaml        # conda Env
-├── requirements.txt        # pip freeze
-├── ... Etcs
+├── models      # python module for training models
+├── datamodules # python module for pl data module
+├── transforms  # python module for data preprocessing
+├── main.py     # Trainer
+├── main.sh     # Training Recipe script
+└── ...         # ETC ...
 ```
 
-## 2. train
+## Models Module Structure
 
-**해당 레포는 [Pytorch-Lightning](https://www.pytorchlightning.ai/)과 [Weights & Biases](https://wandb.ai/)를 사용합니다.**
+```bash
+models
+├── LitBase                 # PL module base
+│   └── lightning_model.py
+├── Model_1                 # Model 1
+│   ├── blocks.py           # Models sub blocks
+│   ├── models.py           # Pure pytorch model define
+│   └── lightning_model.py  # Loss and optimizer setting using PL
+├── Model_2
+├── Model_N
+...
+```
 
-LightningModule에 관한 자세한 내용은 [링크](https://pytorch-lightning.readthedocs.io/en/latest/common/lightning_module.html?highlight=LightningModule)를 참고
+### LitBase
 
 ```python
-class LitModel(pl.LightningModule):
-    def __init__( self, ...):
-        """
-            - hyperparameter save
-            - build model
-            - define loss
-            - define metrics
-        """
+# models.LitBase.lightning_model.py
+class LitBase(pl.LightningModule, metaclass=ABCMeta):
+    @abstractmethod
+    def configure_optimizers(self):
+        return super().configure_optimizers()
+    """
+    def initialize_weights ...
+    def forward ...
+    def training_step ...
+    def validation_step ...
+    def test_step ...
+    def _validation_test_common_epoch_end ...
+    def validation_epoch_end ...
+    def test_epoch_end ...
+    """
+```
+
+### Implemented Models
+
+```python
+# models.LeNet5.lightning_model.py
+class LitLeNet5(LitBase):
+    def __init__(self, args):
         super().__init__()
-        self.save_hyperparameters()
-        self.model = MyModel(...)
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """ model forward """
-        return self.model(x)
-
-    def training_step(self, batch, batch_idx) -> torch.Tensor:
-        ...
-
-    def validation_step(self, batch, batch_idx) -> torch.Tensor:
-        ...
-
-    def test_step(self, batch, batch_idx) -> torch.Tensor:
-        ...
+        self.save_hyperparameters(args)
+        self.model = LeNet5(
+            image_channels=self.hparams.image_channels,
+            num_classes=self.hparams.num_classes,
+        )
+        self.loss = nn.CrossEntropyLoss()
 
     def configure_optimizers(self):
-        ...
+        return optim.Adam(self.parameters(), lr=self.hparams.lr)
 ```
 
-## 3. Run Model
+# Install
 
-```python
+## Install from source code
 
-def train():
-    # Hyperparameters
-    config = utils.get_config()
-    hparams = config.hparams
-    seed_everything(config.seed)
+### using anaconda/miniconda
 
-    # Dataloader
-    dm = datamodule.QMnistDataModule(config.data_dir)
-
-    # Model
-    model = MyModel(...)
-
-    # Logger
-    wandb_logger = WandbLogger(
-        name=f"{config.project_name}-{config.dataset}",
-        project=config.project_name,
-        save_dir=config.save_dir,
-        log_model="all",
-    )
-    wandb_logger.experiment.config.update(hparams)
-    wandb_logger.watch(lenet5, log="all", log_freq=100)
-
-    # Trainer setting
-    callbacks = [ ... ]
-
-    trainer: pl.Trainer = pl.Trainer(
-        logger=wandb_logger,
-        max_epochs=hparams.epochs,
-        callbacks=callbacks,
-        ...
-    )
-
-    # Train
-    trainer.fit(model, datamodule=dm)
-    trainer.test(model, datamodule=dm)
-
-    # Finish
-    wandb_logger.experiment.unwatch(lenet5)
-
-    # Model to Torchscript
-    ...
-
-if __name__ == "__main__":
-    train()
+```bash
+$ conda env create --file environment.yaml
 ```
+
+### using pip
+
+```bash
+$ pip install -r requirements.txt
+```
+
+## Install using docker/docker-compose
+
+```bash
+$ export USERID=$(id -u)
+$ export GROUPID=$(id -g)
+$ docker-compose up -d
+```
+
+```yaml
+version: "3.7"
+    trainer:
+    build: .
+    user: "${USERID}:${GROUPID}"
+    volumes:
+        - .:/training
+        - /{YOUR_DATA_SET_DIR_PATH}:/DATASET # !!Setting dataset path!!
+    command: tail -f /dev/null
+```
+
+# Training
+
+Please see the ["Recipes"](./md/Recipes.md)
+
+# Experiment results
+
+Please see the ["Experiment results"](./md/Experiment.md)
+
+# Supported model architectures
+
+Please see the ["Supported Model"](./md/Supported%20Model.md)
+
+# Supported dataset
+
+Please see the ["Supported Dataset"](./md/Supported%20Dataset.md)
