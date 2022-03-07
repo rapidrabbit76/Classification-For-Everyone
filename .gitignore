@@ -20,9 +20,13 @@ DATASET
 *.pt
 *.onnx
 *.ckpt
-*pth
-*zip
+*.pth
+*.zip
 
 # Jupyter notebooks
 *.ipynb
+
+# wandb sweep
+**/sweep.yaml
+sweep.yaml
 
