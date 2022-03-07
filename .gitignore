@@ -26,3 +26,6 @@ DATASET
 # Jupyter notebooks
 *.ipynb
 
+# run script
+main.sh
+sweep.yaml
