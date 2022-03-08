@@ -1,11 +1,11 @@
 from typing import *
 
+import cv2
+import numpy as np
 import pytorch_lightning as pl
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Subset
 from torchvision.datasets import ImageFolder
-import cv2
-import numpy as np
 
 
 class ImageNet(ImageFolder):
