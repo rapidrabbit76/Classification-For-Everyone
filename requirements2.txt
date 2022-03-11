@@ -1,0 +1,6 @@
+numpy
+pandas
+pytest
+easydict
+torch
+pytorch-lightning
