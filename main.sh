@@ -1,5 +1,5 @@
 python main.py \
-    --seed=9423 \
+    --seed=2022 \
     --experiment_name="VGG" \
     --root_dir="DATASET" \
     --default_root_dir="experiment" \
