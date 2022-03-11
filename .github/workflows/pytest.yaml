@@ -16,7 +16,10 @@ jobs:
         with:
           python-version: "3.9"
 
-      - name: Run Pytest
+      - name: Install Requirements
         runs: |
           pip install -r requirements.txt
+
+      - name: Run Pytest
+        runs: |
           pytest test/
