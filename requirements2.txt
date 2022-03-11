@@ -4,3 +4,9 @@ pytest
 easydict
 torch
 pytorch-lightning
+torchvision
+scikit-learn
+albumentations
+opencv-python-headless
+Pillow
+pyarrow
