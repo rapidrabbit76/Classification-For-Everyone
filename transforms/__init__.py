@@ -3,7 +3,7 @@ from .medium import *
 
 TRANSFORMS_TABLE: Dict["str", Callable] = {
     "BASE": BaseTransforms,
-    "MEDUIM": MediumTransforms,
+    "MEDIUM": MediumTransforms,
 }
 
 __all__ = [
