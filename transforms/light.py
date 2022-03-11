@@ -7,7 +7,7 @@ from PIL import Image
 import cv2
 
 
-class MediumTransforms:
+class LightTransforms:
     mean = (0.485, 0.456, 0.406)
     std = (0.229, 0.224, 0.225)
 
@@ -43,13 +43,9 @@ class MediumTransforms:
                     rotate_limit=15,
                     p=0.5 if train else 0.0,
                 ),
-                A.CLAHE(p=0.5 if train else 0.0),
-                A.HueSaturationValue(
-                    hue_shift_limit=20,
-                    sat_shift_limit=20,
-                    val_shift_limit=20,
-                    p=0.5 if train else 0.0,
-                ),
+                A.RandomBrightnessContrast(p=0.6 if train else 0.0),
+                A.RandomGamma(p=0.6 if train else 0.0),
+                A.CLAHE(p=0.4 if train else 0.0),
                 A.Normalize(
                     mean=mean,
                     std=std,
