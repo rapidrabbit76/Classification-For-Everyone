@@ -26,3 +26,5 @@ DATASET
 # Jupyter notebooks
 *.ipynb
 
+# github actions false
+false/
