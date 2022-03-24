@@ -1,10 +1,10 @@
 from typing import *
-
-import numpy as np
 import pytorch_lightning as pl
+from torch.utils.data import DataLoader, Subset, Dataset
+from torchvision.datasets import MNIST, FashionMNIST, EMNIST, KMNIST
 from sklearn.model_selection import train_test_split
-from torch.utils.data import DataLoader, Dataset, Subset
-from torchvision.datasets import EMNIST, KMNIST, MNIST, FashionMNIST
+import numpy as np
+
 
 
 class MnistDataModuleBase(pl.LightningDataModule):

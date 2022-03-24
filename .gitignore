@@ -20,11 +20,14 @@ DATASET
 *.pt
 *.onnx
 *.ckpt
-*pth
-*zip
+*.pth
+*.zip
 
 # Jupyter notebooks
 *.ipynb
+
+# github actions false
+false/
 
 # run script
 main.sh
