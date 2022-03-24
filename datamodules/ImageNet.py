@@ -1,22 +1,45 @@
 from typing import *
-import pytorch_lightning as pl
-from torch.utils.data import DataLoader, Subset, Dataset
-from torchvision.datasets import MNIST, FashionMNIST, EMNIST, KMNIST
-from sklearn.model_selection import train_test_split
+
+import cv2
 import numpy as np
+import pytorch_lightning as pl
+from sklearn.model_selection import train_test_split
+from torch.utils.data import DataLoader, Subset
+from torchvision.datasets import ImageFolder
 
 
-
-class MnistDataModuleBase(pl.LightningDataModule):
+class ImageNet(ImageFolder):
     def __init__(
         self,
-        DATASET: Dataset,
+        root_dir: str,
+        transforms: Callable = None,
+        **kargs,
+    ) -> None:
+        self.transforms = transforms
+        super().__init__(root_dir, transforms, loader=self._image_loader)
+
+    def _image_loader(cls, path: str) -> np.ndarray:
+        image = cv2.imread(path)
+        return cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    def __getitem__(self, index: int) -> Tuple[Any, Any]:
+        image, target = super().__getitem__(index)
+
+        if self.transform != None:
+            image = self.transforms(image)
+        return image, target
+
+
+class ImageNetDataModuleBase(pl.LightningDataModule):
+    def __init__(
+        self,
+        DATASET: ImageNet,
         root_dir: str,
         train_transforms: Callable,
         val_transforms: Callable,
         test_transforms: Callable,
-        batch_size: int,
-        num_workers: int,
+        batch_size: int = 256,
+        num_workers: int = 8,
     ):
         super().__init__()
         self.save_hyperparameters(
@@ -31,15 +54,10 @@ class MnistDataModuleBase(pl.LightningDataModule):
         self.val_transforms = val_transforms
         self.test_transforms = test_transforms
 
-    def prepare_data(self) -> None:
-        """Dataset download"""
-        self.Dataset(self.hparams.root_dir, train=True, download=True)
-        self.Dataset(self.hparams.root_dir, train=False, download=True)
-
     def setup(self, stage: Optional[str] = None) -> None:
         if stage == "fit" or stage is None:
             # split dataset to train, val
-            ds = self.Dataset(self.hparams.root_dir, train=True, download=False)
+            ds = self.Dataset(self.hparams.root_dir, train=True)
             targets = ds.targets
             train_idx, val_idx = train_test_split(
                 np.arange(len(targets)),
@@ -54,7 +72,6 @@ class MnistDataModuleBase(pl.LightningDataModule):
                     self.hparams.root_dir,
                     train=True,
                     transform=self.train_transforms,
-                    download=False,
                 ),
                 train_idx,
             )
@@ -62,14 +79,13 @@ class MnistDataModuleBase(pl.LightningDataModule):
                 self.Dataset(
                     self.hparams.root_dir,
                     train=True,
-                    transform=self.val_transforms,
-                    download=False,
+                    transform=self.test_transforms,
                 ),
                 val_idx,
             )
 
         if stage == "test" or stage is None:
-            self.test_ds = MNIST(
+            self.test_ds = self.Dataset(
                 self.hparams.root_dir,
                 train=False,
                 transform=self.test_transforms,
@@ -100,18 +116,5 @@ class MnistDataModuleBase(pl.LightningDataModule):
         )
 
 
-def MnistDataModule(**kwargs):
-    return MnistDataModuleBase(MNIST, **kwargs)
-
-
-def FashionMnistDataModule(**kwargs):
-    return MnistDataModuleBase(FashionMNIST, **kwargs)
-
-
-def EmnistDataModule(**kwargs):
-    DATASET = lambda root, **kwargs: EMNIST(root, "byclass", **kwargs)
-    return MnistDataModuleBase(DATASET, **kwargs)
-
-
-def KMnistDataModule(**kwargs):
-    return MnistDataModuleBase(KMNIST, **kwargs)
+def ImageNetDataModule(**kwargs):
+    return ImageNetDataModuleBase(ImageNet, **kwargs)

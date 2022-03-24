@@ -6,6 +6,7 @@ TRANSFORMS_TABLE: Dict["str", Callable] = {
     "BASE": BaseTransforms,
     "LIGHT": LightTransforms,
     "MEDIUM": MediumTransforms,
+
 }
 
 __all__ = [

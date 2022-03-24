@@ -1,10 +1,11 @@
 from typing import *
 
+
+import numpy as np
 import pytorch_lightning as pl
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Subset
 from torchvision.datasets import CIFAR10, CIFAR100
-import numpy as np
 
 __all__ = ["CIFAR10DataModule", "CIFAR100DataModule"]
 

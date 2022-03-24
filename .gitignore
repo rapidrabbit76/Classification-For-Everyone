@@ -28,3 +28,7 @@ DATASET
 
 # github actions false
 false/
+
+# run script
+main.sh
+sweep.yaml
